@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicorn Meat</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicon.ico') }}" />
+    <meta name="description" content="A magical coin made by Ethereum in March 2016. Now wrapped and revived.">
+    <meta name="keywords"
+        content="crypto, crypto ico, cryptocurrency, digital currency, ico, ico agency, ico crypto, ico landing page, ico token, meme coin, meme ico exchange, meme token, memecoin">
+    <meta name="theme-color" content="#FFBA00">
+    <!-- Open Graph Tags -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Unicorn Meat">
+    <meta property="og:description"
+        content="A magical coin made by Ethereum in March 2016. Now wrapped and revived.">
+    <meta property="og:url" content="">
+    <meta property="og:site_name" content="Unicorn Meat">
+    <meta property="og:image" content="">
+    <meta property="og:image:width" content="1180">
+    <meta property="og:image:height" content="600">
+    <meta property="og:image:type" content="image/png">
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Unicorn Meat">
+    <meta name="twitter:description"
+        content="A magical coin made by Ethereum in March 2016. Now wrapped and revived.">
+    <meta name="twitter:image" content="">
+    <!-- preload head styles -->
+    <link rel="preload" href="{{ url_for('static', filename='assets/css/unicons.min.css') }}" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='assets/css/swiper-bundle.min.css') }}" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='assets/css/magic-cursor.min.css') }}" as="style">
+    <!-- preload footer scripts -->
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/jquery.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/scrollmagic.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/swiper-bundle.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/anime.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/typed.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/tilt.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/split-type.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/prettify.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/libs/gsap.min.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/core/magic-cursor.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/helpers/data-attr-helper.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/helpers/swiper-helper.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/helpers/splitype-helper.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/helpers/anime-helper.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/helpers/typed-helper.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/helpers/tilt-helper.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/core/marquee.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/uikit-components-bs.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='assets/js/app.js') }}" as="script">
+    <!-- app head for bootstrap core -->
+    <script src="{{ url_for('static', filename='assets/js/app-head-bs.js') }}"></script>
+    <!-- include uni-core components -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/js/uni-core/css/uni-core.min.css') }}">
+    <!-- include styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/unicons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/swiper-bundle.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/prettify.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/magic-cursor.min.css') }}">
+    <!-- include main style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/theme/theme-two.min.purge.css') }}">
+    <!-- include scripts -->
+    <script src="{{ url_for('static', filename='assets/js/uni-core/js/uni-core-bundle.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/theme/hero-bg.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
+
+    <!--  GDPR modal -->
+    <div id="uc-gdpr-notification"
+        class="uc-gdpr-notification uc-notification min-w-1/2 uc-notification-bottom-left lg:m-2">
+        <div
+            class="uc-notification-message vstack lg:hstack items-end gap-2 lg:gap-4 lg:p-3 bg-white text-dark border rounded-1-5 min-w-1/2">
+            <a id="uc-close-gdpr-notification" class="uc-notification-close text-dark" data-uc-close></a>
+            <div class="vstack">
+                <h2 class="h5 ft-primary fw-bold -ls-1 m-0 text-dark">GDPR Compliance</h2>
+                <p class="fs-6 mt-1">We use cookies to ensure you get the best experience on our website. By continuing
+                    to use our site, you accept our use of cookies, <a href="page-privacy.html"
+                        class="uc-link text-underline">privacy policy</a> and <a href="page-terms.html"
+                        class="uc-link text-underline">terms of service</a>.</p>
+            </div>
+            <button class="btn btn-sm btn-primary px-2" id="uc-accept-gdpr">Accept</button>
+        </div>
+    </div>
+
+    <!--  Menu panel -->
+    <div id="uc-menu-panel" data-uc-offcanvas="overlay: true;">
+        <div
+            class="uc-offcanvas-bar m-1 rounded-2 border border-2 border-black contrast-shadow-md bg-secondary-200 text-dark dark:bg-gray-900 dark:text-white">
+            <header class="uc-offcanvas-header hstack justify-between items-center pb-2">
+                <div class="uc-logo">
+                    <a href="{{ url_for('index') }}" class="h5 text-none text-gray-900 dark:text-white">
+                        <img class="w-40px" src="{{ url_for('static', filename='assets/images/home-two/logo.png') }}"
+                            alt="Unicorn Meat">
+                    </a>
+                </div>
+                <button
+                    class="uc-offcanvas-close rtl:end-auto rtl:start-0 m-1 mt-2 p-0 btn border-0 dark:text-white dark:text-opacity-50 hover:text-primary hover:rotate-90 duration-150 transition-all"
+                    type="button">
+                    <img class="icon icon-3" src="{{ url_for('static', filename='assets/images/icons/close.svg') }}"
+                        alt="close" data-uc-svg>
+                </button>
+            </header>
+
+            <div class="panel">
+                <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#tokenomics">Tokenomics</a></li>
+                    <li><a href="#roadmap">Timeline</a></li>
+                    <li><a href="#web3-actions">Dapp</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <ul class="nav-x gap-1 mt-4">
+                    <li>
+                        <a class="w-32px hover:-rotate-3" href="#" style="font-size: 24px; display: flex; align-items: center; justify-content: center; color: #000; text-decoration: none;"><i class="fab fa-x-twitter" style="display: inline-block;"></i></a>
+                    </li>
+                    <li>
+                        <a class="w-32px hover:-rotate-3" href="#" style="font-size: 24px; display: flex; align-items: center; justify-content: center; color: #0088cc; text-decoration: none;"><i class="fab fa-telegram" style="display: inline-block;"></i></a>
+                    </li>
+                    <li>
+                        <a class="w-32px hover:-rotate-3" href="#" style="font-size: 24px; display: flex; align-items: center; justify-content: center; color: #5865f2; text-decoration: none;"><i class="fab fa-discord" style="display: inline-block;"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!--  Bottom Actions Sticky -->
+    <div class="backtotop-wrap position-fixed bottom-0 end-0 z-99 m-2 vstack">
+        <a class="btn btn-sm p-0 bg-yellow text-black border border-2 border-black contrast-shadow-sm w-48px h-48px rounded-circle"
+            href="to_top" data-uc-backtotop>
+            <img class="icon icon-3" src="{{ url_for('static', filename='assets/images/icons/chevron-up.svg') }}"
+                alt="to-top" data-uc-svg>
+        </a>
+    </div>
+
+    <!-- Header start -->
+    <header class="uc-header header-two uc-navbar-sticky-wrap z-999 uc-dark"
+        data-uc-sticky="start: 100vh; animation: uc-animation-slide-top; sel-target: .uc-navbar-container; cls-active: uc-navbar-sticky; cls-inactive: uc-navbar-transparent; end: !*;">
+        <nav class="uc-navbar-container bg-transparent mt-3 xl:mt-4 uc-navbar-float ft-tertiary z-1"
+            data-anime="translateY: [-40, 0]; opacity: [0, 1]; duration: 750; delay: 0;">
+            <div class="uc-navbar-main" style="--uc-nav-height: 100px">
+                <div class="container">
+                    <div class="uc-navbar min-h-64px lg:min-h-80px xl:min-h-100px ps-2 pe-1 lg:px-4 border border-2 border-black contrast-shadow-md rounded-2 lg:rounded-3"
+                        data-uc-navbar=" animation: uc-animation-slide-top-small; duration: 150;"
+                        style="background-color: #98cefb">
+                        <div class="uc-navbar-left">
+                            <div class="uc-logo">
+                                <a class="panel text-none w-150px xl:w-auto" href="#">
+                                    <img src="{{ url_for('static', filename='assets/images/home-two/logo.png') }}"
+                                        alt="Unicorn Meat Logo" style="height: 40px; width: auto;">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="uc-navbar-center">
+                            <ul class="uc-navbar-nav fs-5 xl:fs-4 gap-3 lg:gap-4 d-none lg:d-flex fw-semibold"
+                                data-uc-scrollspy-nav="closet: > *; offset: 48; scroll: true;">
+                                <li><a href="#about">About</a></li>
+                                <li><a href="#tokenomics">Tokenomics</a></li>
+                                <li><a href="#roadmap">Timeline</a></li>
+                                <li><a href="#web3-actions">Dapp</a></li>
+                                <li><a href="#faq">FAQ</a></li>
+                            </ul>
+                        </div>
+                        <div class="uc-navbar-right">
+                            <a class="btn btn-sm xl:btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0 d-none lg:d-inline-flex"
+                                href="#" data-bs-toggle="modal" data-bs-target="#magicFeaturesModal">
+                                <span>Connect Wallet</span>
+                            </a>
+                            <a class="btn btn-md btn-secondary w-48px h-48px p-0 border border-2 border-black contrast-shadow-sm d-inline-flex lg:d-none"
+                                href="#uc-menu-panel" data-uc-toggle>
+                                <img class="icon icon-3"
+                                    src="{{ url_for('static', filename='assets/images/icons/menu.svg') }}" alt="menu"
+                                    data-uc-svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Header end -->
+
+    <!-- Wrapper start -->
+    <div id="wrapper" class="wrap">
+
+        <!-- Hero start -->
+        <div id="hero_header" class="hero-header section panel overflow-hidden">
+            <div class="section-outer min-h-screen py-9 lg:py-10 hero-bg">
+                <div class="container" style="position: relative; z-index: 1;">
+                    <div class="section-inner panel">
+                        <div class="panel vstack items-center gap-2 lg:gap-3 xl:gap-4 max-w-md mx-auto text-center px-2 lg:px-0 mt-6 lg:mt-8 xl:mt-9"
+                            data-uc-height-viewport="media: @xl;"
+                            data-anime="targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
+                            <img src="{{ url_for('static', filename='assets/images/home-two/um_1_coin.png') }}"
+                                alt="Unicorn Meat Logo" style="max-width: 200px; height: auto;">
+                            <h1 class="h2 xl:h1 mb-0 ls-0">
+                                Unicorn Meat 🍖 <br class="d-none sm:d-block">
+                            </h1>
+                            <p class="fs-4 xl:fs-3">A magical coin made by Ethereum in March 2016.<br>Now wrapped and revived.</p>
+                            <div>
+                                <a class="btn btn-md lg:btn-xl xl:btn-2xl btn-secondary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0"
+                                    href="#about">
+                                    <span>🦄 Magic is cooking!</span>
+                                    <span class="fs-4 mb-narrow">🍖</span>
+                                </a>
+                            </div>
+                            <div class="mt-4">
+                                <ul class="nav-x gap-3 justify-center">
+                                    <li>
+                                        <a class="hover:-rotate-3 transition-transform duration-200" href="#" style="font-size: 28px; color: #6E1E71; text-decoration: none;"><i class="fab fa-x-twitter" style="display: inline-block;"></i></a>
+                                    </li>
+                                    <li>
+                                        <a class="hover:-rotate-3 transition-transform duration-200" href="#" style="font-size: 28px; color: #6E1E71; text-decoration: none;"><i class="fab fa-telegram" style="display: inline-block;"></i></a>
+                                    </li>
+                                    <li>
+                                        <a class="hover:-rotate-3 transition-transform duration-200" href="#" style="font-size: 28px; color: #6E1E71; text-decoration: none;"><i class="fab fa-discord" style="display: inline-block;"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero end -->
+
+        <!-- Text Marquee Start -->
+        <div class="h3 xl:h2 fw-medium py-4 xl:py-6 reverse bg-secondary text-black text-uppercase ls-0"
+            data-uc-marquee="clone: 3; gap: 64; reverse: true;" style="--gap: 32px">
+            <div>
+                <div class="hstack gap-8">
+                    <div>🦄</div>
+                    <span>Meat</span>
+                    <div>🍖</div>
+                    <span>Unicorn</span>
+                    <div>🦄</div>
+                    <span>Meat</span>
+                </div>
+                <div class="hstack gap-8">
+                    <div>🍖</div>
+                    <span>Unicorn</span>
+                    <div>🦄</div>
+                    <span>Meat</span>
+                    <div>🍖</div>
+                    <span>Unicorn</span>
+                </div>
+                <div class="hstack gap-8">
+                    <div>🦄</div>
+                    <span>Meat</span>
+                    <div>🍖</div>
+                    <span>Unicorn</span>
+                    <div>🦄</div>
+                    <span>Meat</span>
+                </div>
+                <div class="hstack gap-8">
+                    <div>🍖</div>
+                    <span>Meat</span>
+                    <div>🦄</div>
+                    <span>Unicorn</span>
+                    <div>🍖</div>
+                    <span>Meat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Marquee end -->
+
+        <!-- Section start -->
+        <div id="about" class="about section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10">
+                <div class="container sm:max-w-lg xl:max-w-2xl">
+                    <div class="section-inner panel">
+                        <div class="section-content panel">
+                            <div class="row justify-center"
+                                data-anime="onview: -400; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
+                                <div class="col-12 col-lg-8 col-xl-6">
+                                    <div class="about-content vstack items-center gap-3 sm:gap-4 text-center">
+                                        <h2 class="title h5 sm:h3 xl:h2 mb-0 ls-0 text-uppercase -rotate-1">The Unicorn
+                                            Meat Story 🍖</h2>
+                                        <div class="desc">
+                                            <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">
+                                                Unicorn Meat is a historic Ethereum meme token, created by Ethereum's
+                                                Alex Van de Sande in March 2016 as part of a demonstration of token
+                                                mutations, DAOs, bribable voting, and on-chain fun. A month after the
+                                                Ethereum Foundation created <a
+                                                    href='https://etherscan.io/token/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
+                                                    target="_blank" rel="noopener noreferrer">Unicorns 🦄</a> as an
+                                                offering in return for anyone who donated 2.014 ETH to the Ethereum Tip
+                                                Jar, Alex <a
+                                                    href="https://gist.github.com/alexvandesande/eca0b87da89ab28fa50c"
+                                                    target="_blank" rel="noopener noreferrer">devised what was conveyed
+                                                    as an April Fool's joke</a> – a <a
+                                                    href='https://etherscan.io/token/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A'>Unicorn
+                                                    Meat token</a> and a <a
+                                                    href="https://etherscan.io/address/0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32"
+                                                    target="_blank" rel="noopener noreferrer">Unicorn Meat Grinder
+                                                    Association contract</a> allowing any Unicorn holder to grind their
+                                                Unicorns for Unicorn Meat, as well as make proposals to change how the
+                                                operation functioned.
+                                            </p>
+                                            <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">
+                                                A week after the announcement, Piper Merriam, a core developer of
+                                                Ethereum, used the proposal and voting mechanism to <a
+                                                    href="https://x.com/pipermerriam/status/718546708641124353"
+                                                    target="_blank" rel="noopener noreferrer">take control of the
+                                                    contract</a> and take 5 ETH for themself. In 2025, an Ethereum
+                                                wanderer followed Piper's footsteps and passed a proposal to transfer
+                                                the Unicorn Meat contract ownership to themself. A once infinitely
+                                                mintable historic meme relic now has a finite supply and is wrapped to
+                                                be tradable and owned by anyone!
+                                            </p>
+                                            <!-- <p class="fs-6 sm:fs-5 xl:fs-4">
+                                                  <a href="https://gist.github.com/alexvandesande/eca0b87da89ab28fa50c" target="_blank" rel="noopener noreferrer">Unicorn Meat Contract</a> | <a href="https://etherscan.io/tx/0x6b81d8c6884728563e1bcb839f81d716bcf0c2d3b7d8ce6c2f6e4bf95704a0d5" target="_blank" rel="noopener noreferrer">Wrapped Unicorn Meat Contract</a>
+                                                </p> -->
+                                        </div>
+                                        <div class="buttons hstack justify-center gap-2 xl:gap-3">
+                                            <a class="btn btn-md xl:btn-2xl btn-secondary px-3 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                                href="https://etherscan.io/tx/0x6b81d8c6884728563e1bcb839f81d716bcf0c2d3b7d8ce6c2f6e4bf95704a0d5">
+                                                <span>Unicorn Meat Contract</span>
+                                            </a>
+                                            <a class="btn btn-md xl:btn-2xl btn-primary-200 px-3 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                                href="https://etherscan.io/tx/0x6b81d8c6884728563e1bcb839f81d716bcf0c2d3b7d8ce6c2f6e4bf95704a0d5">
+                                                <span>Wrapped Unicorn Meat Contract</span>
+                                            </a>
+                                            <!-- <a class="btn btn-primary-200 w-48px h-48px xl:w-64px xl:h-64px border border-2 border-black contrast-shadow-sm hover:-rotate-2" href="https://gist.github.com/alexvandesande/eca0b87da89ab28fa50c">
+                                                    <i class="icon-2 xl:icon-3 unicon-send-alt"></i>
+                                                </a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="section-footer mt-6 sm:mt-8 lg:mt-9 xl:mt-10 text-center"
+                            data-anime="onview: -200; translateY: [24, 0]; opacity: [0, 1]; delay: 200;">
+                            <div class="row child-cols-6 sm:child-cols-4 justify-center gx-0 gy-2">
+                                <div class="col sm:col-4 order-1 sm:order-0">
+                                    <h2 class="h2 sm:h1 xl:display-6 stroke-text-bold mb-1 xl:mb-2">9+</h2>
+                                    <span class="fs-6 sm:fs-5 xl:fs-4">Years on-chain</span>
+                                </div>
+                                <div class="order-0">
+                                    <h2 class="h2 sm:h1 xl:display-6 stroke-text-bold mb-1 xl:mb-2">1 of 2</h2>
+                                    <span class="fs-6 sm:fs-5 xl:fs-4">Tradable coins by Ethereum</span>
+                                </div>
+                                <div class="order-0">
+                                    <h2 class="h2 sm:h1 xl:display-6 stroke-text-bold mb-1 xl:mb-2">∞</h2>
+                                    <span class="fs-6 sm:fs-5 xl:fs-4">Lore</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
+                    <!-- Section start -->
+            <div id="tokenomics" class="tokenomics section panel overflow-hidden">
+                <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #ffe6f0;">
+                <div class="container sm:max-w-lg xl:max-w-2xl">
+                    <div class="section-inner panel">
+                        <div class="section-content panel">
+                            <h2 class="title h5 sm:h3 xl:h2 mb-4 ls-0 text-uppercase text-center -rotate-1">TOKENOMICS
+                            </h2>
+                            <div class="row child-cols-1 lg:child-cols-2 justify-center items-center g-5 sm:g-7 lg:g-9">
+                                <div class="col order-1 order-lg-1">
+                                    <div class="panel p-4 sm:p-5 border border-2 border-black contrast-shadow-md bg-white mx-auto mt-4 mt-lg-5 mb-lg-0"
+                                        style="max-width: 500px; z-index: 2; position: relative;">
+                                        <p class="fs-5 xl:fs-4 mb-2 text-center text-lg-start">
+                                            The Unicorn DAO allowed Unicorn holders to get 1,000 to 103,300 Unicorn Meat
+                                            for each grind, depending on a gamable block-based multiplier. With 2,717
+                                            Unicorns that creates a potential for 280M+ Unicorn Meat. Instead of 280M,
+                                            we capped the supply at 100M.
+                                        </p>
+                                        <ul class="fs-6 xl:fs-5 mb-0 text-start" style="list-style: disc inside;">
+                                            <li><b>Total Supply</b>: 100 million</li>
+                                            <li><b>Fair Launch</b>: No gated presales, anyone can buy at launch.</li>
+                                            <li><b>Treasury</b>: Funds development, marketing, listings, and more.</li>
+                                            <li><b>LPs</b>: Allocated for DEX listings and liquidity pools.</li>
+                                            <li><b>Team</b>: Rewards the core contributors, vested over time.</li>
+                                            <li><b>Community Rewards</b>: Funds future claims and community building
+                                                initiatives.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col order-2 order-lg-2">
+                                    <div class="panel mt-n4 mt-lg-0">
+                                        <div class="row child-cols-auto justify-center g-2 sm:g-3 xl:g-4">
+                                            <div>
+                                                <div
+                                                    class="p-2 xl:p-3 border border-2 border-black contrast-shadow-sm bg-secondary-100 rotate-2">
+                                                    <h5 class="h7 sm:h6 xl:h5 m-0 ft-primary fw-semibold">40% Ethereum Liquidity
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="p-2 xl:p-3 border border-2 border-black contrast-shadow-sm text-black -rotate-1"
+                                                    style="background-color: #dbf2ff">
+                                                    <h5 class="h7 sm:h6 xl:h5 m-0 ft-primary fw-semibold">20% Base
+                                                        Liquidity</h5>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="p-2 xl:p-3 border border-2 border-black contrast-shadow-sm text-black -rotate-1"
+                                                    style="background-color: #dbf2ff">
+                                                    <h5 class="h7 sm:h6 xl:h5 m-0 ft-primary fw-semibold">20% Treasury
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="p-2 xl:p-3 border border-2 border-black contrast-shadow-sm text-black bg-secondary-100 rotate-2">
+                                                    <h5 class="h7 sm:h6 xl:h5 m-0 ft-primary fw-semibold">10% Community
+                                                        Rewards</h5>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div
+                                                    class="p-2 xl:p-3 border border-2 border-black contrast-shadow-sm text-black bg-secondary-100 rotate-2">
+                                                    <h5 class="h7 sm:h6 xl:h5 m-0 ft-primary fw-semibold">10% Team</h5>
+                                                </div>
+                                            </div>
+                                            <!-- <div>
+                                                <div class="p-2 xl:p-3 border border-2 border-black contrast-shadow-sm text-black -rotate-1"
+                                                    style="background-color: #dbf2ff">
+                                                    <h5 class="h7 sm:h6 xl:h5 m-0 ft-primary fw-semibold">10% Liquidity
+                                                        Reserves</h5>
+                                                </div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="section-footer mt-6 sm:mt-8 lg:mt-9 xl:mt-10 text-center" data-anime="onview: -200; translateY: [24, 0]; opacity: [0, 1]; delay: 200;">
+                                <div class="row child-cols-6 justify-center g-0">
+                                    <div>
+                                        <h2 class="h2 sm:h1 xl:display-6 stroke-text-bold mb-1 xl:mb-2">0%</h2>
+                                        <span class="fs-6 sm:fs-5 xl:fs-4">Buy Tax</span>
+                                    </div>
+                                    <div>
+                                        <h2 class="h2 sm:h1 xl:display-6 stroke-text-bold mb-1 xl:mb-2">0%</h2>
+                                        <span class="fs-6 sm:fs-5 xl:fs-4">Sell Tax</span>
+                                    </div>
+                                </div>
+                            </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
+        <div class="d-none xl:d-block">
+            <img src="{{ url_for('static', filename='assets/images/common/italic-line-02.svg') }}" alt="victor">
+        </div>
+
+        <!-- Section start -->
+        <div id="features" class="features section panel">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff">
+                <img class="position-absolute start-0 w-250px xl:w-auto"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-01.svg') }}" alt="victor"
+                    style="top: 11%">
+                <img class="position-absolute end-0 w-200px xl:w-auto"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-02.svg') }}" alt="victor"
+                    style="bottom: 6%">
+                <div class="container sm:max-w-lg xl:max-w-xl">
+                    <div class="section-inner panel">
+                        <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
+                            data-anime="onview: true; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                            <h2 class="h4 sm:h3 xl:h2 m-0 rotate-2 text-uppercase ls-0">Preserving History</h2>
+                        </div>
+                        <div class="section-content panel text-center">
+                            <div class="row child-cols-12 sm:child-cols-6 lg:child-cols-4 justify-center g-3 lg:g-4 xl:g-4 col-match"
+                                data-anime="onview: -400; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
+                                <div>
+                                    <div
+                                        class="features-item panel vstack gap-2 xl:gap-3 px-4 py-6 xl:px-5 xl:py-8 border border-2 border-black contrast-shadow-md text-black bg-white rotate-1">
+                                        <div class="feature-item-image mb-1">
+                                            <div class="image h-100px xl:h-100px mx-auto d-flex align-items-center justify-content-center"
+                                                style="font-size: 72px; line-height: 1;">🦄</div>
+                                        </div>
+                                        <div class="feature-item-content" style="margin-top: -40px;">
+                                            <h4 class="title h5 xl:h4 mt-1 mb-2 xl:mb-3 stroke-text">CLAIM</h4>
+                                            <p class="desc fs-5 xl:fs-4">Unicorn holders were able to grind their
+                                                Unicorns for 1,000-103,300 Unicorn Meat, though no one wanted to give up
+                                                their 🦄. We've reserved 1,000 Unicorn Meat free to claim for each 🦄
+                                                held.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div
+                                        class="features-item panel vstack gap-2 xl:gap-3 px-4 py-6 xl:px-5 xl:py-8 border border-2 border-black contrast-shadow-md text-black bg-white -rotate-1">
+                                        <div class="feature-item-image">
+                                            <div class="image h-100px xl:h-100px mx-auto d-flex align-items-center justify-content-center"
+                                                style="font-size: 72px; line-height: 1;">🍖</div>
+                                        </div>
+                                        <div class="feature-item-content" style="margin-top: -40px;">
+                                            <h4 class="title h5 xl:h4 mb-2 xl:mb-3 stroke-text">FUN</h4>
+                                            <p class="desc fs-5 xl:fs-4">The spirit of the Unicorn April Fool's Joke was
+                                                to have fun and we will preserve that. Future rewards, mutations?,
+                                                initiatives will foster that same spirit.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div
+                                        class="features-item panel vstack gap-2 xl:gap-3 px-4 py-6 xl:px-5 xl:py-8 border border-2 border-black contrast-shadow-md text-black bg-white rotate-1">
+                                        <div class="feature-item-image">
+                                            <div class="image h-100px xl:h-100px mx-auto d-flex align-items-center justify-content-center"
+                                                style="font-size: 72px; line-height: 1;">🏆</div>
+                                        </div>
+                                        <div class="feature-item-content" style="margin-top: -40px;">
+                                            <h4 class="title h5 xl:h4 mb-2 xl:mb-3 stroke-text">LEADERBOARDS</h4>
+                                            <p class="desc fs-5 xl:fs-4">Alex envisioned (and coded) a Unicorn Killers
+                                                Hall of Fame. While the original grinder is no longer active, we will
+                                                seek to bring this idea to life.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
+        <div class="d-none xl:d-block" style="background-color: #dbf2ff">
+            <img class="text-primary" src="{{ url_for('static', filename='assets/images/common/italic-line-01.svg') }}"
+                alt="victor" data-uc-svg style="margin-bottom: -1px; background-color: #dbf2ff">
+        </div>
+
+        <!-- Section start -->
+        <div id="roadmap" class="roadmap section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-primary">
+                <img class="position-absolute end-0"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-03.svg') }}" alt="victor"
+                    style="top: 10%">
+                <img class="position-absolute start-0 w-300px xl:w-auto"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-04.svg') }}" alt="victor"
+                    style="top: 39%">
+                <img class="position-absolute end-0"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-05.svg') }}" alt="victor"
+                    style="bottom: 8%">
+                <div class="container sm:max-w-lg xl:max-w-xl">
+                    <div class="section-inner panel">
+                        <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
+                            data-anime="onview: -200; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                            <h2 class="h4 sm:h3 xl:h2 m-0 rotate-2 text-uppercase ls-0 text-white">Timeline</h2>
+                        </div>
+                        <div class="section-content panel">
+                            <img class="position-absolute start-50 top-50 translate-middle d-none lg:d-block"
+                                src="{{ url_for('static', filename='assets/images/common/line.svg') }}" alt="victor"
+                                style="height: 90%">
+                            <div class="row child-cols-12 items-center g-4 sm:g-6 lg:gx-10 lg:gy-8 xl:gy-9">
+                                <div class="sm:col-8 lg:col-6">
+                                    <div class="roadmap-item panel"
+                                        data-anime="onview: -300; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                                        <div
+                                            class="px-4 py-6 xl:px-6 xl:py-8 border border-2 border-black contrast-shadow-md text-black bg-secondary-100 rotate-1">
+                                            <span class="text-gray-400 fw-semibold">July 30, 2015</span>
+                                            <h4 class="h5 xl:h4 my-2 xl:my-3 stroke-text">The Frontier! 🚀</h4>
+                                            <div class="vstack gap-0 fs-5 xl:fs-4">
+                                                <span>Ethereum mainnet is launched. Vitalik Buterin, Gavin Wood, Alex
+                                                    Van de Sande, and the team set out to drive adoption.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sm:col-4 lg:col-6 d-none sm:d-block">
+                                    <div class="panel">
+                                        <h4 class="h5 xl:h4 m-0 text-secondary -rotate-2">July 30, 2015</h4>
+                                        <img class="position-absolute top-0 d-none xl:d-block"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="left: -15.5%">
+                                        <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="left: -19.5%">
+                                    </div>
+                                </div>
+                                <div class="sm:col-4 lg:col-6 d-none sm:d-block">
+                                    <div class="panel">
+                                        <h4 class="h5 xl:h4 m-0 text-secondary rotate-2 float-end">Feb 11, 2016</h4>
+                                        <img class="position-absolute top-0 d-none xl:d-block"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="right: -15.5%">
+                                        <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="right: -19.5%">
+                                    </div>
+                                </div>
+                                <div class="sm:col-8 lg:col-6">
+                                    <div class="roadmap-item panel"
+                                        data-anime="onview: -300; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                                        <div
+                                            class="px-4 py-6 xl:px-6 xl:py-8 border border-2 border-black contrast-shadow-md text-black bg-secondary-100 rotate-1">
+                                            <span class="text-gray-400 fw-semibold">Feb 11, 2016</span>
+                                            <h4 class="h5 xl:h4 my-2 xl:my-3 stroke-text">The Foundation Tip Jar 💰</h4>
+                                            <div class="vstack gap-0 fs-5 xl:fs-4">
+                                                <span>Alex Van de Sande, on behalf of the Ethereum Foundation, creates
+                                                    the Tip Jar to fund development and community initiatives. Each
+                                                    donation of 2.014 ETH to the Tip Jar is rewarded with a rare Unicorn
+                                                    🦄 token.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sm:col-8 lg:col-6">
+                                    <div class="roadmap-item panel"
+                                        data-anime="onview: -300; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                                        <div
+                                            class="px-4 py-6 xl:px-6 xl:py-8 border border-2 border-black contrast-shadow-md text-black bg-secondary-100 -rotate-1">
+                                            <span class="text-gray-400 fw-semibold">Mar 24, 2016</span>
+                                            <h4 class="h5 xl:h4 my-2 xl:my-3 stroke-text">The Unicorn Grinder 🍖</h4>
+                                            <div class="vstack gap-0 fs-5 xl:fs-4">
+                                                <span>Alex Van de Sande creates the Unicorn Meat Grinder Association
+                                                    contract, allowing Unicorn holders to grind Unicorns 🦄 for new
+                                                    Unicorn Meat 🍖 tokens. Ethereum developer Piper Merriam takes
+                                                    control of the contract and 5 ETH for themself.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sm:col-4 lg:col-6 d-none sm:d-block">
+                                    <div class="panel">
+                                        <h4 class="h5 xl:h4 m-0 text-secondary -rotate-2">Mar 24, 2016</h4>
+                                        <img class="position-absolute top-0 d-none xl:d-block"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="left: -15.5%">
+                                        <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="left: -19.5%">
+                                    </div>
+                                </div>
+                                <div class="sm:col-4 lg:col-6 d-none sm:d-block">
+                                    <div class="panel">
+                                        <h4 class="h5 xl:h4 m-0 text-secondary rotate-2 float-end">July 7, 2025</h4>
+                                        <img class="position-absolute top-0 d-none xl:d-block"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="right: -15.5%">
+                                        <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
+                                            src="{{ url_for('static', filename='assets/images/common/coin.svg') }}"
+                                            alt="victor" style="right: -19.5%">
+                                    </div>
+                                </div>
+                                <div class="sm:col-8 lg:col-6">
+                                    <div class="roadmap-item panel"
+                                        data-anime="onview: -300; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                                        <div
+                                            class="px-4 py-6 xl:px-6 xl:py-8 border border-2 border-black contrast-shadow-md text-black bg-secondary-100 rotate-1">
+                                            <span class="text-gray-400 fw-semibold">July 7, 2025</span>
+                                            <h4 class="h5 xl:h4 my-2 xl:my-3 stroke-text">Meatiny! 🪖</h4>
+                                            <div class="vstack gap-0 fs-5 xl:fs-4">
+                                                <span>An Ethereum wanderer passes a proposal to transfer the Unicorn
+                                                    Meat contract ownership to themself. The historic ERC-20 contract is
+                                                    wrapped and brought back to life as Unicorn Meat, a tradable modern
+                                                    ERC-20 token.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
+        <div class="d-none xl:d-block">
+            <img class="text-primary" src="{{ url_for('static', filename='assets/images/common/italic-line-03.svg') }}"
+                alt="victor" data-uc-svg style="margin-top: -5px">
+        </div>
+
+        <!-- Section start -->
+        <div id="web3-actions" class="web3-actions section panel">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff">
+                <center>
+                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Unicorn Meat Dapp</h2>
+                </center><br>
+                <div class="container sm:max-w-lg xl:max-w-2xl">
+                    <div
+                        class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
+
+                        <div class="row child-cols-1 lg:child-cols-2 g-4">
+                            <!-- Wrap/Unwrap Panel -->
+                            <div class="col">
+                                <div
+                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
+                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
+                                        Wrap Unicorn Meat</h3>
+
+                                </div>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">Want
+                                    to wrap or unwrap Unicorn Meat between the original 2016 contract and the wrapper?
+                                </p><br>
+                                <input id="wrap-unwrap-amount" type="number" min="0" step="any"
+                                    class="form-control h-48px xl:h-64px fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
+                                    placeholder="Enter amount" required
+                                    style="max-width: 220px; margin-left: auto; margin-right: auto;">
+                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
+                                    <button
+                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
+                                        type="button" data-bs-toggle="modal"
+                                        data-bs-target="#magicFeaturesModal">Wrap</button>
+                                    <button
+                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
+                                        type="button" data-bs-toggle="modal"
+                                        data-bs-target="#magicFeaturesModal">Unwrap</button>
+                                </div>
+                            </div>
+                            <!-- Claim Unicorns Panel -->
+                            <div class="col">
+                                <div
+                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
+                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
+                                        "Grind" a Unicorn</h3>
+
+                                </div>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">Did you know that the original Unicorn Meat Grinder didn't actually grind Unicorns? It simply sent the Unicorn to the Unicorn Meat Grinder Association and could be taken by anyone. We think you should have your cake and eat it too, so now you can claim 1,000 Unicorn Meat without harming mythical creatures.</p><br>
+                                <input id="wrap-unwrap-amount" type="number" min="0" step="any"
+                                    class="form-control h-48px xl:h-64px fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
+                                    placeholder="Enter amount" required
+                                    style="max-width: 220px; margin-left: auto; margin-right: auto;">
+                                <button
+                                    class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100 mt-2"
+                                    type="button" data-bs-toggle="modal"
+                                    data-bs-target="#magicFeaturesModal">"Grind"</button>
+                            </div>
+                        </div>
+                        <!-- Error Message Area -->
+                        <div id="web3-error"
+                            class="panel mt-4 p-3 border border-2 border-danger text-danger bg-white text-center d-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
+        <div class="d-none xl:d-block">
+            <img class="text-secondary-100"
+                src="{{ url_for('static', filename='assets/images/common/italic-line-01.svg') }}" alt="victor"
+                data-uc-svg style="margin-bottom: -1px">
+        </div>
+
+        <!-- Section start -->
+        <div id="faq" class="faq section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-secondary-100">
+                <div class="container sm:max-w-md xl:max-w-lg">
+                    <div class="section-inner panel"
+                        data-anime="onview: -300; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
+                        <div
+                            class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center">
+                            <h2 class="h4 sm:h3 xl:h2 m-0 rotate-2 text-uppercase ls-0">Frequently Asked Questions 🤔
+                            </h2>
+                        </div>
+                        <div class="section-content panel">
+                            <ul class="gap-3 sm:gap-4" data-uc-accordion="targets: > li; multiple: true">
+                                <li
+                                    class="panel p-3 sm: p-4 xl:p-6 border border-2 border-black contrast-shadow-sm text-black bg-white rotate-1 uc-open">
+                                    <a class="uc-accordion-title h5 xl:h4 stroke-text m-0" href="#">Is this the real
+                                        historical Unicorn Meat?</a>
+                                    <div class="uc-accordion-content">
+                                        <p class="fs-5 xl:fs-4">Yes! This is the same Unicorn Meat that was created in
+                                            March 2016 by Alex Van de Sande. The <a href="https://x.com/cartoonitunes/status/1942244684513923330" target="_blank" class="fw-semibold text-primary" style="text-decoration: underline;">contract was acquired</a> through the
+                                            Unicorn Meat Grinder Association contract. The supply was wrapped in a
+                                            tradable modern ERC-20 token.</p>
+                                    </div>
+                                </li>
+                                <li
+                                    class="panel p-3 sm:p-4 xl:p-6 border border-2 border-black contrast-shadow-sm text-black bg-white -rotate-1">
+                                    <a class="uc-accordion-title h5 xl:h4 stroke-text m-0" href="#">Can I unwrap Wrapped
+                                        Unicorn Meat?</a>
+                                    <div class="uc-accordion-content">
+                                        <p class="fs-5 xl:fs-4">Yes! Anyone can freely wrap and unwrap Unicorn Meat
+                                            between the original 2016 contract and the wrapper. We have added buttons in
+                                            this website to make it easy, but you can also do so directly on the wrapper
+                                            contract.</p>
+                                    </div>
+                                </li>
+                                <li
+                                    class="panel p-3 sm:p-4 xl:p-6 border border-2 border-black contrast-shadow-sm text-black bg-white rotate-1">
+                                    <a class="uc-accordion-title h5 xl:h4 stroke-text m-0" href="#">Why is Unicorn Meat
+                                        significant?</a>
+                                    <div class="uc-accordion-content">
+                                        <p class="fs-5 xl:fs-4">Unicorn Meat is a historic token created by Ethereum
+                                            leader Alex Van de Sande. It was created as an on-chain April Fools joke,
+                                            allowing anyone to grind their Unicorn for Unicorn Meat. This was perhaps
+                                            the first demonstration of a mutation of a token. Unicorn Meat is one of the
+                                            few tradable tokens that was created by the Ethereum team.</p>
+                                    </div>
+                                </li>
+                                <li
+                                    class="panel p-3 sm:p-4 xl:p-6 border border-2 border-black contrast-shadow-sm text-black bg-white -rotate-1">
+                                    <a class="uc-accordion-title h5 xl:h4 stroke-text m-0" href="#">Why was Unicorn Meat
+                                        wrapped?</a>
+                                    <div class="uc-accordion-content">
+                                        <p class="fs-5 xl:fs-4">The original Unicorn and Unicorn Meat contracts have
+                                            slight deviations from the modern ERC-20 standard. These deviations are not
+                                            supported by Decentralized or Centralized Exchanges. Wrapping the Unicorn
+                                            Meat contract allows it to be used on modern exchanges. That said, those
+                                            that want to hold the original coin can simply unwrap their wrapped supply.
+                                        </p>
+                                    </div>
+                                </li>
+                                <li
+                                    class="panel p-3 sm:p-4 xl:p-6 border border-2 border-black contrast-shadow-sm text-black bg-white rotate-1">
+                                    <a class="uc-accordion-title h5 xl:h4 stroke-text m-0" href="#">Why acquire Unicorn Meat and make it tradable?</a>
+                                    <div class="uc-accordion-content">
+                                        <p class="fs-5 xl:fs-4">Beyond the intrigue of acquiring ownership of a coin created by the Ethereum Foundation — and the potential monetary upside — there are several reasons this move made sense. The Unicorn Meat contract was claimed through a DAO proposal that reached quorum. Anyone holding just one Unicorn could have done the same — and eventually, someone would have.
+                                            <br>Both the Unicorn Meat Grinder Association and the Unicorn Meat contract had been dormant for years. The Grinder Association saw only 23 transactions from a handful of addresses, with the last in September 2017. The Unicorn Meat contract itself had just 7 transactions, ending in December 2016.
+                                            
+                                            <br>Some may cry foul — and that’s okay. But hopefully, more will appreciate the chance to own a piece of Ethereum history and enjoy the fun that lies ahead.</p>
+                                    </div>
+                                </li>
+
+                                <li
+                                    class="panel p-3 sm:p-4 xl:p-6 border border-2 border-black contrast-shadow-sm text-black bg-white -rotate-1">
+                                    <a class="uc-accordion-title h5 xl:h4 stroke-text m-0" href="#">Why renounce the contract?</a>
+                                    <div class="uc-accordion-content">
+                                        <p class="fs-5 xl:fs-4">As long as the Unicorn Meat Grinder Association is not the owner of the Unicorn Meat contract, the unused Unicorn Grinder will not be functional. In order to make Unicorn Meat tradable, it's important to limit the ability to create more tokens to avoid meatflation. Grinding Unicorns yielded between 1,000 to 103,300 Uncorn Meat, using a pseudo-random block based algorithm that is easy to game to ensure you get 103,300 Unicorn Meat. 2,717 * 103,300 = 280,766,100 Unicorn Meat. 100,000,000 Unicorn Meat felt right.
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
+        <!-- Text Marquee Start -->
+        <div class="panel z-99">
+            <div class="position-absolute top-0 start-0 w-100 h-1/2 bg-secondary-100"></div>
+            <div class="position-absolute bottom-0 start-0 w-100 h-1/2" style="background-color: #dbf2ff"></div>
+            <div class="py-1 rotate-1 bg-white">
+                <div class="h3 xl:h2 fw-medium py-4 xl:py-6 reverse bg-secondary text-black text-uppercase ls-0"
+                    data-uc-marquee="clone: 3; gap: 64; reverse: true;" style="--gap: 32px">
+                    <div>
+                        <div class="hstack gap-8">
+                            <div>🦄</div>
+                            <span>Meat</span>
+                            <div>🍖</div>
+                            <span>Unicorn</span>
+                            <div>🦄</div>
+                            <span>Meat</span>
+                        </div>
+                        <div class="hstack gap-8">
+                            <div>🍖</div>
+                            <span>Unicorn</span>
+                            <div>🦄</div>
+                            <span>Meat</span>
+                            <div>🍖</div>
+                            <span>Unicorn</span>
+                        </div>
+                        <div class="hstack gap-8">
+                            <div>🦄</div>
+                            <span>Meat</span>
+                            <div>🍖</div>
+                            <span>Unicorn</span>
+                            <div>🦄</div>
+                            <span>Meat</span>
+                        </div>
+                        <div class="hstack gap-8">
+                            <div>🍖</div>
+                            <span>Meat</span>
+                            <div>🦄</div>
+                            <span>Unicorn</span>
+                            <div>🍖</div>
+                            <span>Meat</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Marquee end -->
+    </div>
+
+    <!-- Wrapper end -->
+
+    <!-- Magic Features Modal -->
+    <div class="modal fade" id="magicFeaturesModal" tabindex="-1" aria-labelledby="magicFeaturesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content border border-2 border-black contrast-shadow-md bg-white text-center p-4">
+                <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"
+                    aria-label="Close" style="font-size: 2rem; background: none; border: none;">&times;</button>
+                <div class="modal-body">
+                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0 mb-3">Magic Features</h2>
+                    <div class="fs-3 mb-2">✨🦄✨</div>
+                    <p class="fs-5 xl:fs-4 mb-0">Magic Features Coming Soon!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer start -->
+    <footer id="uc-footer" class="uc-footer panel overflow-hidden" style="background-color: #dbf2ff">
+        <div class="footer-outer">
+            <div
+                class="footer-cta panel py-6 sm:py-8 lg:py-9 xl:py-10 min-h-850px sm:min-h-950px lg:min-h-1000px xl:min-h-1320px">
+                <img class="position-absolute start-0 bottom-0 w-100"
+                    src="{{ url_for('static', filename='assets/images/home-two/footer.svg') }}" alt="Image">
+                <div class="container sm:max-w-md">
+                    <div class="footer-inner panel vstack gap-4 sm:gap-6 xl:gap-9"
+                        data-anime="onview: -100; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                        <div class="panel text-center">
+                            <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">
+                                References
+                            </h2>
+                        </div>
+                        <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
+                            <ul class="vstack gap-2 list-unstyled m-0">
+                                <li>
+                                    <a href="https://etherscan.io/address/0x123..." target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Unicorn
+                                        Meat Contract</a>
+                                </li>
+                                <li>
+                                    <a href="https://etherscan.io/address/0x456..." target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Wrapped
+                                        Unicorn Meat Contract</a>
+                                </li>
+                                <li>
+                                    <a href="https://x.com/ethereum/status/715821110722433024" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Ethereum
+                                        Twitter Announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://gist.github.com/alexvandesande/eca0b87da89ab28fa50c"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Alex Van de Sande's Announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://gist.github.com/alexvandesande/3abc9f741471e08a6356"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Alex Van de Sande's Contract Code</a>
+                                </li>
+                                <li>
+                                    <a href="https://x.com/pipermerriam/status/718546708641124353" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Piper
+                                        Merriam Takeover announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://x.com/cartoonitunes/status/1942244684513923330" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">cart00n's Takeover announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://etherscan.io/tx/0x78b92f3952e72e4714fdb4124da6bb367fad03b77c46e71b4f73045d0c78e1c4" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">"Meatiny" DAO Proposal</a>
+                                </li>
+                                <li>
+                                    <a href="https://web.archive.org/web/20160405014834/ethereum.org/donate"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Ethereum Foundation 2016 Donation Page</a>
+                                </li>
+                                <li>
+                                    <a href="https://www.reddit.com/r/ethereum/comments/4csw29/so_you_liked_unicorns_but_always_wished_they/" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">r/ethereum Unicorn Meat Grinder Announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://www.reddit.com/r/ethereum/comments/4ma8ts/unicorn_token/" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">r/ethereum Unicorn Token</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/ethereum/ethereum-org/issues/648" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Update the Unicorn Token price</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-content panel bg-primary-400 text-white" style="margin-top: -1px">
+            <div class="container">
+                <div
+                    class="footer-inner panel vstack lg:hstack gap-4 justify-between fs-5 xl:fs-4 text-center py-4 lg:py-6">
+                    <p>Unicorn Meat © 2025, All rights reserved.</p>
+                    <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#roadmap">Timeline</a></li>
+                        <li><a href="#web3-actions">Dapp</a></li>
+                        <li><a href="#tokenomics">Tokenomics</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </div>
+    </footer>
+
+    <!-- Footer end -->
+
+    <!-- include jquery & bootstrap js -->
+    <script defer src="{{ url_for('static', filename='assets/js/libs/jquery.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/bootstrap.min.js') }}"></script>
+
+    <!-- include scripts -->
+    <script defer src="{{ url_for('static', filename='assets/js/libs/anime.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/swiper-bundle.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/scrollmagic.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/typed.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/tilt.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/split-type.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/prettify.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/libs/gsap.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/core/magic-cursor.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/helpers/data-attr-helper.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/helpers/swiper-helper.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/helpers/splitype-helper.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/helpers/anime-helper.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/helpers/typed-helper.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/helpers/tilt-helper.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/core/marquee.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='assets/js/uikit-components-bs.js') }}"></script>
+
+    <!-- include app script -->
+    <script defer src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
+
+    <script>
+        // Schema toggle via URL
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const getSchema = urlParams.get("schema");
+        if (getSchema === "dark") {
+            setDarkMode(1);
+        } else if (getSchema === "light") {
+            setDarkMode(0);
+        }
+    </script>
+    </div>
+</body>
+
+</html>
