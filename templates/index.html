@@ -68,6 +68,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        /* Responsive button text sizing for mobile */
+        @media (max-width: 576px) {
+            .btn-responsive-text {
+                font-size: 0.8rem !important;
+            }
+            .btn-responsive-text-lg {
+                font-size: 0.9rem !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .btn-responsive-text {
+                font-size: 0.85rem !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
@@ -115,9 +132,16 @@
                     <li><a href="#tokenomics">Tokenomics</a></li>
                     <li><a href="#roadmap">Timeline</a></li>
                     <li><a href="#web3-actions">Dapp</a></li>
+                    <li><a href="#claims">Claims</a></li>
                     <li><a href="#faq">FAQ</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
+                <div class="mt-4">
+                    <a class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm connect-wallet-btn w-100"
+                        href="#">
+                        <span class="btn-responsive-text">Connect Wallet</span>
+                    </a>
+                </div>
                 <ul class="nav-x gap-1 mt-4">
                     <li>
                         <a class="w-32px hover:-rotate-3" href="https://x.com/UnicornMeatETH"
@@ -174,13 +198,14 @@
                                 <li><a href="#tokenomics">Tokenomics</a></li>
                                 <li><a href="#roadmap">Timeline</a></li>
                                 <li><a href="#web3-actions">Dapp</a></li>
+                                <li><a href="#claims">Claims</a></li>
                                 <li><a href="#faq">FAQ</a></li>
                             </ul>
                         </div>
                         <div class="uc-navbar-right">
-                            <a class="btn btn-sm xl:btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0 d-none lg:d-inline-flex"
-                                href="#" data-bs-toggle="modal" data-bs-target="#magicFeaturesModal">
-                                <span>Connect Wallet</span>
+                            <a class="btn btn-sm xl:btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0 d-none lg:d-inline-flex connect-wallet-btn"
+                                href="#">
+                                <span class="btn-responsive-text">Connect Wallet</span>
                             </a>
                             <a class="btn btn-md btn-secondary w-48px h-48px p-0 border border-2 border-black contrast-shadow-sm d-inline-flex lg:d-none"
                                 href="#uc-menu-panel" data-uc-toggle>
@@ -775,6 +800,87 @@
 
         <!-- Section end -->
 
+        <!-- Section start -->
+        <div id="claims" class="claims section panel">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #ffe6f0;">
+                <center>
+                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Unicorn Meat Claims</h2>
+                </center><br>
+                <div class="container sm:max-w-lg xl:max-w-2xl">
+                    <div
+                        class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
+
+                        <div class="row child-cols-1 lg:child-cols-2 g-4">
+                            <!-- MistCoin Claims Panel -->
+                            <div class="col order-1 order-lg-1">
+                                <div
+                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
+                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
+                                        MistCoin Holder Claim</h3>
+                                </div>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">
+                                    Attention MistCoin holders! You can now claim your allocated Unicorn Meat tokens on Ethereum L1. 
+                                    This is a temporary claim window for eligible MistCoin hodlers only.
+                                </p>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">
+                                    <strong>How it works:</strong> The claim uses a Merkle tree for efficient verification. 
+                                    Each eligible address can claim their allocated amount once. Claims are processed on-chain 
+                                    with full transparency. If you want to claim directly from the contracts, you can find the instructions <a href="https://github.com/unicornmeateth/mistcoin_claim" target="_blank" rel="noopener noreferrer">here</a>.
+                                </p>
+                                
+                                <!-- Claim Status -->
+                                <div id="claim-status" class="mb-3">
+                                    <div class="alert alert-info border border-2 border-black contrast-shadow-lg bg-info-50 rounded-3 text-center">
+                                        <div class="d-flex align-items-center justify-content-center mb-3">
+                                            <div style="width: 24px; height: 24px; background-color: #17a2b8; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                                <span style="font-size: 14px;">🔗</span>
+                                            </div>
+                                            <h5 class="mb-0 fw-bold text-info">Check Eligibility</h5>
+                                        </div>
+                                        <p class="mb-3 fs-6">Connect your wallet to check if you're eligible for MistCoin claims.</p>
+                                        <button id="check-claim-button" class="btn btn-primary btn-lg border border-2 border-black contrast-shadow-sm fw-bold px-4 py-2">
+                                            <span class="btn-responsive-text-lg">🔍 Check Eligibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
+                                    <button
+                                        class="btn btn-md btn-primary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
+                                        type="button" onclick="window.open('https://etherscan.io/address/0x1eD74EaACE8a96A79BCa9099696723134c0F6751', '_blank')">
+                                        <span class="btn-responsive-text">View Claim Contract</span>
+                                    </button>
+                                    <button
+                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
+                                        type="button" onclick="window.open('https://github.com/unicornmeateth/mistcoin_claim', '_blank')">
+                                        <span class="btn-responsive-text">Direct Claim Instructions</span>
+                                    </button>
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <small class="text-muted">
+                                        <strong>Contract Features:</strong> Merkle proof verification, one-time claims per address, 
+                                        owner-controlled claim windows, emergency token recovery
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Claim Stats -->
+                            <div class="col order-2 order-lg-2">
+                                <h4 class="h5 mb-3 text-center">Claim Statistics</h4>
+                                <div id="claim-stats" class="mb-4">
+                                    <div class="text-center">
+                                        <p class="text-muted">Loading claim statistics...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
         <div class="d-none xl:d-block">
             <img class="text-secondary-100"
                 src="{{ url_for('static', filename='assets/images/common/italic-line-01.svg') }}" alt="victor"
@@ -1091,6 +1197,7 @@
                         <li><a href="#about">About</a></li>
                         <li><a href="#roadmap">Timeline</a></li>
                         <li><a href="#web3-actions">Dapp</a></li>
+                        <li><a href="#claims">Claims</a></li>
                         <li><a href="#tokenomics">Tokenomics</a></li>
                         <li><a href="#faq">FAQ</a></li>
                     </ul>
@@ -1124,6 +1231,23 @@
     <script defer src="{{ url_for('static', filename='assets/js/helpers/tilt-helper.js') }}"></script>
     <script defer src="{{ url_for('static', filename='assets/js/core/marquee.js') }}"></script>
     <script defer src="{{ url_for('static', filename='assets/js/uikit-components-bs.js') }}"></script>
+
+    <!-- include ethers.js for blockchain interactions -->
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
+    <script>
+        // Verify ethers.js loaded
+        if (typeof window.ethers !== 'undefined') {
+            console.log('✅ Ethers.js loaded successfully:', window.ethers.version);
+        } else {
+            console.error('❌ Ethers.js failed to load');
+        }
+    </script>
+    
+    <!-- include WalletKit library -->
+    <script src="{{ url_for('static', filename='assets/js/walletkit.umd.js') }}"></script>
+    
+    <!-- include WalletKit integration -->
+    <script defer src="{{ url_for('static', filename='assets/js/walletkit-integration.js') }}"></script>
 
     <!-- include app script -->
     <script defer src="{{ url_for('static', filename='assets/js/app.js') }}"></script>

@@ -1,8 +1,73 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import os
+from web3 import Web3
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# MistCoin Claim Contract ABI (simplified for the functions we need)
+MISTCOIN_CLAIM_ABI = [
+    {
+        "inputs": [
+            {"name": "amount", "type": "uint256"},
+            {"name": "merkleProof", "type": "bytes32[]"}
+        ],
+        "name": "claim",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"name": "user", "type": "address"}],
+        "name": "hasClaimed",
+        "outputs": [{"name": "", "type": "bool"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"name": "user", "type": "address"},
+            {"name": "amount", "type": "uint256"},
+            {"name": "merkleProof", "type": "bytes32[]"}
+        ],
+        "name": "getClaimableAmount",
+        "outputs": [{"name": "claimableAmount", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getStats",
+        "outputs": [
+            {"name": "_totalAllocated", "type": "uint256"},
+            {"name": "_totalClaimed", "type": "uint256"},
+            {"name": "_remainingAllocated", "type": "uint256"},
+            {"name": "_contractBalance", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "claimEnabled",
+        "outputs": [{"name": "", "type": "bool"}],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
+
+# Import Merkle tree data
+from merkle_data import MOCK_MERKLE_DATA
+
+# Web3 setup
+w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/FF0GUedsNSBgY9vgIPWUbJqjkPeFwVsO'))
+
+# Contract addresses
+CLAIM_CONTRACT_ADDRESS = '0x1eD74EaACE8a96A79BCa9099696723134c0F6751'
+WRAPPED_CONTRACT_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'
+
+# Create contract instances
+claim_contract = w3.eth.contract(address=CLAIM_CONTRACT_ADDRESS, abi=MISTCOIN_CLAIM_ABI)
 
 @app.route('/')
 def index():
@@ -38,6 +103,186 @@ def not_found(error):
 @app.route('/<path:path>')
 def catch_all(path):
     return redirect(url_for('index'))
+
+@app.route('/api/claim-status')
+def get_claim_status():
+    """Get claim contract status (open/closed)"""
+    try:
+        # Call the real contract to check if claims are enabled
+        claim_enabled = claim_contract.functions.claimEnabled().call()
+        return jsonify({
+            'success': True,
+            'claimEnabled': claim_enabled
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/claim-stats')
+def get_claim_stats():
+    """Get claim contract statistics"""
+    try:
+        # Call the real contract to get stats
+        stats = claim_contract.functions.getStats().call()
+        return jsonify({
+            'success': True,
+            'stats': {
+                'totalAllocated': str(stats[0]),
+                'totalClaimed': str(stats[1]),
+                'remainingAllocated': str(stats[2]),
+                'contractBalance': str(stats[3])
+            }
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/check-claim/<address>')
+def check_claim_eligibility(address):
+    """Check if an address is eligible for claims"""
+    try:
+        # Validate and convert to checksum address
+        try:
+            checksum_address = w3.to_checksum_address(address)
+        except Exception:
+            return jsonify({'error': 'Invalid address'}), 400
+        
+        # Check if address is in our Merkle tree data
+        address_lower = checksum_address.lower()
+        claim_data = None
+        for claim in MOCK_MERKLE_DATA['claims']:
+            if claim['address'].lower() == address_lower:
+                claim_data = claim
+                break
+        
+        if claim_data:
+            
+            # Check if user has already claimed
+            has_claimed = claim_contract.functions.hasClaimed(checksum_address).call()
+            
+            # Get claimable amount from contract
+            claimable_amount = claim_contract.functions.getClaimableAmount(
+                checksum_address, 
+                claim_data['amount'], 
+                claim_data['proof']
+            ).call()
+            
+            return jsonify({
+                'success': True,
+                'hasClaimed': has_claimed,
+                'claimableAmount': str(claimable_amount),
+                'merkleProof': claim_data['proof']
+            })
+        else:
+            # Check if user has claimed (in case they're not in Merkle tree)
+            has_claimed = claim_contract.functions.hasClaimed(checksum_address).call()
+            return jsonify({
+                'success': True,
+                'hasClaimed': has_claimed,
+                'claimableAmount': '0',
+                'merkleProof': []
+            })
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/balance/wrapped/<address>')
+def get_wrapped_balance(address):
+    """Get wrapped Unicorn Meat balance for an address"""
+    try:
+        # Validate and convert to checksum address
+        try:
+            checksum_address = w3.to_checksum_address(address)
+        except Exception:
+            return jsonify({'error': 'Invalid address'}), 400
+        
+        # ERC-20 balanceOf function ABI
+        balance_abi = [{"constant": True, "inputs": [{"name": "_owner", "type": "address"}], "name": "balanceOf", "outputs": [{"name": "balance", "type": "uint256"}], "type": "function"}]
+        
+        # Create contract instance
+        wrapped_contract = w3.eth.contract(address=WRAPPED_CONTRACT_ADDRESS, abi=balance_abi)
+        
+        # Get balance
+        balance = wrapped_contract.functions.balanceOf(checksum_address).call()
+        
+        return jsonify({
+            'success': True,
+            'balance': str(balance)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/balance/unicorn-meat/<address>')
+def get_unicorn_meat_balance(address):
+    """Get original Unicorn Meat balance for an address"""
+    try:
+        # Validate and convert to checksum address
+        try:
+            checksum_address = w3.to_checksum_address(address)
+        except Exception:
+            return jsonify({'error': 'Invalid address'}), 400
+        
+        # Mock balance for testing - replace with actual contract call
+        import random
+        mock_balance = random.randint(100000, 10000000)  # 100K to 10M tokens
+        
+        return jsonify({
+            'success': True,
+            'balance': str(mock_balance)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/claim-tokens', methods=['POST'])
+def claim_tokens():
+    """Process token claims"""
+    try:
+        data = request.get_json()
+        user_address = data.get('user_address')
+        
+        if not user_address:
+            return jsonify({'error': 'Invalid address'}), 400
+        
+        # Validate and convert to checksum address
+        try:
+            checksum_address = w3.to_checksum_address(user_address)
+        except Exception:
+            return jsonify({'error': 'Invalid address'}), 400
+        
+        # Check if user is eligible
+        address_lower = checksum_address.lower()
+        claim_data = None
+        for claim in MOCK_MERKLE_DATA['claims']:
+            if claim['address'].lower() == address_lower:
+                claim_data = claim
+                break
+        
+        if not claim_data:
+            return jsonify({'error': 'Address not eligible for claims'}), 400
+        
+        # Check if user has already claimed
+        has_claimed = claim_contract.functions.hasClaimed(checksum_address).call()
+        if has_claimed:
+            return jsonify({'error': 'Tokens already claimed'}), 400
+        
+        # Get claimable amount from contract
+        claimable_amount = claim_contract.functions.getClaimableAmount(
+            checksum_address, 
+            claim_data['amount'], 
+            claim_data['proof']
+        ).call()
+        
+        if claimable_amount == 0:
+            return jsonify({'error': 'No tokens available to claim'}), 400
+        
+        # For now, return success message. In production, this would trigger the actual claim transaction
+        return jsonify({
+            'success': True,
+            'message': f'Successfully claimed {claimable_amount} Unicorn Meat tokens!',
+            'amount': str(claimable_amount),
+            'merkleProof': claim_data['proof']
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True) 
