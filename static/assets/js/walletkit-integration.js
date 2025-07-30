@@ -591,7 +591,7 @@ class UnicornMeatWalletKit {
             const signer = provider.getSigner();
             
             // Claim contract address
-            const claimContractAddress = '0x1eD74EaACE8a96A79BCa9099696723134c0F6751';
+            const claimContractAddress = '0xEC2c2AdEB8Ee3A338485ae684D1B1CB6DA0A498c';
             
             // Claim contract ABI
             const claimAbi = [
@@ -826,7 +826,7 @@ class UnicornMeatWalletKit {
                 if (!claimedAmount && this.isConnected && this.account) {
                     try {
                         // Create contract instance to get claimed amount
-                        const claimContractAddress = '0x1eD74EaACE8a96A79BCa9099696723134c0F6751';
+                        const claimContractAddress = '0xEC2c2AdEB8Ee3A338485ae684D1B1CB6DA0A498c';
                         const claimAbi = [
                             {
                                 "inputs": [{"name": "account", "type": "address"}],
