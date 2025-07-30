@@ -1,0 +1,25 @@
+{
+  "name": "unicorn-meat-website",
+  "version": "1.0.0",
+  "description": "Unicorn Meat - A magical coin made by Ethereum in March 2016. Now wrapped and revived!",
+  "main": "app.py",
+  "scripts": {
+    "start": "python app.py",
+    "dev": "python app.py"
+  },
+  "dependencies": {
+    "@reown/walletkit": "^1.0.0",
+    "@walletconnect/utils": "^2.0.0",
+    "@walletconnect/core": "^2.0.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "ethereum",
+    "unicorn-meat",
+    "web3",
+    "crypto",
+    "memecoin"
+  ],
+  "author": "Unicorn Meat Team",
+  "license": "MIT"
+} 

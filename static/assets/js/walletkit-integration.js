@@ -805,12 +805,9 @@ class UnicornMeatWalletKit {
                              aria-valuemin="0" 
                              aria-valuemax="100">
                         </div>
-                        <div class="position-absolute top-50 end-0 translate-middle-y pe-3">
-                            <span class="fs-6 fw-bold text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${percentage.toFixed(1)}%</span>
-                        </div>
                     </div>
                     <div class="mt-2 text-center">
-                        <small class="text-muted fw-medium">${this.formatStatsNumber(stats.totalClaimed)} of ${this.formatStatsNumber(stats.totalAllocated)} tokens claimed</small>
+                        <small class="text-muted fw-medium">${this.formatStatsNumber(stats.totalClaimed)} of ${this.formatStatsNumber(stats.totalAllocated)} tokens claimed (${percentage.toFixed(1)}%)</small>
                     </div>
                 </div>
             `;
@@ -848,7 +845,7 @@ class UnicornMeatWalletKit {
                 }
                 
                 claimStatus.innerHTML = `
-                    <div class="alert alert-warning border border-2 border-black contrast-shadow-lg bg-warning-50 rounded-3 text-center">
+                    <div class="alert alert-warning border border-2 border-black contrast-shadow-lg bg-warning-50 rounded-3 text-center p-4">
                         <div class="d-flex align-items-center justify-content-center mb-3">
                             <div style="width: 24px; height: 24px; background-color: #ffc107; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
                                 <span style="font-size: 14px;">⚠️</span>
@@ -860,7 +857,7 @@ class UnicornMeatWalletKit {
                 `;
             } else if (data.claimableAmount > 0) {
                 claimStatus.innerHTML = `
-                    <div class="alert alert-success border border-2 border-black contrast-shadow-lg bg-success-50 rounded-3 text-center">
+                    <div class="alert alert-success border border-2 border-black contrast-shadow-lg bg-success-50 rounded-3 text-center p-4">
                         <div class="d-flex align-items-center justify-content-center mb-3">
                             <div style="width: 24px; height: 24px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
                                 <span style="font-size: 14px;">✅</span>
@@ -868,7 +865,7 @@ class UnicornMeatWalletKit {
                             <h5 class="mb-0 fw-bold text-success">Eligible for Claim!</h5>
                         </div>
                         <p class="mb-3 fs-6">You can claim <strong>${this.formatStatsNumber(data.claimableAmount)}</strong> Unicorn Meat tokens.</p>
-                        <button id="claim-button" class="btn btn-success btn-lg border border-2 border-black contrast-shadow-sm fw-bold px-4 py-2">
+                        <button id="claim-button" class="btn btn-success btn-lg border border-2 border-black contrast-shadow-sm fw-bold px-4 py-2 mb-0">
                             <span class="btn-responsive-text-lg">🍖 Claim Tokens</span>
                         </button>
                     </div>
