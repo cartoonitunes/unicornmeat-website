@@ -134,7 +134,7 @@
                     <li><a href="#web3-actions">Dapp</a></li>
                     <li><a href="#claims">Claims</a></li>
                     <li><a href="#faq">FAQ</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#references">Links</a></li>
                 </ul>
                 <div class="mt-4">
                     <a class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm connect-wallet-btn w-100"
@@ -145,18 +145,47 @@
                 <ul class="nav-x gap-1 mt-4">
                     <li>
                         <a class="w-32px hover:-rotate-3" href="https://x.com/UnicornMeatETH"
+                            target="_blank" rel="noopener noreferrer"
                             style="font-size: 24px; display: flex; align-items: center; justify-content: center; color: #000; text-decoration: none;"><i
                                 class="fab fa-x-twitter" style="display: inline-block;"></i></a>
                     </li>
                     <li>
                         <a class="w-32px hover:-rotate-3" href="https://t.me/UnicornMeatETH"
+                            target="_blank" rel="noopener noreferrer"
                             style="font-size: 24px; display: flex; align-items: center; justify-content: center; color: #0088cc; text-decoration: none;"><i
                                 class="fab fa-telegram" style="display: inline-block;"></i></a>
                     </li>
                     <li>
                         <a class="w-32px hover:-rotate-3" href="mailto:team@unicornmeateth.com"
+                            target="_blank" rel="noopener noreferrer"
                             style="font-size: 24px; display: flex; align-items: center; justify-content: center; color: #6E1E71; text-decoration: none;"><i
                                 class="fas fa-envelope" style="display: inline-block;"></i></a>
+                    </li>
+                </ul>
+                <ul class="nav-x gap-1 mt-2">
+                    <li>
+                        <a class="w-32px hover:-rotate-3" href="https://www.coingecko.com/en/coins/unicorn-meat"
+                            target="_blank" rel="noopener noreferrer"
+                            style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                            <img src="{{ url_for('static', filename='assets/images/icons/coingecko.png') }}" 
+                                 alt="Coingecko" style="width: 24px; height: 24px;">
+                        </a>
+                    </li>
+                    <li>
+                        <a class="w-32px hover:-rotate-3" href="https://dexscreener.com/ethereum/0xc3b9903f07c7b7614b9b5b490c7ce89bd688282e"
+                            target="_blank" rel="noopener noreferrer"
+                            style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                            <img src="{{ url_for('static', filename='assets/images/icons/dexscreener.png') }}" 
+                                 alt="DexScreener" style="width: 24px; height: 24px;">
+                        </a>
+                    </li>
+                    <li>
+                        <a class="w-32px hover:-rotate-3" href="https://www.dextools.io/app/en/token/unicornmeat"
+                            target="_blank" rel="noopener noreferrer"
+                            style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                            <img src="{{ url_for('static', filename='assets/images/icons/dextools.png') }}" 
+                                 alt="DexTools" style="width: 24px; height: 24px;">
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -253,20 +282,52 @@
                                     <li>
                                         <a class="hover:-rotate-3 transition-transform duration-200"
                                             href="https://x.com/UnicornMeatETH"
+                                            target="_blank" rel="noopener noreferrer"
                                             style="font-size: 28px; color: #6E1E71; text-decoration: none;"><i
                                                 class="fab fa-x-twitter" style="display: inline-block;"></i></a>
                                     </li>
                                     <li>
                                         <a class="hover:-rotate-3 transition-transform duration-200"
                                             href="https://t.me/UnicornMeatETH"
+                                            target="_blank" rel="noopener noreferrer"
                                             style="font-size: 28px; color: #6E1E71; text-decoration: none;"><i
                                                 class="fab fa-telegram" style="display: inline-block;"></i></a>
                                     </li>
                                     <li>
                                         <a class="hover:-rotate-3 transition-transform duration-200"
                                             href="mailto:team@unicornmeateth.com"
+                                            target="_blank" rel="noopener noreferrer"
                                             style="font-size: 28px; color: #6E1E71; text-decoration: none;"><i
                                                 class="fas fa-envelope" style="display: inline-block;"></i></a>
+                                    </li>
+                                </ul>
+                                <ul class="nav-x gap-3 justify-center mt-2">
+                                    <li>
+                                        <a class="hover:-rotate-3 transition-transform duration-200"
+                                            href="https://www.coingecko.com/en/coins/unicorn-meat"
+                                            target="_blank" rel="noopener noreferrer"
+                                            style="text-decoration: none;">
+                                            <img src="{{ url_for('static', filename='assets/images/icons/coingecko.png') }}" 
+                                                 alt="Coingecko" style="width: 28px; height: 28px;">
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="hover:-rotate-3 transition-transform duration-200"
+                                            href="https://dexscreener.com/ethereum/0xc3b9903f07c7b7614b9b5b490c7ce89bd688282e"
+                                            target="_blank" rel="noopener noreferrer"
+                                            style="text-decoration: none;">
+                                            <img src="{{ url_for('static', filename='assets/images/icons/dexscreener.png') }}" 
+                                                 alt="DexScreener" style="width: 28px; height: 28px;">
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="hover:-rotate-3 transition-transform duration-200"
+                                            href="https://www.dextools.io/app/en/token/unicornmeat"
+                                            target="_blank" rel="noopener noreferrer"
+                                            style="text-decoration: none;">
+                                            <img src="{{ url_for('static', filename='assets/images/icons/dextools.png') }}" 
+                                                 alt="DexTools" style="width: 28px; height: 28px;">
+                                        </a>
                                     </li>
                                 </ul>
                             </div>
@@ -372,6 +433,7 @@
                                                     target="_blank" rel="noopener noreferrer">renounced contract</a>,
                                                 and is wrapped to be tradable and owned by anyone!
                                             </p>
+                                            <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">Unicorn Meat is a meme token – no financial value, just mythical fun 🦄🍖.</p>
                                         </div>
                                         <div class="buttons vstack sm:hstack justify-center gap-2 xl:gap-3">
                                             <a class="btn btn-md xl:btn-2xl btn-secondary px-3 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
@@ -1097,7 +1159,7 @@
 
     <!-- Footer start -->
     <footer id="uc-footer" class="uc-footer panel overflow-hidden" style="background-color: #dbf2ff">
-        <div class="footer-outer">
+        <div id="references" class="footer-outer">
             <div
                 class="footer-cta panel py-6 sm:py-8 lg:py-9 xl:py-10 min-h-850px sm:min-h-950px lg:min-h-1000px xl:min-h-1320px">
                 <img class="position-absolute start-0 bottom-0 w-100"
