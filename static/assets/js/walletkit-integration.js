@@ -690,7 +690,7 @@ class UnicornMeatWalletKit {
             
             this.showLoading('Waiting for wallet approval...');
             
-            // Call the claim function with explicit gas limit
+            // Call the claim function with better gas estimation for OKX and other wallets
             console.log('Sending transaction with:', {
                 amount: amount.toString(),
                 amountHex: '0x' + amount.toString(16),
@@ -698,8 +698,22 @@ class UnicornMeatWalletKit {
                 address: this.account.address
             });
             
+            // Try to estimate gas first, then use a buffer for OKX compatibility
+            let gasEstimate;
+            try {
+                gasEstimate = await claimContract.estimateGas.claim(amount, this.currentClaimData.merkleProof);
+                console.log('Gas estimate:', gasEstimate.toString());
+            } catch (estimateError) {
+                console.log('Gas estimation failed, using default:', estimateError);
+                gasEstimate = window.ethers.BigNumber.from(300000);
+            }
+            
+            // Add 20% buffer for OKX wallet compatibility
+            const gasLimit = gasEstimate.mul(120).div(100);
+            console.log('Using gas limit:', gasLimit.toString());
+            
             const tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                gasLimit: 300000 // Set explicit gas limit
+                gasLimit: gasLimit
             });
             
             this.showLoading('Transaction submitted! Waiting for confirmation...');
@@ -759,6 +773,15 @@ class UnicornMeatWalletKit {
                 } else {
                     this.showError('Transaction failed. Please try again with a higher gas limit.');
                 }
+            } else if (error.message && error.message.includes('Third Party contract execution error')) {
+                // OKX wallet specific error
+                this.showError('OKX wallet error: Please try refreshing the page and ensure you have enough ETH for gas fees. If the issue persists, try using MetaMask or another wallet.');
+            } else if (error.message && error.message.includes('execution reverted')) {
+                // Contract revert error
+                this.showError('Transaction reverted by contract. Please check your eligibility or try again later.');
+            } else if (error.message && error.message.includes('insufficient funds')) {
+                // Insufficient funds error
+                this.showError('Insufficient ETH for gas fees. Please add more ETH to your wallet and try again.');
             } else {
                 this.showError('Failed to claim tokens: ' + error.message);
             }
