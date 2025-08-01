@@ -708,13 +708,45 @@ class UnicornMeatWalletKit {
                 gasEstimate = window.ethers.BigNumber.from(300000);
             }
             
-            // Add 20% buffer for OKX wallet compatibility
-            const gasLimit = gasEstimate.mul(120).div(100);
+            // Add 50% buffer for OKX wallet compatibility (more conservative)
+            const gasLimit = gasEstimate.mul(150).div(100);
             console.log('Using gas limit:', gasLimit.toString());
             
-            const tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                gasLimit: gasLimit
-            });
+            // For OKX wallet, try using a more explicit transaction format
+            const claimData = claimContract.interface.encodeFunctionData('claim', [amount, this.currentClaimData.merkleProof]);
+            
+            // Get current gas price for OKX compatibility
+            let gasPrice;
+            try {
+                gasPrice = await provider.getGasPrice();
+                console.log('Current gas price:', gasPrice.toString());
+            } catch (gasPriceError) {
+                console.log('Gas price fetch failed, using default');
+                gasPrice = window.ethers.utils.parseUnits('20', 'gwei'); // Default 20 gwei
+            }
+            
+            const txRequest = {
+                to: claimContractAddress,
+                data: claimData,
+                gasLimit: gasLimit,
+                gasPrice: gasPrice,
+                from: this.account.address
+            };
+            
+            console.log('Transaction request:', txRequest);
+            
+            // Try sending the transaction directly through the provider
+            let tx;
+            try {
+                tx = await signer.sendTransaction(txRequest);
+            } catch (txError) {
+                console.log('Direct transaction failed, trying contract method:', txError);
+                // Fallback to contract method with higher gas limit
+                const fallbackGasLimit = gasEstimate.mul(200).div(100); // 100% buffer
+                tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+                    gasLimit: fallbackGasLimit
+                });
+            }
             
             this.showLoading('Transaction submitted! Waiting for confirmation...');
             
