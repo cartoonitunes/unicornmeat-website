@@ -708,48 +708,24 @@ class UnicornMeatWalletKit {
                 gasEstimate = window.ethers.BigNumber.from(300000);
             }
             
-            // Add 50% buffer for OKX wallet compatibility (more conservative)
-            const gasLimit = gasEstimate.mul(150).div(100);
+            // Single, reliable approach for all wallets including OKX
+            console.log('Attempting claim with optimized settings...');
+            
+            // Use a reasonable gas limit
+            const gasLimit = gasEstimate.mul(120).div(100); // 20% buffer
             console.log('Using gas limit:', gasLimit.toString());
             
-            // For OKX wallet, try a simpler approach with higher gas limit
-            console.log('Attempting claim with OKX-optimized settings...');
+            // Get current fee data for optimal pricing
+            const feeData = await provider.getFeeData();
+            const maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice;
+            const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || window.ethers.utils.parseUnits('1.5', 'gwei');
             
-            // Use a very conservative gas limit for OKX
-            const okxGasLimit = gasEstimate.mul(300).div(100); // 200% buffer for OKX
-            console.log('Using OKX gas limit:', okxGasLimit.toString());
-            
-            // Try the standard contract method first with high gas limit
-            let tx;
-            try {
-                tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                    gasLimit: okxGasLimit
-                });
-            } catch (contractError) {
-                console.log('Contract method failed, trying with maxFeePerGas:', contractError);
-                
-                // Try with explicit maxFeePerGas and maxPriorityFeePerGas for EIP-1559
-                const feeData = await provider.getFeeData();
-                const maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice;
-                const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || window.ethers.utils.parseUnits('1.5', 'gwei');
-                
-                try {
-                    tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                        gasLimit: okxGasLimit,
-                        maxFeePerGas: maxFeePerGas,
-                        maxPriorityFeePerGas: maxPriorityFeePerGas
-                    });
-                } catch (eip1559Error) {
-                    console.log('EIP-1559 method failed, trying legacy gasPrice:', eip1559Error);
-                    
-                    // Final fallback: try with legacy gasPrice
-                    const legacyGasPrice = await provider.getGasPrice();
-                    tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                        gasLimit: okxGasLimit,
-                        gasPrice: legacyGasPrice
-                    });
-                }
-            }
+            // Single transaction attempt with optimal parameters
+            const tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+                gasLimit: gasLimit,
+                maxFeePerGas: maxFeePerGas,
+                maxPriorityFeePerGas: maxPriorityFeePerGas
+            });
             
             this.showLoading('Transaction submitted! Waiting for confirmation...');
             
@@ -810,7 +786,7 @@ class UnicornMeatWalletKit {
                 }
             } else if (error.message && error.message.includes('Third Party contract execution error')) {
                 // OKX wallet specific error
-                this.showError('OKX wallet compatibility issue detected. Please try: 1) Switch to MetaMask wallet, 2) Update your OKX wallet to latest version, 3) Try with a different browser, or 4) Contact support if the issue persists.');
+                this.showError('OKX wallet compatibility issue detected. This is a known issue with OKX wallet and complex contract interactions. Please switch to MetaMask wallet for the most reliable experience.');
             } else if (error.message && error.message.includes('execution reverted')) {
                 // Contract revert error
                 this.showError('Transaction reverted by contract. Please check your eligibility or try again later.');
