@@ -712,40 +712,43 @@ class UnicornMeatWalletKit {
             const gasLimit = gasEstimate.mul(150).div(100);
             console.log('Using gas limit:', gasLimit.toString());
             
-            // For OKX wallet, try using a more explicit transaction format
-            const claimData = claimContract.interface.encodeFunctionData('claim', [amount, this.currentClaimData.merkleProof]);
+            // For OKX wallet, try a simpler approach with higher gas limit
+            console.log('Attempting claim with OKX-optimized settings...');
             
-            // Get current gas price for OKX compatibility
-            let gasPrice;
-            try {
-                gasPrice = await provider.getGasPrice();
-                console.log('Current gas price:', gasPrice.toString());
-            } catch (gasPriceError) {
-                console.log('Gas price fetch failed, using default');
-                gasPrice = window.ethers.utils.parseUnits('20', 'gwei'); // Default 20 gwei
-            }
+            // Use a very conservative gas limit for OKX
+            const okxGasLimit = gasEstimate.mul(300).div(100); // 200% buffer for OKX
+            console.log('Using OKX gas limit:', okxGasLimit.toString());
             
-            const txRequest = {
-                to: claimContractAddress,
-                data: claimData,
-                gasLimit: gasLimit,
-                gasPrice: gasPrice,
-                from: this.account.address
-            };
-            
-            console.log('Transaction request:', txRequest);
-            
-            // Try sending the transaction directly through the provider
+            // Try the standard contract method first with high gas limit
             let tx;
             try {
-                tx = await signer.sendTransaction(txRequest);
-            } catch (txError) {
-                console.log('Direct transaction failed, trying contract method:', txError);
-                // Fallback to contract method with higher gas limit
-                const fallbackGasLimit = gasEstimate.mul(200).div(100); // 100% buffer
                 tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                    gasLimit: fallbackGasLimit
+                    gasLimit: okxGasLimit
                 });
+            } catch (contractError) {
+                console.log('Contract method failed, trying with maxFeePerGas:', contractError);
+                
+                // Try with explicit maxFeePerGas and maxPriorityFeePerGas for EIP-1559
+                const feeData = await provider.getFeeData();
+                const maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice;
+                const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || window.ethers.utils.parseUnits('1.5', 'gwei');
+                
+                try {
+                    tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+                        gasLimit: okxGasLimit,
+                        maxFeePerGas: maxFeePerGas,
+                        maxPriorityFeePerGas: maxPriorityFeePerGas
+                    });
+                } catch (eip1559Error) {
+                    console.log('EIP-1559 method failed, trying legacy gasPrice:', eip1559Error);
+                    
+                    // Final fallback: try with legacy gasPrice
+                    const legacyGasPrice = await provider.getGasPrice();
+                    tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+                        gasLimit: okxGasLimit,
+                        gasPrice: legacyGasPrice
+                    });
+                }
             }
             
             this.showLoading('Transaction submitted! Waiting for confirmation...');
@@ -807,7 +810,7 @@ class UnicornMeatWalletKit {
                 }
             } else if (error.message && error.message.includes('Third Party contract execution error')) {
                 // OKX wallet specific error
-                this.showError('OKX wallet error: Please try refreshing the page and ensure you have enough ETH for gas fees. If the issue persists, try using MetaMask or another wallet.');
+                this.showError('OKX wallet compatibility issue detected. Please try: 1) Switch to MetaMask wallet, 2) Update your OKX wallet to latest version, 3) Try with a different browser, or 4) Contact support if the issue persists.');
             } else if (error.message && error.message.includes('execution reverted')) {
                 // Contract revert error
                 this.showError('Transaction reverted by contract. Please check your eligibility or try again later.');
