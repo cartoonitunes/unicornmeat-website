@@ -715,17 +715,30 @@ class UnicornMeatWalletKit {
             const gasLimit = gasEstimate.mul(120).div(100); // 20% buffer
             console.log('Using gas limit:', gasLimit.toString());
             
-            // Get current fee data for optimal pricing
-            const feeData = await provider.getFeeData();
-            const maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice;
-            const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || window.ethers.utils.parseUnits('1.5', 'gwei');
-            
-            // Single transaction attempt with optimal parameters
-            const tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                gasLimit: gasLimit,
-                maxFeePerGas: maxFeePerGas,
-                maxPriorityFeePerGas: maxPriorityFeePerGas
-            });
+            // Try legacy gasPrice method first (better OKX compatibility)
+            let tx;
+            try {
+                const gasPrice = await provider.getGasPrice();
+                console.log('Using legacy gasPrice method for better wallet compatibility');
+                
+                tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+                    gasLimit: gasLimit,
+                    gasPrice: gasPrice
+                });
+            } catch (legacyError) {
+                console.log('Legacy method failed, trying EIP-1559:', legacyError);
+                
+                // Fallback to EIP-1559 if legacy fails
+                const feeData = await provider.getFeeData();
+                const maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice;
+                const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || window.ethers.utils.parseUnits('1.5', 'gwei');
+                
+                tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+                    gasLimit: gasLimit,
+                    maxFeePerGas: maxFeePerGas,
+                    maxPriorityFeePerGas: maxPriorityFeePerGas
+                });
+            }
             
             this.showLoading('Transaction submitted! Waiting for confirmation...');
             
@@ -786,7 +799,7 @@ class UnicornMeatWalletKit {
                 }
             } else if (error.message && error.message.includes('Third Party contract execution error')) {
                 // OKX wallet specific error
-                this.showError('OKX wallet compatibility issue detected. This is a known issue with OKX wallet and complex contract interactions. Please switch to MetaMask wallet for the most reliable experience.');
+                this.showError('OKX wallet is having trouble with this contract interaction. This is a known limitation of OKX wallet with complex smart contracts. Please use MetaMask, WalletConnect, or another wallet for claiming tokens.');
             } else if (error.message && error.message.includes('execution reverted')) {
                 // Contract revert error
                 this.showError('Transaction reverted by contract. Please check your eligibility or try again later.');
