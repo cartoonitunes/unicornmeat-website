@@ -715,30 +715,14 @@ class UnicornMeatWalletKit {
             const gasLimit = gasEstimate.mul(120).div(100); // 20% buffer
             console.log('Using gas limit:', gasLimit.toString());
             
-            // Try legacy gasPrice method first (better OKX compatibility)
-            let tx;
-            try {
-                const gasPrice = await provider.getGasPrice();
-                console.log('Using legacy gasPrice method for better wallet compatibility');
-                
-                tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                    gasLimit: gasLimit,
-                    gasPrice: gasPrice
-                });
-            } catch (legacyError) {
-                console.log('Legacy method failed, trying EIP-1559:', legacyError);
-                
-                // Fallback to EIP-1559 if legacy fails
-                const feeData = await provider.getFeeData();
-                const maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice;
-                const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || window.ethers.utils.parseUnits('1.5', 'gwei');
-                
-                tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
-                    gasLimit: gasLimit,
-                    maxFeePerGas: maxFeePerGas,
-                    maxPriorityFeePerGas: maxPriorityFeePerGas
-                });
-            }
+            // Use legacy gasPrice method for better wallet compatibility
+            const gasPrice = await provider.getGasPrice();
+            console.log('Using legacy gasPrice method for better wallet compatibility');
+            
+            const tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+                gasLimit: gasLimit,
+                gasPrice: gasPrice
+            });
             
             this.showLoading('Transaction submitted! Waiting for confirmation...');
             
