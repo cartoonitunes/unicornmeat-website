@@ -277,7 +277,7 @@
                                     <span class="fs-4 mb-narrow">🍖</span>
                                 </a>
                             </div>
-                            <div class="mt-4">
+                            <div class="mt-2 mb-16">
                                 <ul class="nav-x gap-3 justify-center">
                                     <li>
                                         <a class="hover:-rotate-3 transition-transform duration-200"
@@ -340,7 +340,7 @@
         <!-- Hero end -->
 
         <!-- Text Marquee Start -->
-        <div class="h3 xl:h2 fw-medium py-4 xl:py-6 reverse bg-secondary text-black text-uppercase ls-0"
+        <div class="h3 xl:h2 fw-medium py-4 xl:py-6 mt-16 reverse bg-secondary text-black text-uppercase ls-0"
             data-uc-marquee="clone: 3; gap: 64; reverse: true;" style="--gap: 32px">
             <div>
                 <div class="hstack gap-8">
@@ -590,11 +590,8 @@
                                                 style="font-size: 72px; line-height: 1;">🦄</div>
                                         </div>
                                         <div class="feature-item-content" style="margin-top: -40px;">
-                                            <h4 class="title h5 xl:h4 mt-1 mb-2 xl:mb-3 stroke-text">CLAIM</h4>
-                                            <p class="desc fs-5 xl:fs-4">Unicorn holders were able to grind their
-                                                Unicorns for 1,000-103,300 Unicorn Meat, though no one wanted to give up
-                                                their 🦄. We've reserved 1,000 Unicorn Meat free to claim for each 🦄
-                                                held.</p>
+                                            <h4 class="title h5 xl:h4 mt-1 mb-2 xl:mb-3 stroke-text">AIRDROP</h4>
+                                            <p class="desc fs-5 xl:fs-4">Unicorn holders and evil Etherean Unicorn grinders were <a href="https://etherscan.io/tx/0x319d9228ebc030efbbfef122ddf8323ce8ae0220ecc37907c8072aa7aa0268d6" target="_blank" rel="noopener noreferrer">airdropped</a> 10% of the Unicorn Meat supply on Aug 2, 2025. 3% was divided amongst the seven Unicorn grinders, and 7% to Unicorn holders distributed proportionally to their Unicorn holdings.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -624,7 +621,7 @@
                                             <h4 class="title h5 xl:h4 mb-2 xl:mb-3 stroke-text">LEADERBOARDS</h4>
                                             <p class="desc fs-5 xl:fs-4">Alex envisioned (and coded) a Unicorn Killers
                                                 Hall of Fame. While the original grinder is no longer active, we will
-                                                seek to bring this idea to life.</p>
+                                                seek to bring this idea and more to life.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -801,9 +798,9 @@
                     <div
                         class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
 
-                        <div class="row child-cols-1 lg:child-cols-2 g-4">
+                        <div class="row justify-content-center">
                             <!-- Wrap/Unwrap Panel -->
-                            <div class="col">
+                            <div class="col-lg-6 col-md-8 col-sm-10">
                                 <div
                                     class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
                                     <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
@@ -819,36 +816,14 @@
                                     style="max-width: 220px; margin-left: auto; margin-right: auto;">
                                 <div class="vstack gap-2 w-100 mt-2 align-items-center">
                                     <button
+                                        id="wrap-button"
                                         class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
-                                        type="button" data-bs-toggle="modal"
-                                        data-bs-target="#magicFeaturesModal">Wrap</button>
+                                        type="button">Wrap</button>
                                     <button
+                                        id="unwrap-button"
                                         class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
-                                        type="button" data-bs-toggle="modal"
-                                        data-bs-target="#magicFeaturesModal">Unwrap</button>
+                                        type="button">Unwrap</button>
                                 </div>
-                            </div>
-                            <!-- Claim Unicorns Panel -->
-                            <div class="col">
-                                <div
-                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
-                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
-                                        "Grind" a Unicorn</h3>
-
-                                </div>
-                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">Did
-                                    you know that the original Unicorn Meat Grinder didn't actually grind Unicorns? It
-                                    simply sent the Unicorn to the Unicorn Meat Grinder Association and could be taken
-                                    by anyone. We think you should have your cake and eat it too, so soon you will be
-                                    able to claim 1,000 Unicorn Meat without harming mythical creatures.</p><br>
-                                <input id="wrap-unwrap-amount" type="number" min="0" step="any"
-                                    class="form-control h-48px xl:h-64px fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
-                                    placeholder="Enter amount" required
-                                    style="max-width: 220px; margin-left: auto; margin-right: auto;">
-                                <button
-                                    class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100 mt-2"
-                                    type="button" data-bs-toggle="modal"
-                                    data-bs-target="#magicFeaturesModal">"Grind"</button>
                             </div>
                         </div>
                         <!-- Error Message Area -->

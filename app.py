@@ -277,10 +277,81 @@ def claim_tokens():
         return jsonify({
             'success': True,
             'message': f'Successfully claimed {claimable_amount} Unicorn Meat tokens!',
-            'amount': str(claimable_amount),
-            'merkleProof': claim_data['proof']
         })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/wrap', methods=['POST'])
+def wrap_tokens():
+    """Wrap Unicorn Meat tokens"""
+    try:
+        data = request.get_json()
+        amount = data.get('amount')
+        user_address = data.get('user_address')
         
+        if not amount or not user_address:
+            return jsonify({'error': 'Missing amount or user address'}), 400
+        
+        # Validate and convert to checksum address
+        try:
+            checksum_address = w3.to_checksum_address(user_address)
+        except Exception:
+            return jsonify({'error': 'Invalid address'}), 400
+        
+        # Convert amount to wei (assuming 3 decimals like the original contract)
+        amount_wei = int(float(amount) * 1000)
+        
+        # For now, return instructions for manual wrapping
+        # In production, this would trigger the actual wrap transaction
+        return jsonify({
+            'success': True,
+            'message': f'To wrap {amount} Unicorn Meat tokens:',
+            'instructions': [
+                '1. Go to the original Unicorn Meat contract on Etherscan',
+                '2. Connect your wallet',
+                '3. Call the approve function with:',
+                f'   - spender: {WRAPPED_CONTRACT_ADDRESS}',
+                f'   - value: {amount_wei}',
+                '4. Then call the wrap function on the wrapped contract',
+                '5. Or use the Wrap button on this site for a guided experience'
+            ]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/unwrap', methods=['POST'])
+def unwrap_tokens():
+    """Unwrap Unicorn Meat tokens"""
+    try:
+        data = request.get_json()
+        amount = data.get('amount')
+        user_address = data.get('user_address')
+        
+        if not amount or not user_address:
+            return jsonify({'error': 'Missing amount or user address'}), 400
+        
+        # Validate and convert to checksum address
+        try:
+            checksum_address = w3.to_checksum_address(user_address)
+        except Exception:
+            return jsonify({'error': 'Invalid address'}), 400
+        
+        # Convert amount to wei (assuming 3 decimals like the original contract)
+        amount_wei = int(float(amount) * 1000)
+        
+        # For now, return instructions for manual unwrapping
+        # In production, this would trigger the actual unwrap transaction
+        return jsonify({
+            'success': True,
+            'message': f'To unwrap {amount} Unicorn Meat tokens:',
+            'instructions': [
+                '1. Go to the Wrapped Unicorn Meat contract on Etherscan',
+                '2. Connect your wallet',
+                '3. Call the unwrap function with:',
+                f'   - value: {amount_wei}',
+                '4. Or use the Unwrap button on this site for a guided experience'
+            ]
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -1002,35 +1002,69 @@ class UnicornMeatWalletKit {
         }
         
         try {
-            this.showLoading('Wrapping tokens... This requires approval on the original token.');
+            this.showLoading('Checking balance...');
             
-            const response = await fetch('/api/wrap', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    amount: amount,
-                    user_address: this.account.address
-                })
-            });
+            // Get provider and signer
+            const provider = new window.ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
             
-            const result = await response.json();
+            // Convert amount to wei (3 decimals like original contract)
+            const amountWei = window.ethers.utils.parseUnits(amount.toString(), 3);
             
-            if (result.success) {
-                let message = result.message + '\n\n';
-                if (result.instructions) {
-                    message += result.instructions.join('\n');
-                }
-                this.showSuccess(message);
-                await this.loadContractData();
-            } else {
-                this.showError(result.error || 'Failed to wrap tokens');
+            // Use the full ABI for better compatibility
+            const originalContractABI = [
+                {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"type":"function"},
+                {"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"type":"function"},
+                {"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"type":"function"},
+                {"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"type":"function"},
+                {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"type":"function"},
+                {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"type":"function"},
+                {"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},
+                {"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"mintedAmount","type":"uint256"}],"name":"mintToken","outputs":[],"type":"function"},
+                {"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},
+                {"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"type":"function"},
+                {"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"},
+                {"constant":true,"inputs":[{"name":"","type":"address"}],"name":"frozenAccount","outputs":[{"name":"","type":"bool"}],"type":"function"},
+                {"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"spentAllowance","outputs":[{"name":"","type":"uint256"}],"type":"function"},
+                {"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"type":"function"},
+                {"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"freeze","type":"bool"}],"name":"freezeAccount","outputs":[],"type":"function"},
+                {"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"type":"function"}
+            ];
+            
+            // Create contract instance
+            const originalContract = new window.ethers.Contract(this.contractAddresses.unicornMeat, originalContractABI, signer);
+            
+            // Check if user has enough tokens to wrap
+            const balance = await originalContract.balanceOf(this.account.address);
+            if (balance.lt(amountWei)) {
+                this.showError(`Insufficient balance. You have ${this.formatLargeNumber(balance)} tokens, but trying to wrap ${amount} tokens.`);
+                return;
             }
+            
+            this.showLoading('Wrapping tokens using approveAndCall...');
+            
+            // Use approveAndCall on the original contract
+            // This will call receiveApproval on the wrapped contract
+            const wrapTx = await originalContract.approveAndCall(
+                this.contractAddresses.wrappedUnicornMeat,  // _spender: wrapped contract address
+                amountWei                                   // _value: amount to wrap
+            );
+            await wrapTx.wait();
+            
+            console.log('Wrap transaction successful:', wrapTx.hash);
+            this.showSuccess(`Successfully wrapped ${amount} Unicorn Meat tokens! Transaction: ${wrapTx.hash}`);
+            await this.loadContractData();
+            await this.updateConnectButton();
             
         } catch (error) {
             console.error('Error wrapping tokens:', error);
-            this.showError('Failed to wrap tokens: ' + error.message);
+            if (error.code === 4001) {
+                this.showError('Transaction was rejected by user');
+            } else if (error.message && error.message.includes('insufficient funds')) {
+                this.showError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
+            } else {
+                this.showError('Failed to wrap tokens: ' + error.message);
+            }
         }
     }
     
@@ -1049,33 +1083,46 @@ class UnicornMeatWalletKit {
         try {
             this.showLoading('Unwrapping tokens...');
             
-            const response = await fetch('/api/unwrap', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    amount: amount,
-                    user_address: this.account.address
-                })
-            });
+            // Get provider and signer
+            const provider = new window.ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
             
-            const result = await response.json();
+            // Convert amount to wei (3 decimals like original contract)
+            const amountWei = window.ethers.utils.parseUnits(amount.toString(), 3);
             
-            if (result.success) {
-                let message = result.message + '\n\n';
-                if (result.instructions) {
-                    message += result.instructions.join('\n');
+            // Wrapped contract ABI (unwrap function)
+            const wrappedContractABI = [
+                {
+                    "constant": false,
+                    "inputs": [
+                        {"name": "_value", "type": "uint256"}
+                    ],
+                    "name": "unwrap",
+                    "outputs": [],
+                    "type": "function"
                 }
-                this.showSuccess(message);
-                await this.loadContractData();
-            } else {
-                this.showError(result.error || 'Failed to unwrap tokens');
-            }
+            ];
+            
+            // Create contract instance
+            const wrappedContract = new window.ethers.Contract(this.contractAddresses.wrappedUnicornMeat, wrappedContractABI, signer);
+            
+            // Unwrap the tokens
+            const unwrapTx = await wrappedContract.unwrap(amountWei);
+            await unwrapTx.wait();
+            
+            this.showSuccess(`Successfully unwrapped ${amount} Unicorn Meat tokens!`);
+            await this.loadContractData();
+            await this.updateConnectButton();
             
         } catch (error) {
             console.error('Error unwrapping tokens:', error);
-            this.showError('Failed to unwrap tokens: ' + error.message);
+            if (error.code === 4001) {
+                this.showError('Transaction was rejected by user');
+            } else if (error.message && error.message.includes('insufficient funds')) {
+                this.showError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
+            } else {
+                this.showError('Failed to unwrap tokens: ' + error.message);
+            }
         }
     }
     
@@ -1137,6 +1184,12 @@ class UnicornMeatWalletKit {
     showMessage(message, type) {
         // Create modal for errors and important messages
         if (type === 'error' || type === 'success') {
+            // Clear any loading messages when showing success/error
+            const errorDiv = document.getElementById('web3-error');
+            if (errorDiv) {
+                errorDiv.textContent = '';
+                errorDiv.className = 'panel mt-4 p-3 border border-2 text-center d-none';
+            }
             this.showModal(message, type);
         } else {
             // For loading messages, use the existing error div
