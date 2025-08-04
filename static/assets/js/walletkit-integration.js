@@ -597,8 +597,9 @@ class UnicornMeatWalletKit {
             const claimAbi = [
                 {
                     "inputs": [
+                        {"name": "recipient", "type": "address"},
                         {"name": "amount", "type": "uint256"},
-                        {"name": "proof", "type": "bytes32[]"}
+                        {"name": "merkleProof", "type": "bytes32[]"}
                     ],
                     "name": "claim",
                     "outputs": [],
@@ -692,16 +693,16 @@ class UnicornMeatWalletKit {
             
             // Call the claim function with better gas estimation for OKX and other wallets
             console.log('Sending transaction with:', {
+                recipient: this.account.address,
                 amount: amount.toString(),
                 amountHex: '0x' + amount.toString(16),
-                proofLength: this.currentClaimData.merkleProof.length,
-                address: this.account.address
+                proofLength: this.currentClaimData.merkleProof.length
             });
             
             // Try to estimate gas first, then use a buffer for OKX compatibility
             let gasEstimate;
             try {
-                gasEstimate = await claimContract.estimateGas.claim(amount, this.currentClaimData.merkleProof);
+                gasEstimate = await claimContract.estimateGas.claim(this.account.address, amount, this.currentClaimData.merkleProof);
                 console.log('Gas estimate:', gasEstimate.toString());
             } catch (estimateError) {
                 console.log('Gas estimation failed, using default:', estimateError);
@@ -719,7 +720,7 @@ class UnicornMeatWalletKit {
             const gasPrice = await provider.getGasPrice();
             console.log('Using legacy gasPrice method for better wallet compatibility');
             
-            const tx = await claimContract.claim(amount, this.currentClaimData.merkleProof, {
+            const tx = await claimContract.claim(this.account.address, amount, this.currentClaimData.merkleProof, {
                 gasLimit: gasLimit,
                 gasPrice: gasPrice
             });
