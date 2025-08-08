@@ -479,7 +479,6 @@ class UnicornMeatWalletKit {
         
         try {
             await this.loadClaimStats();
-            await this.checkClaimEligibility();
         } catch (error) {
             console.error('Error loading claim data:', error);
         }
