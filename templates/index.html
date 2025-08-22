@@ -85,7 +85,129 @@
             }
         }
     </style>
-</head>
+    <style>
+        .copy-btn {
+            position: relative;
+            transition: all 0.2s ease;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .copy-btn:hover {
+            background-color: #000 !important;
+            color: #fff !important;
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+        
+        .copy-btn.copied::after {
+            content: "Copied!";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+        
+        /* Address display control */
+        .full-address {
+            display: block;
+        }
+        
+        .short-address {
+            display: none;
+        }
+        
+        /* Mobile: show short addresses, hide full addresses */
+        @media (max-width: 767px) {
+            .full-address {
+                display: none;
+            }
+            
+            .short-address {
+                display: block;
+            }
+        }
+        
+        /* Specific mobile breakpoint: 640-680px */
+        @media (min-width: 640px) and (max-width: 680px) {
+            .tokenomics .row {
+                flex-direction: column;
+            }
+            .tokenomics .col.order-2.order-lg-2 {
+                order: 2 !important;
+            }
+            .tokenomics .col.order-1.order-lg-1 {
+                order: 1 !important;
+            }
+        }
+        
+        /* Force desktop layout */
+        @media (min-width: 768px) {
+            .tokenomics .row {
+                flex-direction: row !important;
+            }
+            .tokenomics .col-12.col-md-6 {
+                flex: 0 0 50% !important;
+                max-width: 50% !important;
+            }
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            
+            copyButtons.forEach(button => {
+                button.addEventListener('click', async function() {
+                    const address = this.getAttribute('data-address');
+                    
+                    try {
+                        await navigator.clipboard.writeText(address);
+                        
+                        // Add copied class for visual feedback
+                        this.classList.add('copied');
+                        
+                        // Remove copied class after 2 seconds
+                        setTimeout(() => {
+                            this.classList.remove('copied');
+                        }, 2000);
+                        
+                    } catch (err) {
+                        console.error('Failed to copy: ', err);
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = address;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        
+                        // Still show copied feedback
+                        this.classList.add('copied');
+                        setTimeout(() => {
+                            this.classList.remove('copied');
+                        }, 2000);
+                    }
+                });
+            });
+        });
+    </script>
+    </head>
 
 <body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
 
@@ -130,9 +252,9 @@
                 <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
                     <li><a href="#about">About</a></li>
                     <li><a href="#tokenomics">Tokenomics</a></li>
+                    <li><a href="#trading">Buy 🦄🍖</a></li>
                     <li><a href="#roadmap">Timeline</a></li>
                     <li><a href="#web3-actions">Dapp</a></li>
-                    <li><a href="#claims">Claims</a></li>
                     <li><a href="#faq">FAQ</a></li>
                     <li><a href="#references">Links</a></li>
                 </ul>
@@ -225,9 +347,9 @@
                                 data-uc-scrollspy-nav="closet: > *; offset: 48; scroll: true;">
                                 <li><a href="#about">About</a></li>
                                 <li><a href="#tokenomics">Tokenomics</a></li>
+                                <li><a href="#trading">Buy 🦄🍖</a></li>
                                 <li><a href="#roadmap">Timeline</a></li>
                                 <li><a href="#web3-actions">Dapp</a></li>
-
                                 <li><a href="#faq">FAQ</a></li>
                             </ul>
                         </div>
@@ -500,7 +622,7 @@
                                 </div>
                                 <div class="order-0">
                                     <h2 class="h2 sm:h1 xl:display-6 stroke-text-bold mb-1 xl:mb-2">1 of 2</h2>
-                                    <span class="fs-6 sm:fs-5 xl:fs-4">Tradable coins by Ethereum</span>
+                                    <span class="fs-6 sm:fs-5 xl:fs-4">Tradable coins made BY Ethereum</span>
                                 </div>
                                 <div class="order-0">
                                     <h2 class="h2 sm:h1 xl:display-6 stroke-text-bold mb-1 xl:mb-2">∞</h2>
@@ -523,16 +645,11 @@
                         <div class="section-content panel">
                             <h2 class="title h5 sm:h3 xl:h2 mb-4 ls-0 text-uppercase text-center -rotate-1">TOKENOMICS
                             </h2>
-                            <div class="row child-cols-1 lg:child-cols-2 justify-center items-center g-5 sm:g-7 lg:g-9">
-                                <div class="col order-1 order-lg-1">
+                            <div class="row justify-center items-center g-5 sm:g-7 lg:g-9">
+                                <div class="col-12 col-md-6 order-1 order-lg-1">
                                     <div class="panel p-4 sm:p-5 border border-2 border-black contrast-shadow-md bg-white mx-auto mt-4 mt-lg-5 mb-lg-0"
                                         style="max-width: 500px; z-index: 2; position: relative;">
-                                        <p class="fs-5 xl:fs-4 mb-2 text-center text-lg-start">
-                                            The Unicorn DAO allowed Unicorn holders to get 1,000 to 103,300 Unicorn Meat
-                                            for each grind, depending on a gamable block-based multiplier. With 2,717
-                                            Unicorns that creates a potential for 280M+ Unicorn Meat. Instead of 280M,
-                                            we capped the supply at 100M.
-                                        </p>
+
                                         <ul class="fs-6 xl:fs-5 mb-0 text-start" style="list-style: disc inside;">
                                             <li><b>Total Supply</b>: 100 million</li>
                                             <li><b>Fair Launch</b>: No gated presales, anyone can buy at launch.</li>
@@ -544,7 +661,7 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <div class="col order-2 order-lg-2">
+                                <div class="col-12 col-md-6 order-2 order-lg-2">
                                     <div class="panel mt-n4 mt-lg-0">
                                         <div class="row child-cols-auto justify-center g-2 sm:g-3 xl:g-4">
                                             <div>
@@ -592,6 +709,114 @@
             </div>
         </div>
 
+        <!-- Section end -->
+
+        <!-- Section start -->
+        <div id="trading" class="trading section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #ffe6f0;">
+                <img class="position-absolute start-0 w-200px xl:w-auto"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-01.svg') }}" alt="cloud"
+                    style="top: 15%">
+                <img class="position-absolute end-0 w-150px xl:w-auto"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-02.svg') }}" alt="cloud"
+                    style="bottom: 10%">
+                
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
+                                
+                                <div class="section-header panel text-center mb-4 sm:mb-6 xl:mb-9"
+                                    data-anime="onview: -200; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                                    <h2 class="h4 sm:h3 xl:h2 m-0 rotate-2 text-uppercase ls-0">Buy Unicorn Meat 🦄🍖</h2>
+                                </div>
+
+                                <!-- DexScreener Chart Widget -->
+                                <div class="row justify-content-center mb-4 sm:mb-6 xl:mb-8"
+                                    data-anime="onview: -400; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
+                                    <div class="col-12 col-lg-10 col-xl-8">
+                                        <div class="panel p-3 border border-2 border-black contrast-shadow-lg bg-white rotate-1">
+                                            <iframe 
+                                                src="https://dexscreener.com/ethereum/0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668?embed=1" 
+                                                frameborder="0" 
+                                                width="100%" 
+                                                height="520" 
+                                                style="border-radius: 8px;" 
+                                                allowfullscreen>
+                                            </iframe>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Trading Information -->
+                                <div class="row child-cols-1 lg:child-cols-2 g-3 lg:g-4"
+                                    data-anime="onview: -400; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 300});">
+                                    <div class="col order-1 order-lg-1">
+                                        <div class="panel p-3 sm:p-4 border border-2 border-black contrast-shadow-lg bg-white -rotate-1">
+                                            <h3 class="h6 sm:h5 xl:h4 m-0 mb-3 text-uppercase ls-0 text-center">Token Details</h3>
+                                            <div>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Token Name:</strong> Unicorn Meat</p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Symbol:</strong> w🍖</p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Ethereum Contract:</strong></p>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <code class="small text-break flex-grow-1 full-address">0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668</code>
+                                                    <code class="small text-break flex-grow-1 short-address">0xDFA2...668</code>
+                                                    <button class="copy-btn" 
+                                                            data-address="0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668"
+                                                            title="Copy full address">
+                                                        <i class="far fa-copy fa-fw"></i>
+                                                    </button>
+                                                </div>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Base Contract:</strong></p>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <code class="small text-break flex-grow-1 full-address">0xa0ff877E3d4f3a108B1B3d5eB3e4369301D2b2D7</code>
+                                                    <code class="small text-break flex-grow-1 short-address">0xa0ff...2D7</code>
+                                                    <button class="copy-btn" 
+                                                            data-address="0xa0ff877E3d4f3a108B1B3d5eB3e4369301D2b2D7"
+                                                            title="Copy full address">
+                                                        <i class="far fa-copy fa-fw"></i>
+                                                    </button>
+                                                </div>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Decimals:</strong> 3</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col order-2 order-lg-2">
+                                        <div class="panel p-3 sm:p-4 border border-2 border-black contrast-shadow-lg bg-white rotate-1">
+                                            <h3 class="h6 sm:h5 xl:h4 m-0 mb-3 text-uppercase ls-0 text-center">How to Trade</h3>
+                                            <div>
+                                                <ol class="mb-0 fs-7 sm:fs-6">
+                                                    <li class="mb-2">Decide if you want to buy on <a href="https://app.uniswap.org/swap?outputCurrency=0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668" target="_blank" class="text-primary">Ethereum</a> or <a href="https://app.uniswap.org/swap?outputCurrency=0xa0ff877E3d4f3a108B1B3d5eB3e4369301D2b2D7&chain=base" target="_blank" class="text-primary">Base</a></li>
+                                                    <li class="mb-2">Head to <a href="https://app.uniswap.org/swap?outputCurrency=0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668" target="_blank" class="text-primary">Uniswap</a> or <a href="https://swap.cow.fi/#/1/swap/WETH/w%F0%9F%8D%96" target="_blank" class="text-primary">Cowswap</a> in your preferred wallet (Cowswap avoids some fees)</li>
+                                                    <li class="mb-2">Enter the amount of ETH to swap to Unicorn Meat</li>
+                                                    <li class="mb-2">Click Swap!</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Direct Trading Links -->
+                                <div class="text-center mt-4 sm:mt-5"
+                                    data-anime="onview: -400; translateY: [24, 0]; opacity: [0, 1]; delay: 400;">
+                                    <div class="buttons vstack sm:hstack justify-center gap-2 xl:gap-3">
+                                        <a href="https://app.uniswap.org/swap?outputCurrency=0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668" 
+                                           target="_blank" class="btn btn-md sm:btn-lg" style="background-color: #ffe6f0; border-color: #000; color: #000; box-shadow: 4px 4px 0 #000;">
+                                            <i class="icon icon-arrow-right me-2"></i>Buy on Ethereum
+                                        </a>
+                                        <a href="https://app.uniswap.org/swap?outputCurrency=0xa0ff877E3d4f3a108B1B3d5eB3e4369301D2b2D7&chain=base" 
+                                           target="_blank" class="btn btn-md sm:btn-lg" style="background-color: #dbf2ff; border-color: #000; color: #000; box-shadow: 4px 4px 0 #000;">
+                                            <i class="icon icon-arrow-right me-2"></i>Buy on Base
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Section end -->
 
         <div class="d-none xl:d-block">
@@ -1240,6 +1465,8 @@
     
     <!-- include WalletKit integration -->
     <script defer src="{{ url_for('static', filename='assets/js/walletkit-integration.js') }}"></script>
+    
+
 
     <!-- include app script -->
     <script defer src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
@@ -1255,6 +1482,8 @@
             setDarkMode(0);
         }
     </script>
+    
+
     </div>
 </body>
 
