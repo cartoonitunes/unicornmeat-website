@@ -42,6 +42,9 @@ class UnicornMeatWalletKit {
             // Initialize WalletKit
             await this.initializeWalletKit();
             
+            // Check for existing wallet connections
+            this.checkExistingConnections();
+            
             // Load claim statistics and status immediately (no wallet needed)
             await this.loadClaimStats();
             await this.loadClaimStatus();
@@ -390,8 +393,13 @@ class UnicornMeatWalletKit {
     }
     
     openWalletModal() {
-        // Go directly to MetaMask connection
-        this.connectWithMetaMask();
+        // Check if already connected
+        if (this.isConnected && this.account) {
+            this.showConnectionInfoModal();
+        } else {
+            // Go directly to MetaMask connection
+            this.connectWithMetaMask();
+        }
     }
     
     showSimpleWalletModal() {
@@ -420,6 +428,63 @@ class UnicornMeatWalletKit {
                         <small class="text-muted">Don't have a wallet? Install MetaMask or try WalletConnect!</small>
                     </div>
                 `;
+            }
+        }
+        
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    }
+    
+    async showConnectionInfoModal() {
+        const modal = document.getElementById('magicFeaturesModal');
+        if (modal) {
+            const modalBody = modal.querySelector('.modal-body');
+            if (modalBody) {
+                const truncatedAddress = `${this.account.address.slice(0, 6)}...${this.account.address.slice(-4)}`;
+                
+                // Show loading state first
+                modalBody.innerHTML = `
+                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0 mb-3">🦄 Wallet Connected!</h2>
+                    <div class="fs-3 mb-3">🍖</div>
+                    
+                    <div class="text-center mb-4">
+                        <div class="alert alert-success border border-2 border-black contrast-shadow-sm mb-3">
+                            <strong>Address:</strong> ${truncatedAddress}
+                        </div>
+                        <div class="alert alert-info border border-2 border-black contrast-shadow-sm mb-3">
+                            <strong>Wrapped Unicorn Meat Balance:</strong> Loading...
+                        </div>
+                    </div>
+                    
+                    <div class="text-center d-flex gap-2 justify-content-center">
+                        <button class="btn btn-md btn-danger border border-2 border-black contrast-shadow-md px-4" onclick="window.unicornMeatWalletKit.disconnectWallet()">
+                            <i class="icon icon-times me-2"></i>Disconnect
+                        </button>
+                        <button class="btn btn-md btn-success border border-2 border-black contrast-shadow-md px-4" onclick="window.unicornMeatWalletKit.closeModal()">
+                            <i class="icon icon-check me-2"></i>Sweet!
+                        </button>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">Your wallet is connected and ready to use!</small>
+                    </div>
+                `;
+                
+                // Load balance asynchronously
+                try {
+                    const balance = await this.getWrappedBalance();
+                    const formattedBalance = this.formatLargeNumber(balance);
+                    const balanceElement = modalBody.querySelector('.alert-info');
+                    if (balanceElement) {
+                        balanceElement.innerHTML = `<strong>Unicorn Meat Balance:</strong> ${formattedBalance} w🍖`;
+                    }
+                } catch (error) {
+                    console.error('Error loading balance:', error);
+                    const balanceElement = modalBody.querySelector('.alert-info');
+                    if (balanceElement) {
+                        balanceElement.innerHTML = `<strong>Wrapped Unicorn Meat Balance:</strong> Error loading balance`;
+                    }
+                }
             }
         }
         
@@ -457,6 +522,73 @@ class UnicornMeatWalletKit {
         } catch (error) {
             console.error('Error connecting with MetaMask:', error);
             this.showError('Failed to connect with MetaMask: ' + error.message);
+        }
+    }
+    
+    disconnectWallet() {
+        // Reset connection state
+        this.account = null;
+        this.isConnected = false;
+        this.provider = null;
+        this.signer = null;
+        
+        // Update the connect button
+        this.updateConnectButton();
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('magicFeaturesModal'));
+        if (modal) {
+            modal.hide();
+        }
+        
+        // Show disconnect message
+        this.showSuccess('Wallet disconnected successfully!');
+        
+        // Also update subdomain claimer if it exists
+        if (window.subdomainClaimer) {
+            window.subdomainClaimer.disconnectWallet();
+        }
+    }
+    
+    closeModal() {
+        // Simply close the modal without any other actions
+        const modal = bootstrap.Modal.getInstance(document.getElementById('magicFeaturesModal'));
+        if (modal) {
+            modal.hide();
+        }
+    }
+    
+    checkExistingConnections() {
+        // Check if MetaMask is already connected
+        if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
+            console.log('Found existing MetaMask connection:', window.ethereum.selectedAddress);
+            this.account = { address: window.ethereum.selectedAddress };
+            this.isConnected = true;
+            
+            // Set up ethers if available
+            if (typeof window.ethers !== 'undefined') {
+                this.provider = new window.ethers.providers.Web3Provider(window.ethereum);
+                this.signer = this.provider.getSigner();
+            }
+            
+            // Update the connect button to show balance
+            this.updateConnectButton();
+            
+            // Load contract data
+            this.loadContractData();
+            this.loadClaimData();
+            
+            // Listen for account changes
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    this.handleDisconnection();
+                } else {
+                    this.account = { address: accounts[0] };
+                    this.updateConnectButton();
+                    this.loadContractData();
+                    this.loadClaimData();
+                }
+            });
         }
     }
     
@@ -981,6 +1113,13 @@ class UnicornMeatWalletKit {
         
         try {
             const response = await fetch(`/api/balance/wrapped/${this.account.address}`);
+            
+            if (!response.ok) {
+                console.warn(`Flask API error: ${response.status} ${response.statusText}`);
+                // Return '0' for any API errors to prevent crashes
+                return '0';
+            }
+            
             const data = await response.json();
             return data.balance || '0';
         } catch (error) {
