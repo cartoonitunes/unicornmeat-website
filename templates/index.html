@@ -168,45 +168,864 @@
         }
     </style>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const copyButtons = document.querySelectorAll('.copy-btn');
-            
-            copyButtons.forEach(button => {
-                button.addEventListener('click', async function() {
-                    const address = this.getAttribute('data-address');
-                    
-                    try {
-                        await navigator.clipboard.writeText(address);
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const copyButtons = document.querySelectorAll('.copy-btn');
+                
+                copyButtons.forEach(button => {
+                    button.addEventListener('click', async function() {
+                        const address = this.getAttribute('data-address');
                         
-                        // Add copied class for visual feedback
-                        this.classList.add('copied');
-                        
-                        // Remove copied class after 2 seconds
-                        setTimeout(() => {
-                            this.classList.remove('copied');
-                        }, 2000);
-                        
-                    } catch (err) {
-                        console.error('Failed to copy: ', err);
-                        // Fallback for older browsers
-                        const textArea = document.createElement('textarea');
-                        textArea.value = address;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        
-                        // Still show copied feedback
-                        this.classList.add('copied');
-                        setTimeout(() => {
-                            this.classList.remove('copied');
-                        }, 2000);
-                    }
+                        try {
+                            await navigator.clipboard.writeText(address);
+                            
+                            // Add copied class for visual feedback
+                            this.classList.add('copied');
+                            
+                            // Remove copied class after 2 seconds
+                            setTimeout(() => {
+                                this.classList.remove('copied');
+                            }, 2000);
+                            
+                        } catch (err) {
+                            console.error('Failed to copy: ', err);
+                            // Fallback for older browsers
+                            const textArea = document.createElement('textarea');
+                            textArea.value = address;
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                            
+                            // Still show copied feedback
+                            this.classList.add('copied');
+                            setTimeout(() => {
+                                this.classList.remove('copied');
+                            }, 2000);
+                        }
+                    });
                 });
+                
+                // Subdomain Claimer functionality
+                const subdomainClaimer = {
+                    contractAddress: '0x46cd4Efe59523D7D1E002BA5CecEAEc820DE596b',
+                    contractABI: [
+                        {
+                            "inputs": [
+                                {"internalType": "string", "name": "label", "type": "string"}
+                            ],
+                            "name": "claim",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "release",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+                            "name": "currentLabelOf",
+                            "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [{"internalType": "string", "name": "label", "type": "string"}],
+                            "name": "isReserved",
+                            "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [{"internalType": "string", "name": "label", "type": "string"}],
+                            "name": "getLabelOwner",
+                            "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+                            "stateMutability": "view",
+                            "type": "function"
+                        }
+                    ],
+                    web3: null,
+                    contract: null,
+                    userAddress: null,
+                    
+                    init() {
+                        // Wait for DOM to be fully ready before setting up event listeners
+                        const waitForDOM = () => {
+                            const validationMessages = document.getElementById('validation-messages');
+                            const validationText = document.getElementById('validation-text');
+                            const claimBtn = document.getElementById('claim-btn');
+                            
+                            if (validationMessages && validationText && claimBtn) {
+                                console.log('DOM elements ready, setting up event listeners');
+                                this.setupEventListeners();
+                            } else {
+                                console.log('DOM elements not ready yet, waiting...');
+                                setTimeout(waitForDOM, 100);
+                            }
+                        };
+                        
+                        waitForDOM();
+                        
+                        this.checkWalletConnection();
+                        this.setupWalletkitIntegration();
+                    },
+                    
+                    setupEventListeners() {
+                        console.log('setupEventListeners called');
+                        const connectWalletBtn = document.getElementById('connect-wallet-btn');
+                        const claimBtn = document.getElementById('claim-btn');
+                        const subdomainInput = document.getElementById('subdomain-label');
+                        
+                        console.log('Found elements:', { connectWalletBtn: !!connectWalletBtn, claimBtn: !!claimBtn, subdomainInput: !!subdomainInput });
+                        
+                        if (connectWalletBtn) {
+                            console.log('Setting up connect wallet button event listener');
+                            connectWalletBtn.addEventListener('click', () => {
+                                console.log('Connect wallet button clicked');
+                                this.connectWallet();
+                            });
+                        }
+                        
+                        if (claimBtn) {
+                            claimBtn.addEventListener('click', () => this.claimSubdomain());
+                        }
+                        
+                        // Add validation functionality
+                        if (subdomainInput) {
+                            let validationTimeout;
+                            subdomainInput.addEventListener('input', (e) => {
+                                // Clear previous timeout
+                                clearTimeout(validationTimeout);
+                                
+                                // Always check for elements on each input event
+                                const validationMessages = document.getElementById('validation-messages');
+                                const validationText = document.getElementById('validation-text');
+                                const claimBtn = document.getElementById('claim-btn');
+                                const joinHerdSection = document.getElementById('join-herd');
+                                
+                                console.log('Input event - elements check:', {
+                                    validationMessages: !!validationMessages,
+                                    validationText: !!validationText,
+                                    claimBtn: !!claimBtn,
+                                    joinHerdSection: !!joinHerdSection,
+                                    sectionVisible: joinHerdSection ? joinHerdSection.style.display !== 'none' : false
+                                });
+                                
+                                // Try to recover missing validationText element
+                                let finalValidationText = validationText;
+                                if (!finalValidationText && validationMessages) {
+                                    console.log('Attempting to recover validationText element');
+                                    const recoveredValidationText = validationMessages.querySelector('#validation-text');
+                                    if (recoveredValidationText) {
+                                        console.log('Recovered validationText element');
+                                        finalValidationText = recoveredValidationText;
+                                    } else {
+                                        console.log('Failed to recover validationText element');
+                                    }
+                                }
+                                
+                                console.log('Final validationText status:', !!finalValidationText);
+                                
+                                // Debug: Check what's actually in the validationMessages container
+                                if (validationMessages) {
+                                    console.log('validationMessages innerHTML:', validationMessages.innerHTML);
+                                    console.log('validationMessages children:', validationMessages.children.length);
+                                    if (validationMessages.children.length > 0) {
+                                        Array.from(validationMessages.children).forEach((child, index) => {
+                                            console.log(`Child ${index}:`, child.tagName, child.id, child.className);
+                                        });
+                                    }
+                                }
+                                
+                                // Only validate if ALL required elements exist and section is visible
+                                if (validationMessages && finalValidationText && claimBtn && joinHerdSection && joinHerdSection.style.display !== 'none') {
+                                    // Store element references for the debounced validation
+                                    const elements = { validationMessages, validationText: finalValidationText, claimBtn };
+                                    
+                                    // Debounce validation - wait 500ms after user stops typing
+                                    validationTimeout = setTimeout(() => {
+                                        // Re-check elements before validation to ensure they still exist
+                                        const currentValidationMessages = document.getElementById('validation-messages');
+                                        const currentValidationText = document.getElementById('validation-text');
+                                        const currentClaimBtn = document.getElementById('claim-btn');
+                                        
+                                        if (currentValidationMessages && currentValidationText && currentClaimBtn) {
+                                            const currentElements = { validationMessages: currentValidationMessages, validationText: currentValidationText, claimBtn: currentClaimBtn };
+                                            this.validateLabelWithElements(e.target.value, currentElements);
+                                        } else {
+                                            console.log('Elements no longer exist, skipping validation');
+                                        }
+                                    }, 500);
+                                } else {
+                                    console.log('Missing elements, cannot validate:', {
+                                        missing: {
+                                            validationMessages: !validationMessages,
+                                            validationText: !finalValidationText,
+                                            claimBtn: !claimBtn,
+                                            joinHerdSection: !joinHerdSection
+                                        }
+                                    });
+                                    
+                                    // Reset button state when we can't validate
+                                    if (claimBtn) {
+                                        claimBtn.disabled = true;
+                                        claimBtn.innerHTML = '<i class="icon icon-check me-2"></i>Claim Subdomain';
+                                    }
+                                }
+                                
+                                // Always try to update button text if claim button exists
+                                if (claimBtn) {
+                                    this.updateClaimButtonText();
+                                }
+                            });
+                        }
+                    },
+                    
+                    setupWalletkitIntegration() {
+                        // Wait for walletkit to be fully initialized
+                        const waitForWalletkit = () => {
+                            if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.init) {
+                                // Wait a bit more for walletkit to fully initialize
+                                setTimeout(() => {
+                                    if (window.unicornMeatWalletKit.isConnected) {
+                                        this.handleWalletkitConnection();
+                                    }
+                                    this.setupWalletkitListeners();
+                                }, 500);
+                            } else {
+                                // Check again in 100ms
+                                setTimeout(waitForWalletkit, 100);
+                            }
+                        };
+                        
+                        waitForWalletkit();
+                    },
+                    
+                    setupWalletkitListeners() {
+                        // Listen for walletkit connection changes
+                        if (window.unicornMeatWalletKit) {
+                            // Override the original updateConnectButton to also update subdomain claimer
+                            const originalUpdateConnectButton = window.unicornMeatWalletKit.updateConnectButton;
+                            window.unicornMeatWalletKit.updateConnectButton = async function() {
+                                await originalUpdateConnectButton.call(this);
+                                
+                                // Also update subdomain claimer if it exists
+                                if (window.subdomainClaimer) {
+                                    window.subdomainClaimer.checkWalletkitConnection();
+                                }
+                            };
+                        }
+                    },
+                    
+                    handleWalletkitConnection() {
+                        if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected) {
+                                                    this.userAddress = window.unicornMeatWalletKit.account.address;
+                        this.web3 = new Web3(window.ethereum);
+                        this.contract = new this.web3.eth.Contract(this.contractABI, this.contractAddress);
+                        
+                        this.showWalletStatus();
+                        this.showClaimForm();
+                        this.checkCurrentSubdomain();
+                        this.updateGasPriceDisplay();
+                        }
+                    },
+                    
+                    checkWalletkitConnection() {
+                        // This method is called by WalletKit integration to sync state
+                        if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected) {
+                            this.handleWalletkitConnection();
+                        } else {
+                            this.disconnectWallet();
+                        }
+                    },
+                    
+                    async connectWallet() {
+                        console.log('connectWallet called');
+                        try {
+                            // Use the existing walletkit connection
+                            if (window.unicornMeatWalletKit) {
+                                console.log('WalletKit found, checking connection status');
+                                if (window.unicornMeatWalletKit.isConnected) {
+                                    console.log('WalletKit already connected, handling connection');
+                                    this.handleWalletkitConnection();
+                                } else {
+                                    console.log('WalletKit not connected, opening modal');
+                                    // Open the walletkit modal
+                                    window.unicornMeatWalletKit.openWalletModal();
+                                }
+                            } else {
+                                console.log('WalletKit not found, falling back to MetaMask');
+                                // Fallback to direct MetaMask
+                                if (typeof window.ethereum !== 'undefined') {
+                                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                                    this.userAddress = accounts[0];
+                                    this.web3 = new Web3(window.ethereum);
+                                    this.contract = new this.web3.eth.Contract(this.contractABI, this.contractAddress);
+                                    
+                                    this.showWalletStatus();
+                                    this.showClaimForm();
+                                    this.checkCurrentSubdomain();
+                                    
+                                    // Listen for account changes
+                                    window.ethereum.on('accountsChanged', (accounts) => {
+                                        if (accounts.length === 0) {
+                                            this.disconnectWallet();
+                                        } else {
+                                            this.userAddress = accounts[0];
+                                            this.checkCurrentSubdomain();
+                                        }
+                                    });
+                                } else {
+                                    this.showError('Please install MetaMask or another Web3 wallet');
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error in connectWallet:', error);
+                            this.showError('Failed to connect wallet: ' + error.message);
+                        }
+                    },
+                    
+                    disconnectWallet() {
+                        this.userAddress = null;
+                        this.web3 = null;
+                        this.contract = null;
+                        this.hideWalletStatus();
+                        this.hideClaimForm();
+                        this.hideCurrentSubdomain();
+                    },
+                    
+                    showWalletStatus() {
+                        document.getElementById('wallet-status').style.display = 'block';
+                        document.getElementById('connect-wallet-section').style.display = 'none';
+                        
+                        // Check and display current subdomain if available
+                        this.checkCurrentSubdomain();
+                    },
+                    
+                    hideWalletStatus() {
+                        document.getElementById('wallet-status').style.display = 'none';
+                        document.getElementById('connect-wallet-section').style.display = 'block';
+                    },
+                    
+                    showClaimForm() {
+                        document.getElementById('claim-form').style.display = 'block';
+                        document.getElementById('connect-wallet-section').style.display = 'none';
+                    },
+                    
+                    hideClaimForm() {
+                        document.getElementById('claim-form').style.display = 'none';
+                        document.getElementById('connect-wallet-section').style.display = 'block';
+                    },
+                    
+                    async checkCurrentSubdomain() {
+                        if (!this.contract || !this.userAddress) return;
+                        
+                        try {
+                            const currentLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
+                            if (currentLabel && currentLabel.length > 0) {
+                                this.showCurrentSubdomain(currentLabel);
+                            } else {
+                                this.hideCurrentSubdomain();
+                            }
+                        } catch (error) {
+                            console.error('Error checking current subdomain:', error);
+                        }
+                    },
+                    
+                    async showCurrentSubdomain(label) {
+                        // Update the header to show they're already a member
+                        const header = document.querySelector('#join-herd h2');
+                        if (header) {
+                            header.innerHTML = 'Welcome 🦄️ Herd Member!';
+                        }
+                        
+                        // Update the wallet status display
+                        const walletStatus = document.getElementById('wallet-status');
+                        if (walletStatus.style.display !== 'none') {
+                            const subdomainDisplay = walletStatus.querySelector('#subdomain-display');
+                            if (subdomainDisplay) {
+                                subdomainDisplay.textContent = label + '.the🦄.eth';
+                            }
+                        }
+                        
+                        // Update button text based on current state
+                        await this.updateClaimButtonText();
+                    },
+                    
+                    async updateClaimButtonText() {
+                        const claimBtn = document.getElementById('claim-btn');
+                        
+                        // Safety check - ensure claim button exists
+                        if (!claimBtn) {
+                            return;
+                        }
+                        
+                        // Check if there's text in the input for validation
+                        const input = document.getElementById('subdomain-label');
+                        const hasInput = input && input.value.trim();
+                        
+                        // Check if user actually owns a subdomain by calling the smart contract
+                        let hasSubdomain = false;
+                        if (this.userAddress && this.contract) {
+                            try {
+                                const userLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
+                                hasSubdomain = userLabel && userLabel.trim() !== '';
+                                console.log('User subdomain check:', { userLabel, hasSubdomain });
+                            } catch (error) {
+                                console.log('Error checking user subdomain:', error);
+                                hasSubdomain = false;
+                            }
+                        }
+                        
+                        if (hasSubdomain && hasInput) {
+                            // User has a subdomain and there's input text
+                            claimBtn.innerHTML = '<i class="icon icon-check me-2"></i>Replace Subdomain';
+                        } else {
+                            // User doesn't have a subdomain, or no input text
+                            claimBtn.innerHTML = '<i class="icon icon-check me-2"></i>Claim Subdomain';
+                        }
+                        
+                        // Note: Button disabled state is handled by the validation logic
+                        // This method only updates the text, not the enabled/disabled state
+                    },
+                    
+                    async hideCurrentSubdomain() {
+                        // Revert the header back to original
+                        const header = document.querySelector('#join-herd h2');
+                        if (header) {
+                            header.innerHTML = 'Join the 🦄️ Herd!';
+                        }
+                        
+                        // Clear the wallet status display
+                        const walletStatus = document.getElementById('wallet-status');
+                        if (walletStatus.style.display !== 'none') {
+                            const subdomainDisplay = walletStatus.querySelector('#subdomain-display');
+                            if (subdomainDisplay) {
+                                subdomainDisplay.textContent = 'No subdomain claimed';
+                            }
+                        }
+                        
+                        // Update button text back to "Claim Subdomain"
+                        await this.updateClaimButtonText();
+                    },
+                    
+
+                    
+                    async checkSubdomainAvailability(label) {
+                        if (!this.contract || !label.trim()) return false;
+                        
+                        try {
+                            // Check if the label is reserved by the smart contract
+                            const isReserved = await this.contract.methods.isReserved(label.trim()).call();
+                            if (isReserved) {
+                                console.log('Label is reserved by smart contract');
+                                return false; // Reserved labels cannot be claimed
+                            }
+                            
+                            // Check if the current user already owns this label through the smart contract
+                            if (this.userAddress) {
+                                try {
+                                    const userLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
+                                    console.log('Current user owns label:', userLabel);
+                                    
+                                    if (userLabel === label.trim()) {
+                                        console.log('Current user already owns this label');
+                                        return false; // User already owns this label
+                                    }
+                                } catch (contractError) {
+                                    console.log('Smart contract user label check failed:', contractError);
+                                }
+                            }
+                            
+                            // Check if this label is owned by anyone through the smart contract
+                            try {
+                                const labelOwner = await this.contract.methods.getLabelOwner(label.trim()).call();
+                                console.log('Label owner from smart contract:', labelOwner);
+                                
+                                if (labelOwner && labelOwner !== '0x0000000000000000000000000000000000000000') {
+                                    console.log('Label is owned by someone through smart contract:', labelOwner);
+                                    return false; // Already owned by someone
+                                }
+                            } catch (contractError) {
+                                console.log('Smart contract label owner check failed:', contractError);
+                                // If this method doesn't exist, we'll fall back to ENS checks
+                            }
+                            
+                            // Check if the subdomain is already claimed by someone else using ENS
+                            if (typeof window.ethers !== 'undefined') {
+                                try {
+                                    const provider = new window.ethers.providers.Web3Provider(window.ethereum);
+                                    const subdomain = `${label.trim()}.the🦄.eth`;
+                                    console.log('Checking ENS for subdomain:', subdomain);
+                                    
+                                    // First try to get the resolver
+                                    const ensResolver = await provider.getResolver(subdomain);
+                                    console.log('ENS resolver result:', ensResolver);
+                                    
+                                    if (ensResolver) {
+                                        // Check if the resolver has an address (meaning it's claimed)
+                                        try {
+                                            const address = await ensResolver.getAddress();
+                                            console.log('ENS address result:', address);
+                                            
+                                            if (address && address !== '0x0000000000000000000000000000000000000000') {
+                                                console.log('Subdomain already claimed by ENS:', address);
+                                                return false; // Already claimed by someone
+                                            }
+                                            
+                                            // If we have a resolver but no address, the subdomain is still claimed
+                                            // A resolver existing means someone has set it up, even if not fully configured
+                                            console.log('Resolver exists but no address - subdomain is claimed');
+                                            return false; // Already claimed
+                                        } catch (addressError) {
+                                            console.log('ENS address check failed:', addressError);
+                                            // If we can't get the address but resolver exists, assume claimed
+                                            return false; // Conservative approach
+                                        }
+                                    }
+                                    
+                                    // Note: Direct ENS Registry calls are unreliable for subdomains
+                                    // We rely on resolver checks which are more accurate
+                                    
+                                } catch (ensError) {
+                                    console.error('ENS check failed:', ensError);
+                                    // If ENS check fails, be conservative and assume it's not available
+                                    return false;
+                                }
+                            }
+                            
+                            return true; // Available to claim
+                        } catch (error) {
+                            console.error('Error checking subdomain availability:', error);
+                            // If we can't check, be conservative and assume it's not available
+                            return false;
+                        }
+                    },
+                    
+                    async validateLabelWithElements(label, elements) {
+                        console.log('validateLabelWithElements called with:', label, 'and elements:', elements);
+                        
+                        // Safety check - ensure elements exist
+                        if (!elements.validationMessages || !elements.claimBtn) {
+                            console.error('Validation elements not found in validateLabelWithElements');
+                            
+                            // Try to find elements again as fallback
+                            const fallbackValidationMessages = document.getElementById('validation-messages');
+                            const fallbackValidationText = document.getElementById('validation-text');
+                            const fallbackClaimBtn = document.getElementById('claim-btn');
+                            
+                            if (fallbackValidationMessages && fallbackValidationText && fallbackClaimBtn) {
+                                console.log('Found elements on fallback, retrying validation');
+                                const fallbackElements = { validationMessages: fallbackValidationMessages, validationText: fallbackValidationText, claimBtn: fallbackClaimBtn };
+                                return this.validateLabelWithElements(label, fallbackElements);
+                            }
+                            
+                            return false;
+                        }
+                        
+                        let isValid = true;
+                        let messages = [];
+                        
+                        // Clear previous messages but preserve the validationText element
+                        const existingValidationText = elements.validationMessages.querySelector('#validation-text');
+                        elements.validationMessages.innerHTML = '';
+                        
+                        // Restore the validationText element if it was removed
+                        if (existingValidationText) {
+                            elements.validationMessages.appendChild(existingValidationText);
+                        }
+                        
+                        // Length validation
+                        if (label.length === 0) {
+                            messages.push('Subdomain label is required');
+                            isValid = false;
+                        } else if (label.length < 1) {
+                            messages.push('Subdomain label must be at least 1 character');
+                            isValid = false;
+                        } else if (label.length > 63) {
+                            messages.push('Subdomain label must be 63 characters or less');
+                            isValid = false;
+                        }
+                        
+                        // Character validation
+                        if (label.length > 0) {
+                            if (label.startsWith('-') || label.endsWith('-')) {
+                                messages.push('Subdomain label cannot start or end with a hyphen');
+                                isValid = false;
+                            }
+                            if (label.startsWith(' ') || label.endsWith(' ')) {
+                                messages.push('Subdomain label cannot start or end with a space');
+                                isValid = false;
+                            }
+                            if (!/^[a-zA-Z0-9\-]+$/.test(label)) {
+                                messages.push('Subdomain label can only contain letters, numbers, and hyphens');
+                                isValid = false;
+                            }
+                        }
+                        
+                        console.log('Basic validation result:', { isValid, messages, labelLength: label.length });
+                        
+                        // Check availability if label is valid and has sufficient length
+                        if (isValid && label.trim() && label.trim().length >= 2) {
+                            console.log('Checking availability for:', label.trim());
+                            
+                            this.checkSubdomainAvailability(label.trim()).then(isAvailable => {
+                                console.log('Availability check result:', isAvailable);
+                                
+                                // Use the stored element references
+                                if (!elements.validationText || !elements.claimBtn) {
+                                    console.error('Validation elements no longer exist in callback');
+                                    return;
+                                }
+                                
+                                if (!isAvailable) {
+                                    elements.validationText.innerHTML = '<i class="icon icon-exclamation-triangle me-2"></i>This subdomain is not available.';
+                                    elements.validationText.className = 'text-warning fw-bold';
+                                    elements.claimBtn.disabled = true;
+                                    elements.claimBtn.innerHTML = '<i class="icon icon-times me-2"></i>Already Claimed!';
+                                } else {
+                                    // Show success message and enable claim button
+                                    elements.validationText.innerHTML = '<i class="icon icon-check me-2"></i>Available to claim!';
+                                    elements.validationText.className = 'text-success fw-bold';
+                                    
+                                    console.log('Enabling claim button for available subdomain');
+                                    elements.claimBtn.disabled = false;
+                                    console.log('Button disabled state after enabling:', elements.claimBtn.disabled);
+                                    
+                                    // Update button text and ensure it's enabled
+                                    this.updateClaimButtonText();
+                                    
+                                    // Double-check button is enabled (in case updateClaimButtonText disabled it)
+                                    if (elements.claimBtn) {
+                                        elements.claimBtn.disabled = false;
+                                        console.log('Button disabled state after double-check:', elements.claimBtn.disabled);
+                                    }
+                                }
+                            }).catch(error => {
+                                console.error('Error in availability check:', error);
+                            });
+                        } else if (label.length === 0) {
+                            // Reset validation text when input is empty
+                            if (elements.validationText) {
+                                elements.validationText.innerHTML = 'Type a subdomain to check availability';
+                                elements.validationText.className = 'text-muted';
+                            }
+                            if (elements.claimBtn) {
+                                elements.claimBtn.disabled = true;
+                            }
+                        } else if (label.trim().length < 2) {
+                            // Show message for short labels
+                            if (elements.validationText) {
+                                elements.validationText.innerHTML = 'Type at least 2 characters to check availability';
+                                elements.validationText.className = 'text-muted';
+                            }
+                            if (elements.claimBtn) {
+                                elements.claimBtn.disabled = true;
+                            }
+                        }
+                        
+                        // Display validation messages
+                        if (messages.length > 0) {
+                            if (elements.validationText) {
+                                elements.validationText.innerHTML = '<i class="icon icon-alert me-2"></i>' + messages[0];
+                                elements.validationText.className = 'text-danger fw-bold';
+                            }
+                        }
+                        
+                        // Only enable/disable button based on basic validation if we're not doing availability check
+                        // The availability check will handle button state for valid labels
+                        if (label.trim().length < 2) {
+                            elements.claimBtn.disabled = true;
+                        }
+                        
+                        return isValid;
+                    },
+                    
+                    async validateLabel(label) {
+                        // Backward compatibility - get elements and call the new method
+                        const validationMessages = document.getElementById('validation-messages');
+                        const validationText = document.getElementById('validation-text');
+                        const claimBtn = document.getElementById('claim-btn');
+                        
+                        if (validationMessages && validationText && claimBtn) {
+                            const elements = { validationMessages, validationText, claimBtn };
+                            return await this.validateLabelWithElements(label, elements);
+                        } else {
+                            console.error('Validation elements not found in validateLabel');
+                            return false;
+                        }
+                    },
+                    
+                    async claimSubdomain() {
+                        const label = document.getElementById('subdomain-label').value.trim();
+                        
+                        if (!(await this.validateLabel(label))) {
+                            return;
+                        }
+                        
+                        try {
+                            this.showTransactionStatus();
+                            
+                            const gasEstimate = await this.contract.methods.claim(label).estimateGas({ from: this.userAddress });
+                            
+                            // Use a more conservative gas limit to reduce costs
+                            // 10% buffer instead of 20% for cost optimization
+                            const gasLimit = Math.ceil(gasEstimate * 1.1); // Reduced buffer for cost savings
+                            
+                            const gasPrice = await this.web3.eth.getGasPrice();
+                            const estimatedCost = (gasLimit * gasPrice) / 1e18;
+                            
+                            console.log('Gas estimation:', {
+                                gasEstimate: gasEstimate.toString(),
+                                gasLimit: gasLimit,
+                                gasPrice: gasPrice,
+                                estimatedCost: estimatedCost.toFixed(6),
+                                savings: `Reduced buffer from 20% to 10% (saved ~${Math.ceil(gasEstimate * 0.1)} gas units)`
+                            });
+                            
+                            // Show gas cost to user before transaction
+                            if (estimatedCost > 0.01) { // If more than 1 cent
+                                if (!confirm(`Gas cost estimated at ~$${estimatedCost.toFixed(4)} (${gasLimit} gas × ${(gasPrice / 1e9).toFixed(2)} gwei). Continue?`)) {
+                                    this.hideTransactionStatus();
+                                    return;
+                                }
+                            }
+                            
+                            // Try to use a slightly lower gas price for cost savings
+                            // Get current gas price and use 90% of it for potential savings
+                            const currentGasPrice = await this.web3.eth.getGasPrice();
+                            const optimizedGasPrice = Math.floor(Number(currentGasPrice) * 0.9); // 10% reduction
+                            
+                            console.log('Gas price optimization:', {
+                                currentGasPrice: currentGasPrice.toString(),
+                                optimizedGasPrice: optimizedGasPrice.toString(),
+                                potentialSavings: `${((currentGasPrice - optimizedGasPrice) / currentGasPrice * 100).toFixed(1)}%`
+                            });
+                            
+                            const result = await this.contract.methods.claim(label).send({
+                                from: this.userAddress,
+                                gas: gasLimit,
+                                gasPrice: optimizedGasPrice
+                            });
+                            
+                            this.hideTransactionStatus();
+                            this.showSuccess(`Successfully claimed ${label}.the🦄.eth! Transaction: ${result.transactionHash}`);
+                            
+                            // Clear form and refresh current subdomain
+                            document.getElementById('subdomain-label').value = '';
+                            this.checkCurrentSubdomain();
+                            
+                        } catch (error) {
+                            this.hideTransactionStatus();
+                            this.showError('Failed to claim subdomain: ' + error.message);
+                        }
+                    },
+                    
+                    async releaseSubdomain() {
+                        if (!confirm('Are you sure you want to release your subdomain? This action cannot be undone.')) {
+                            return;
+                        }
+                        
+                        try {
+                            this.showTransactionStatus();
+                            
+                            const gasEstimate = await this.contract.methods.release().estimateGas({ from: this.userAddress });
+                            const gasLimit = Math.ceil(gasEstimate * 1.2);
+                            
+                            const result = await this.contract.methods.release().send({
+                                from: this.userAddress,
+                                gas: gasLimit
+                            });
+                            
+                            this.hideTransactionStatus();
+                            this.showSuccess('Successfully released your subdomain! Transaction: ' + result.transactionHash);
+                            
+                            // Refresh current subdomain
+                            this.checkCurrentSubdomain();
+                            
+                        } catch (error) {
+                            this.hideTransactionStatus();
+                            this.showError('Failed to release subdomain: ' + error.message);
+                        }
+                    },
+                    
+                    showTransactionStatus() {
+                        document.getElementById('tx-status').style.display = 'block';
+                        document.getElementById('claim-btn').disabled = true;
+
+                    },
+                    
+                    hideTransactionStatus() {
+                        document.getElementById('tx-status').style.display = 'none';
+                        document.getElementById('claim-btn').disabled = false;
+                    },
+                    
+                    showSuccess(message) {
+                        this.showMessage(message, 'success');
+                    },
+                    
+                    showError(message) {
+                        this.showMessage(message, 'danger');
+                    },
+                    
+                    showMessage(message, type) {
+                        const resultMessages = document.getElementById('result-messages');
+                        const div = document.createElement('div');
+                        div.className = `alert alert-${type} border border-2 border-black contrast-shadow-sm`;
+                        div.innerHTML = `<i class="icon icon-${type === 'success' ? 'check' : 'alert'} me-2"></i>${message}`;
+                        
+                        resultMessages.appendChild(div);
+                        
+                        // Auto-remove after 10 seconds
+                        setTimeout(() => {
+                            if (div.parentNode) {
+                                div.parentNode.removeChild(div);
+                            }
+                        }, 10000);
+                    },
+                    
+                    async updateGasPriceDisplay() {
+                        try {
+                            if (typeof window.ethereum !== 'undefined') {
+                                const gasPrice = await this.web3.eth.getGasPrice();
+                                const gasPriceGwei = (gasPrice / 1e9).toFixed(2);
+                                const gasPriceElement = document.getElementById('current-gas-price');
+                                if (gasPriceElement) {
+                                    gasPriceElement.textContent = gasPriceGwei;
+                                }
+                            }
+                        } catch (error) {
+                            console.log('Could not update gas price display:', error);
+                        }
+                    },
+                    
+                    checkWalletConnection() {
+                        // Check if already connected via walletkit
+                        if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected) {
+                            this.handleWalletkitConnection();
+                        } else if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
+                            this.userAddress = window.ethereum.selectedAddress;
+                            this.web3 = new Web3(window.ethereum);
+                            this.contract = new this.web3.eth.Contract(this.contractABI, this.contractAddress);
+                            
+                            this.showWalletStatus();
+                            this.showClaimForm();
+                            this.checkCurrentSubdomain();
+                            this.updateGasPriceDisplay();
+                        }
+                    }
+                };
+                
+                // Initialize subdomain claimer
+                subdomainClaimer.init();
+                
+                // Make it globally accessible for walletkit integration
+                window.subdomainClaimer = subdomainClaimer;
             });
-        });
-    </script>
+        </script>
     </head>
 
 <body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
@@ -251,10 +1070,10 @@
             <div class="panel">
                 <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
                     <li><a href="#about">About</a></li>
-                    <li><a href="#tokenomics">Tokenomics</a></li>
                     <li><a href="#trading">Buy 🦄🍖</a></li>
-                    <li><a href="#roadmap">Timeline</a></li>
                     <li><a href="#web3-actions">Dapp</a></li>
+                    <li><a href="#join-herd">🦄 Herd</a></li>
+                    <li><a href="#roadmap">Timeline</a></li>
                     <li><a href="#faq">FAQ</a></li>
                     <li><a href="#references">Links</a></li>
                 </ul>
@@ -346,10 +1165,10 @@
                             <ul class="uc-navbar-nav fs-5 xl:fs-4 gap-3 lg:gap-4 d-none lg:d-flex fw-semibold"
                                 data-uc-scrollspy-nav="closet: > *; offset: 48; scroll: true;">
                                 <li><a href="#about">About</a></li>
-                                <li><a href="#tokenomics">Tokenomics</a></li>
                                 <li><a href="#trading">Buy 🦄🍖</a></li>
-                                <li><a href="#roadmap">Timeline</a></li>
                                 <li><a href="#web3-actions">Dapp</a></li>
+                                <li><a href="#join-herd">🦄 Herd</a></li>
+                                <li><a href="#roadmap">Timeline</a></li>
                                 <li><a href="#faq">FAQ</a></li>
                             </ul>
                         </div>
@@ -893,13 +1712,225 @@
 
         <!-- Section end -->
 
-        <div class="d-none xl:d-block" style="background-color: #dbf2ff">
-            <img class="text-primary" src="{{ url_for('static', filename='assets/images/common/italic-line-01.svg') }}"
-                alt="victor" data-uc-svg style="margin-bottom: -1px; background-color: #dbf2ff">
+        <div class="d-none xl:d-block">
+            <img src="{{ url_for('static', filename='assets/images/common/italic-line-02.svg') }}" alt="victor">
+        </div>
+
+       
+
+        <!-- Section start -->
+        <div id="web3-actions" class="web3-actions section panel">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff">
+                <center>
+                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Unicorn Meat Dapp</h2>
+                </center><br>
+                <div class="container sm:max-w-lg xl:max-w-2xl">
+                    <div
+                        class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
+
+                        <div class="row justify-content-center">
+                            <!-- Wrap/Unwrap Panel -->
+                            <div class="col-lg-6 col-md-8 col-sm-10">
+                                <div
+                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
+                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
+                                        Wrap Unicorn Meat</h3>
+
+                                </div>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">Want
+                                    to wrap or unwrap Unicorn Meat between the original 2016 contract and the wrapper?
+                                </p><br>
+                                <input id="wrap-unwrap-amount" type="number" min="0" step="any"
+                                    class="form-control h-48px xl:h-64px fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
+                                    placeholder="Enter amount" required
+                                    style="max-width: 220px; margin-left: auto; margin-right: auto;">
+                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
+                                    <button
+                                        id="wrap-button"
+                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
+                                        type="button">Wrap</button>
+                                    <button
+                                        id="unwrap-button"
+                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
+                                        type="button">Unwrap</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Error Message Area -->
+                        <div id="web3-error"
+                            class="panel mt-4 p-3 border border-2 border-danger text-danger bg-white text-center d-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section end -->
+
+
+
+        <div class="d-none xl:d-block">
+            <img class="text-secondary-100"
+                src="{{ url_for('static', filename='assets/images/common/italic-line-01.svg') }}" alt="victor"
+                data-uc-svg style="margin-bottom: -1px">
         </div>
 
         <!-- Section start -->
-        <div id="roadmap" class="roadmap section panel overflow-hidden">
+        <div id="join-herd" class="join-herd section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #ffe6f0;">
+                <img class="position-absolute start-0 w-200px xl:w-auto"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-03.svg') }}" alt="cloud"
+                    style="top: 20%">
+                <img class="position-absolute end-0 w-150px xl:w-auto"
+                    src="{{ url_for('static', filename='assets/images/common/cloud-04.svg') }}" alt="cloud"
+                    style="bottom: 15%">
+                
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
+                                
+                                <div class="section-header panel text-center mb-4 sm:mb-6 xl:mb-9"
+                                    data-anime="onview: -200; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                                    <h2 class="h4 sm:h3 xl:h2 m-0 rotate-2 text-uppercase ls-0">Join the 🦄️ Herd!</h2>
+                                </div>
+
+                                <div class="row child-cols-1 lg:child-cols-2 g-3 lg:g-4"
+                                    data-anime="onview: -400; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 300});">
+                                    <div class="col order-1 order-lg-1">
+                                        <div class="panel p-3 sm:p-4 border border-2 border-black contrast-shadow-lg bg-white -rotate-1">
+                                            <h3 class="h6 sm:h5 xl:h4 m-0 mb-3 text-uppercase ls-0 text-center">Claim Your 🦄️ Herd Subdomain</h3>
+                                            <div>
+                                                <p class="fs-7 sm:fs-6 mb-3">Join the legendary 🦄️ herd by claiming your unique subdomain on <strong>the🦄.eth</strong>!</p>
+                                                
+                                                <p class="fs-7 sm:fs-6 mb-3">Choose any name you like: <strong>alice.the🦄.eth</strong>, <strong>meatlover.the🦄.eth</strong>, or get creative! Each wallet can claim one subdomain and update it anytime.</p>
+                                                
+                                                <p class="fs-7 sm:fs-6 mb-0"><strong>💡 Pro Tip:</strong> Use your subdomain as your X (Twitter) name to show off your herd membership! Rumor has it that herd members will be rewarded 👀.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col order-2 order-lg-2">
+                                        <div class="panel p-3 sm:p-4 border border-2 border-black contrast-shadow-lg bg-white rotate-1">
+                                            <h3 class="h6 sm:h5 xl:h4 m-0 mb-3 text-uppercase ls-0 text-center">Smart Contract Details</h3>
+                                            <div>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Contract Address:</strong></p>
+                                                <div class="d-flex align-items-center gap-2 mb-3">
+                                                    <code class="small text-break flex-grow-1 full-address">0x46cd4Efe59523D7D1E002BA5CecEAEc820DE596b</code>
+                                                    <code class="small text-break flex-grow-1 short-address">0x46cd...96b</code>
+                                                    <button class="copy-btn" 
+                                                            data-address="0x46cd4Efe59523D7D1E002BA5CecEAEc820DE596b"
+                                                            title="Copy full address">
+                                                        <i class="icon icon-copy me-1"></i>
+                                                    </button>
+                                                </div>
+                                                
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Parent Domain:</strong> the🦄.eth</p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Network:</strong> Ethereum Mainnet</p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Cost:</strong> Gas fees only</p>
+                                                
+                                                <div class="mt-4 d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                                                    <a href="https://etherscan.io/address/0x46cd4Efe59523D7D1E002BA5CecEAEc820DE596b" 
+                                                       target="_blank" class="btn btn-sm btn-outline-dark">
+                                                        <i class="icon icon-external-link me-1"></i>Etherscan
+                                                    </a>
+                                                    <a href="https://app.ens.domains/the🦄.eth" 
+                                                       target="_blank" class="btn btn-sm btn-outline-dark">
+                                                        <i class="icon icon-external-link me-1"></i>ENS
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-4 sm:mt-5"
+                                    data-anime="onview: -400; translateY: [24, 0]; opacity: [0, 1]; delay: 400;">
+                                    <div style="max-width: 700px; margin: 0 auto;">
+                                        <h3 class="h5 sm:h4 xl:h3 m-0 mb-4 text-uppercase ls-0">🚀 Ready to Claim?</h3>
+                                        
+                                        <!-- Wallet Connection Status -->
+                                                                                  <div id="wallet-status" class="mb-4" style="display: none;">
+                                              <div class="alert alert-success border border-2 border-black contrast-shadow-sm">
+                                                  <i class="icon icon-check me-2"></i>Your current 🦄️ herd subdomain: <strong><span id="subdomain-display"></span></strong>
+                                              </div>
+                                          </div>
+                                        
+                                        <!-- Connect Wallet Button -->
+                                        <div id="connect-wallet-section" class="mb-4">
+                                            <button id="connect-wallet-btn" class="btn btn-lg btn-primary border border-2 border-black contrast-shadow-md px-5">
+                                                <i class="icon icon-wallet me-2"></i>Connect Wallet to Start
+                                            </button>
+                                            
+                                            <!-- Gas Cost Info -->
+                                            <div class="mt-3 text-center">
+                                                <small class="text-muted">
+                                                    <i class="icon icon-info me-1"></i>
+                                                    <strong>Gas Cost Note:</strong> Subdomain claiming involves complex smart contract operations (ENS resolution, storage, validation). 
+                                                    Current gas price: <span id="current-gas-price">Loading...</span> gwei
+                                                    <br>
+                                                    <span class="text-info">💡 Tip: Gas costs are lowest during low network activity (late night/early morning UTC)</span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Claim Form -->
+                                        <div id="claim-form" class="mb-4" style="display: none;">
+                                            <div class="row justify-content-center">
+                                                <div class="col-12 col-md-10">
+                                                    <div class="mb-4" style="max-width: 400px; margin: 0 auto;">
+                                                        <div class="position-relative">
+                                                            <input type="text" id="subdomain-label" class="form-control border border-2 border-black text-center pr-5" 
+                                                                   placeholder="alice" maxlength="63" style="font-size: 16px; height: 48px;">
+                                                            <span class="position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); font-size: 16px; font-weight: 500; color: #d63384; pointer-events: none;">.the🦄.eth</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Validation Messages -->
+                                                    <div id="validation-messages" class="mb-3" style="height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                        <span id="validation-text" class="text-muted">Type a subdomain to check availability</span>
+                                                    </div>
+                                                    
+                                                    <!-- Action Buttons -->
+                                                    <div class="text-center">
+                                                        <button id="claim-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md px-5" 
+                                                                style="background-color: #ff6b9d; color: white;" disabled>
+                                                            <i class="icon icon-check me-2"></i>Claim Subdomain
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Transaction Status -->
+                                        <div id="tx-status" class="mb-4" style="display: none;">
+                                            <div class="alert alert-warning border border-2 border-black contrast-shadow-sm">
+                                                <i class="icon icon-clock me-2"></i>Transaction in progress... Please wait.
+                                            </div>
+                                        </div>
+                                        
+
+                                        
+                                        <!-- Success/Error Messages -->
+                                        <div id="result-messages"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Section end -->
+
+        <div class="d-none xl:d-block">
+            <img class="text-secondary-100"
+                src="{{ url_for('static', filename='assets/images/common/italic-line-01.svg') }}" alt="victor"
+                data-uc-svg style="margin-bottom: -1px">
+        </div>
+
+         <!-- Section start -->
+         <div id="roadmap" class="roadmap section panel overflow-hidden">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-primary">
                 <img class="position-absolute end-0"
                     src="{{ url_for('static', filename='assets/images/common/cloud-03.svg') }}" alt="victor"
@@ -1046,64 +2077,7 @@
             <img class="text-primary" src="{{ url_for('static', filename='assets/images/common/italic-line-03.svg') }}"
                 alt="victor" data-uc-svg style="margin-top: -5px">
         </div>
-
-        <!-- Section start -->
-        <div id="web3-actions" class="web3-actions section panel">
-            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff">
-                <center>
-                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Unicorn Meat Dapp</h2>
-                </center><br>
-                <div class="container sm:max-w-lg xl:max-w-2xl">
-                    <div
-                        class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
-
-                        <div class="row justify-content-center">
-                            <!-- Wrap/Unwrap Panel -->
-                            <div class="col-lg-6 col-md-8 col-sm-10">
-                                <div
-                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
-                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
-                                        Wrap Unicorn Meat</h3>
-
-                                </div>
-                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">Want
-                                    to wrap or unwrap Unicorn Meat between the original 2016 contract and the wrapper?
-                                </p><br>
-                                <input id="wrap-unwrap-amount" type="number" min="0" step="any"
-                                    class="form-control h-48px xl:h-64px fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
-                                    placeholder="Enter amount" required
-                                    style="max-width: 220px; margin-left: auto; margin-right: auto;">
-                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
-                                    <button
-                                        id="wrap-button"
-                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
-                                        type="button">Wrap</button>
-                                    <button
-                                        id="unwrap-button"
-                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
-                                        type="button">Unwrap</button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Error Message Area -->
-                        <div id="web3-error"
-                            class="panel mt-4 p-3 border border-2 border-danger text-danger bg-white text-center d-none">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section end -->
-
-
-
-        <div class="d-none xl:d-block">
-            <img class="text-secondary-100"
-                src="{{ url_for('static', filename='assets/images/common/italic-line-01.svg') }}" alt="victor"
-                data-uc-svg style="margin-bottom: -1px">
-        </div>
-
+        
         <!-- Section start -->
         <div id="faq" class="faq section panel overflow-hidden">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-secondary-100">
@@ -1412,10 +2386,10 @@
                     <p>Unicorn Meat © 2025, All rights reserved.</p>
                     <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
                         <li><a href="#about">About</a></li>
-                        <li><a href="#roadmap">Timeline</a></li>
+                        <li><a href="#trading">Buy 🦄🍖</a></li>
                         <li><a href="#web3-actions">Dapp</a></li>
-
-                        <li><a href="#tokenomics">Tokenomics</a></li>
+                        <li><a href="#join-herd">🦄 Herd</a></li>
+                        <li><a href="#roadmap">Timeline</a></li>
                         <li><a href="#faq">FAQ</a></li>
                     </ul>
                 </div>
@@ -1460,9 +2434,14 @@
         }
     </script>
     
+                <!-- include Web3.js for subdomain claimer -->
+        <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+        <!-- include ethers.js for ENS resolution -->
+        <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    
     <!-- include WalletKit library -->
     <script src="{{ url_for('static', filename='assets/js/walletkit.umd.js') }}"></script>
-    
+
     <!-- include WalletKit integration -->
     <script defer src="{{ url_for('static', filename='assets/js/walletkit-integration.js') }}"></script>
     
