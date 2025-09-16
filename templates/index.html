@@ -1026,7 +1026,7 @@
                 window.subdomainClaimer = subdomainClaimer;
             });
         </script>
-    </head>
+</head>
 
 <body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
 
@@ -1071,7 +1071,7 @@
                 <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
                     <li><a href="#about">About</a></li>
                     <li><a href="#trading">Buy 🦄🍖</a></li>
-                    <li><a href="#web3-actions">Dapp</a></li>
+                    <li><a href="#grinder">Grinder</a></li>
                     <li><a href="#join-herd">🦄 Herd</a></li>
                     <li><a href="#roadmap">Timeline</a></li>
                     <li><a href="#faq">FAQ</a></li>
@@ -1166,7 +1166,7 @@
                                 data-uc-scrollspy-nav="closet: > *; offset: 48; scroll: true;">
                                 <li><a href="#about">About</a></li>
                                 <li><a href="#trading">Buy 🦄🍖</a></li>
-                                <li><a href="#web3-actions">Dapp</a></li>
+                                <li><a href="#grinder">Grinder</a></li>
                                 <li><a href="#join-herd">🦄 Herd</a></li>
                                 <li><a href="#roadmap">Timeline</a></li>
                                 <li><a href="#faq">FAQ</a></li>
@@ -1684,7 +1684,7 @@
                                             <h4 class="title h5 xl:h4 mb-2 xl:mb-3 stroke-text">FUN</h4>
                                             <p class="desc fs-5 xl:fs-4">The spirit of the Unicorn April Fool's Joke was
                                                 to have fun and we will preserve that. Future rewards, mutations?,
-                                                initiatives will foster that same spirit.</p>
+                                                initiatives will foster that same spirit. Could the Unicorn Meat Grinder come back?</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1698,8 +1698,7 @@
                                         <div class="feature-item-content" style="margin-top: -40px;">
                                             <h4 class="title h5 xl:h4 mb-2 xl:mb-3 stroke-text">LEADERBOARDS</h4>
                                             <p class="desc fs-5 xl:fs-4">Alex envisioned (and coded) a Unicorn Killers
-                                                Hall of Fame. While the original grinder is no longer active, we will
-                                                seek to bring this idea and more to life.</p>
+                                                Hall of Fame. Word on the street is something magical is coming. Will you compete for most evil Etherean?</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1719,14 +1718,51 @@
        
 
         <!-- Section start -->
-        <div id="web3-actions" class="web3-actions section panel">
+        <div id="grinder" class="web3-actions section panel">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff">
                 <center>
-                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Unicorn Meat Dapp</h2>
+                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Unicorn Meat Grinder</h2>
                 </center><br>
                 <div class="container sm:max-w-lg xl:max-w-2xl">
                     <div
                         class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
+
+                        <div class="row justify-content-center">
+                            <!-- Grind Unicorn Panel -->
+                            <div class="col-lg-6 col-md-8 col-sm-10 mb-4">
+                                <div
+                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
+                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
+                                        Grind Unicorns 🦄</h3>
+                                </div>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100 text-center">Grind your Unicorns 🦄 to get Unicorn Meat 🍖 using the original 2016 Unicorn Meat Grinder Association contract.
+                                </p>
+                                <div class="fs-7 text-center mb-3" style="font-size: 0.8rem;">
+                                    <p class="mb-2 mt-3"><strong>How it works:</strong></p>
+                                    <ol class="list-unstyled text-start" style="display: inline-block;">
+                                        <li class="mb-1">Checks your Unicorn balance: <a href="https://etherscan.io/token/0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7?1#readContract" target="_blank" rel="noopener noreferrer" class="text-primary">View Contract</a></li>
+                                        <li class="mb-1">Asks you to approve the Grinder to spend your Unicorns: <a href="https://etherscan.io/token/0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7?1#writeContract" target="_blank" rel="noopener noreferrer" class="text-primary">Approve</a></li>
+                                        <li class="mb-1">Calls grindUnicorns() to exchange Unicorns for Unicorn Meat: <a href="https://gist.github.com/alexvandesande/3abc9f741471e08a6356#file-meat-grinder-association" target="_blank" rel="noopener noreferrer" class="text-primary">Grinder Association DAO</a></li>
+                                        <li class="mb-1">The Meat Grinder dispenses the Unicorn Meat to you: <a href="https://etherscan.io/address/0x66b4bc57a40f4dcbe96d69be74244356879bd4ce#code" target="_blank" rel="noopener noreferrer" class="text-primary">Meat Grinder</a></li>
+                                    </ol>
+                                </div><br>
+                                <input id="grind-amount" type="number" min="1" step="1"
+                                    class="form-control fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
+                                    placeholder="# of Unicorns" required
+                                    style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">
+                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
+                                    <button
+                                        id="grind-button"
+                                        class="btn btn-md btn-primary border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Approve & Grind 🦄</button>
+                                </div>
+                                <!-- Grind Error Message Area -->
+                                <div id="grind-error"
+                                    class="panel mt-3 p-2 border border-2 border-danger text-danger bg-white text-center d-none"
+                                    style="width: 250px; margin-left: auto; margin-right: auto;">
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="row justify-content-center">
                             <!-- Wrap/Unwrap Panel -->
@@ -1737,22 +1773,27 @@
                                         Wrap Unicorn Meat</h3>
 
                                 </div>
-                                <p class="fs-6 xl:fs-5 mb-3 w-100" style="margin-left: auto; margin-right: auto;">Want
+                                <p class="fs-6 xl:fs-5 mb-3 w-100 text-center">Want
                                     to wrap or unwrap Unicorn Meat between the original 2016 contract and the wrapper?
                                 </p><br>
                                 <input id="wrap-unwrap-amount" type="number" min="0" step="any"
-                                    class="form-control h-48px xl:h-64px fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
-                                    placeholder="Enter amount" required
-                                    style="max-width: 220px; margin-left: auto; margin-right: auto;">
+                                    class="form-control fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
+                                    placeholder="Unicorn Meat" required
+                                    style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">
                                 <div class="vstack gap-2 w-100 mt-2 align-items-center">
                                     <button
                                         id="wrap-button"
-                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
-                                        type="button">Wrap</button>
+                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Wrap</button>
                                     <button
                                         id="unwrap-button"
-                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2 w-100"
-                                        type="button">Unwrap</button>
+                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Unwrap</button>
+                                </div>
+                                <!-- Wrap/Unwrap Error Message Area -->
+                                <div id="wrap-error"
+                                    class="panel mt-3 p-2 border border-2 border-danger text-danger bg-white text-center d-none"
+                                    style="width: 250px; margin-left: auto; margin-right: auto;">
                                 </div>
                             </div>
                         </div>
@@ -1760,6 +1801,42 @@
                         <div id="web3-error"
                             class="panel mt-4 p-3 border border-2 border-danger text-danger bg-white text-center d-none">
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coming Soon Modal -->
+        <div id="coming-soon-modal" class="modal fade" tabindex="-1" aria-labelledby="comingSoonModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 500px; margin: 1rem;">
+                <div class="modal-content border border-3 border-black contrast-shadow-lg" style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb, #ffd1dc); padding: 2rem;">
+                    <div class="text-center mb-4">
+                        <h1 class="text-uppercase fw-bold mb-3" style="color: #000; font-size: 1.8rem;">
+                            🦄 Something Magical is Coming! 🦄
+                        </h1>
+                        <div class="mb-3">
+                            <span style="font-size: 2rem;">✨</span>
+                            <span style="font-size: 1.5rem; margin: 0 0.5rem;">🌟</span>
+                            <span style="font-size: 2rem;">✨</span>
+                        </div>
+                    </div>
+                    <div class="text-center mb-4">
+                        <p class="fs-4 fw-bold mb-3" style="color: #000;">
+                            The Unicorn Meat Grinder is under construction! 🏗️
+                        </p>
+                        <p class="fs-5 mb-4" style="color: #000;">
+                            Get ready to grind your Unicorns into delicious Unicorn Meat! 🍖
+                        </p>
+                        <div class="mb-3">
+                            <span style="font-size: 1.5rem; margin: 0 0.3rem;">🦄</span>
+                            <span style="font-size: 1.2rem; margin: 0 0.3rem;">→</span>
+                            <span style="font-size: 1.5rem; margin: 0 0.3rem;">🍖</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-lg btn-light border border-2 border-black contrast-shadow-sm hover:-rotate-2 fw-bold" data-bs-dismiss="modal" style="min-width: 150px;">
+                            Go Back 🚀
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1847,7 +1924,7 @@
                                 <div class="text-center mt-4 sm:mt-5"
                                     data-anime="onview: -400; translateY: [24, 0]; opacity: [0, 1]; delay: 400;">
                                     <div style="max-width: 700px; margin: 0 auto;">
-                                        <h3 class="h5 sm:h4 xl:h3 m-0 mb-4 text-uppercase ls-0">🚀 Ready to Claim?</h3>
+                                        <h3 class="h5 sm:h4 xl:h3 m-0 mb-4 text-uppercase ls-0">Ready to Join?</h3>
                                         
                                         <!-- Wallet Connection Status -->
                                                                                   <div id="wallet-status" class="mb-4" style="display: none;">
@@ -1929,8 +2006,8 @@
                 data-uc-svg style="margin-bottom: -1px">
         </div>
 
-         <!-- Section start -->
-         <div id="roadmap" class="roadmap section panel overflow-hidden">
+        <!-- Section start -->
+        <div id="roadmap" class="roadmap section panel overflow-hidden">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-primary">
                 <img class="position-absolute end-0"
                     src="{{ url_for('static', filename='assets/images/common/cloud-03.svg') }}" alt="victor"
@@ -2077,7 +2154,7 @@
             <img class="text-primary" src="{{ url_for('static', filename='assets/images/common/italic-line-03.svg') }}"
                 alt="victor" data-uc-svg style="margin-top: -5px">
         </div>
-        
+
         <!-- Section start -->
         <div id="faq" class="faq section panel overflow-hidden">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-secondary-100">
@@ -2387,7 +2464,7 @@
                     <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
                         <li><a href="#about">About</a></li>
                         <li><a href="#trading">Buy 🦄🍖</a></li>
-                        <li><a href="#web3-actions">Dapp</a></li>
+                        <li><a href="#grinder">Grinder</a></li>
                         <li><a href="#join-herd">🦄 Herd</a></li>
                         <li><a href="#roadmap">Timeline</a></li>
                         <li><a href="#faq">FAQ</a></li>
@@ -2441,7 +2518,7 @@
     
     <!-- include WalletKit library -->
     <script src="{{ url_for('static', filename='assets/js/walletkit.umd.js') }}"></script>
-
+    
     <!-- include WalletKit integration -->
     <script defer src="{{ url_for('static', filename='assets/js/walletkit-integration.js') }}"></script>
     
@@ -2460,6 +2537,159 @@
         } else if (getSchema === "light") {
             setDarkMode(0);
         }
+
+        // Grind Unicorn functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const grindButton = document.getElementById('grind-button');
+            const grindAmountInput = document.getElementById('grind-amount');
+            const grindError = document.getElementById('grind-error');
+            const wrapError = document.getElementById('wrap-error');
+
+            function showGrindError(message) {
+                grindError.textContent = message;
+                grindError.classList.remove('d-none');
+                setTimeout(() => {
+                    grindError.classList.add('d-none');
+                }, 5000);
+            }
+
+            function showGrindSuccess(message) {
+                grindError.textContent = message;
+                grindError.classList.remove('d-none', 'text-danger');
+                grindError.classList.add('text-success');
+                setTimeout(() => {
+                    grindError.classList.add('d-none');
+                    grindError.classList.remove('text-success');
+                    grindError.classList.add('text-danger');
+                }, 5000);
+            }
+
+            function showWrapError(message) {
+                wrapError.textContent = message;
+                wrapError.classList.remove('d-none');
+                setTimeout(() => {
+                    wrapError.classList.add('d-none');
+                }, 5000);
+            }
+
+            function showWrapSuccess(message) {
+                wrapError.textContent = message;
+                wrapError.classList.remove('d-none', 'text-danger');
+                wrapError.classList.add('text-success');
+                setTimeout(() => {
+                    wrapError.classList.add('d-none');
+                    wrapError.classList.remove('text-success');
+                    wrapError.classList.add('text-danger');
+                }, 5000);
+            }
+
+
+            if (grindButton && grindAmountInput) {
+                grindButton.addEventListener('click', () => {
+                    // Show coming soon modal
+                    const modal = new bootstrap.Modal(document.getElementById('coming-soon-modal'));
+                    modal.show();
+                });
+
+                /* 
+                // TODO: Uncomment this block when ready to enable actual grinding functionality
+                // This is the original grinding logic that's temporarily disabled
+                grindButton.addEventListener('click', async () => {
+                    const amount = grindAmountInput.value;
+                    if (!amount || amount <= 0) {
+                        showGrindError('Please enter a valid amount of Unicorns to grind');
+                        return;
+                    }
+
+                    try {
+                        // Check if wallet is connected
+                        if (!window.ethereum || !window.ethereum.selectedAddress) {
+                            showGrindError('Please connect your wallet first');
+                            return;
+                        }
+
+                        // Get the contract instances
+                        const web3 = new Web3(window.ethereum);
+                        const accounts = await web3.eth.getAccounts();
+                        const userAddress = accounts[0];
+
+                        // Unicorn token contract (0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7)
+                        const unicornTokenABI = [
+                            {
+                                "constant": true,
+                                "inputs": [{"name": "_owner", "type": "address"}],
+                                "name": "balanceOf",
+                                "outputs": [{"name": "balance", "type": "uint256"}],
+                                "type": "function"
+                            },
+                            {
+                                "constant": false,
+                                "inputs": [
+                                    {"name": "_spender", "type": "address"},
+                                    {"name": "_value", "type": "uint256"}
+                                ],
+                                "name": "approve",
+                                "outputs": [{"name": "success", "type": "bool"}],
+                                "type": "function"
+                            }
+                        ];
+                        const unicornTokenAddress = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7';
+                        const unicornTokenContract = new web3.eth.Contract(unicornTokenABI, unicornTokenAddress);
+
+                        // Meat Grinders Association contract (0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32)
+                        const grinderABI = [
+                            {
+                                "constant": false,
+                                "inputs": [{"name": "amountOfUnicornsToGrind", "type": "uint256"}],
+                                "name": "grindUnicorns",
+                                "outputs": [],
+                                "type": "function"
+                            }
+                        ];
+                        const grinderAddress = '0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32';
+                        const grinderContract = new web3.eth.Contract(grinderABI, grinderAddress);
+
+                        // Convert amount to wei (Unicorn is 0 decimal token, so no conversion needed)
+                        const amountWei = web3.utils.toBN(amount.toString());
+
+                        // Check if user has enough Unicorn tokens
+                        console.log('Checking Unicorn token balance...');
+                        const balance = await unicornTokenContract.methods.balanceOf(userAddress).call();
+                        const balanceBN = web3.utils.toBN(balance);
+                        
+                        console.log(`User has ${balance.toString()} Unicorn tokens`);
+                        
+                        if (balanceBN.lt(amountWei)) {
+                            showGrindError(`Insufficient Unicorn tokens. You have ${balance.toString()} but need ${amount}.`);
+                            return;
+                        }
+
+                        // First, approve the grinder contract to spend Unicorn tokens
+                        console.log('Approving Unicorn tokens...');
+                        const approveTx = await unicornTokenContract.methods.approve(grinderAddress, amountWei).send({
+                            from: userAddress,
+                            gas: 100000
+                        });
+                        console.log('Approval transaction:', approveTx);
+
+                        // Then, call grindUnicorns
+                        console.log('Grinding Unicorns...');
+                        const grindTx = await grinderContract.methods.grindUnicorns(amountWei).send({
+                            from: userAddress,
+                            gas: 200000
+                        });
+                        console.log('Grind transaction:', grindTx);
+
+                        showGrindSuccess(`Successfully ground ${amount} Unicorns! Check your wallet for Unicorn Meat tokens.`);
+
+                    } catch (error) {
+                        console.error('Grind error:', error);
+                        showGrindError(`Failed to grind Unicorns: ${error.message}`);
+                    }
+                });
+                */
+            }
+        });
     </script>
     
 

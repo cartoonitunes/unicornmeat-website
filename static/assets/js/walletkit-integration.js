@@ -341,8 +341,7 @@ class UnicornMeatWalletKit {
             wrapButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (!this.isConnected) {
-                    this.showError('Please connect your wallet first');
-                    this.openWalletModal();
+                    this.showWrapError('Please connect your wallet first');
                     return;
                 }
                 this.wrapTokens();
@@ -355,8 +354,7 @@ class UnicornMeatWalletKit {
             unwrapButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (!this.isConnected) {
-                    this.showError('Please connect your wallet first');
-                    this.openWalletModal();
+                    this.showWrapError('Please connect your wallet first');
                     return;
                 }
                 this.unwrapTokens();
@@ -1130,13 +1128,13 @@ class UnicornMeatWalletKit {
     
     async wrapTokens() {
         if (!this.isConnected || !this.account) {
-            this.showError('Please connect your wallet first');
+            this.showWrapError('Please connect your wallet first');
             return;
         }
         
         const amount = document.getElementById('wrap-unwrap-amount').value;
         if (!amount || amount <= 0) {
-            this.showError('Please enter a valid amount');
+            this.showWrapError('Please enter a valid amount');
             return;
         }
         
@@ -1176,7 +1174,7 @@ class UnicornMeatWalletKit {
             // Check if user has enough tokens to wrap
             const balance = await originalContract.balanceOf(this.account.address);
             if (balance.lt(amountWei)) {
-                this.showError(`Insufficient balance. You have ${this.formatLargeNumber(balance)} tokens, but trying to wrap ${amount} tokens.`);
+                this.showWrapError(`Insufficient balance. You have ${this.formatLargeNumber(balance)} tokens, but trying to wrap ${amount} tokens.`);
                 return;
             }
             
@@ -1191,31 +1189,31 @@ class UnicornMeatWalletKit {
             await wrapTx.wait();
             
             console.log('Wrap transaction successful:', wrapTx.hash);
-            this.showSuccess(`Successfully wrapped ${amount} Unicorn Meat tokens! Transaction: ${wrapTx.hash}`);
+            this.showWrapSuccess(`Successfully wrapped ${amount} Unicorn Meat tokens! Transaction: ${wrapTx.hash}`);
             await this.loadContractData();
             await this.updateConnectButton();
             
         } catch (error) {
             console.error('Error wrapping tokens:', error);
             if (error.code === 4001) {
-                this.showError('Transaction was rejected by user');
+                this.showWrapError('Transaction was rejected by user');
             } else if (error.message && error.message.includes('insufficient funds')) {
-                this.showError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
+                this.showWrapError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
             } else {
-                this.showError('Failed to wrap tokens: ' + error.message);
+                this.showWrapError('Failed to wrap tokens: ' + error.message);
             }
         }
     }
     
     async unwrapTokens() {
         if (!this.isConnected || !this.account) {
-            this.showError('Please connect your wallet first');
+            this.showWrapError('Please connect your wallet first');
             return;
         }
         
         const amount = document.getElementById('wrap-unwrap-amount').value;
         if (!amount || amount <= 0) {
-            this.showError('Please enter a valid amount');
+            this.showWrapError('Please enter a valid amount');
             return;
         }
         
@@ -1249,18 +1247,18 @@ class UnicornMeatWalletKit {
             const unwrapTx = await wrappedContract.unwrap(amountWei);
             await unwrapTx.wait();
             
-            this.showSuccess(`Successfully unwrapped ${amount} Unicorn Meat tokens!`);
+            this.showWrapSuccess(`Successfully unwrapped ${amount} Unicorn Meat tokens!`);
             await this.loadContractData();
             await this.updateConnectButton();
             
         } catch (error) {
             console.error('Error unwrapping tokens:', error);
             if (error.code === 4001) {
-                this.showError('Transaction was rejected by user');
+                this.showWrapError('Transaction was rejected by user');
             } else if (error.message && error.message.includes('insufficient funds')) {
-                this.showError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
+                this.showWrapError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
             } else {
-                this.showError('Failed to unwrap tokens: ' + error.message);
+                this.showWrapError('Failed to unwrap tokens: ' + error.message);
             }
         }
     }
@@ -1314,6 +1312,37 @@ class UnicornMeatWalletKit {
     
     showError(message) {
         this.showMessage(message, 'error');
+    }
+    
+    showWrapError(message) {
+        const wrapError = document.getElementById('wrap-error');
+        if (wrapError) {
+            wrapError.textContent = message;
+            wrapError.classList.remove('d-none');
+            setTimeout(() => {
+                wrapError.classList.add('d-none');
+            }, 5000);
+        } else {
+            // Fallback to regular error display
+            this.showError(message);
+        }
+    }
+    
+    showWrapSuccess(message) {
+        const wrapError = document.getElementById('wrap-error');
+        if (wrapError) {
+            wrapError.textContent = message;
+            wrapError.classList.remove('d-none', 'text-danger');
+            wrapError.classList.add('text-success');
+            setTimeout(() => {
+                wrapError.classList.add('d-none');
+                wrapError.classList.remove('text-success');
+                wrapError.classList.add('text-danger');
+            }, 5000);
+        } else {
+            // Fallback to regular success display
+            this.showSuccess(message);
+        }
     }
     
     showLoading(message) {
