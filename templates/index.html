@@ -166,6 +166,44 @@
                 max-width: 50% !important;
             }
         }
+        
+        /* Adjust sticky navbar when announcement banner is present */
+        .announcement-banner:not([style*="display: none"]) ~ header.uc-navbar-sticky-wrap .uc-navbar-sticky {
+            top: var(--announcement-height, 60px) !important;
+        }
+        
+        /* Calculate announcement banner height dynamically */
+        @media (max-width: 576px) {
+            .announcement-banner:not([style*="display: none"]) ~ header.uc-navbar-sticky-wrap .uc-navbar-sticky {
+                top: var(--announcement-height, 50px) !important;
+            }
+            
+            /* Extra padding on mobile to prevent text overlap with close button */
+            .announcement-banner .text-center {
+                padding-right: 2.75rem !important;
+            }
+        }
+        
+        @media (min-width: 577px) and (max-width: 991px) {
+            .announcement-banner:not([style*="display: none"]) ~ header.uc-navbar-sticky-wrap .uc-navbar-sticky {
+                top: var(--announcement-height, 55px) !important;
+            }
+            
+            .announcement-banner .text-center {
+                padding-right: 2.5rem !important;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .announcement-banner:not([style*="display: none"]) ~ header.uc-navbar-sticky-wrap .uc-navbar-sticky {
+                top: var(--announcement-height, 60px) !important;
+            }
+            
+            .announcement-banner .text-center {
+                padding-right: 2.25rem !important;
+            }
+        }
+        
     </style>
     
             <script>
@@ -1030,6 +1068,20 @@
 
 <body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
 
+    <!-- Announcement Banner -->
+    <div id="announcement-banner" class="announcement-banner" style="position: sticky; top: 0; z-index: 1000; background: linear-gradient(135deg, #ffb3d1, #ffc0cb); border-bottom: 2px solid #000; padding: 0.75rem 1rem;">
+        <div class="container" style="position: relative;">
+            <div class="text-center w-100" style="padding-right: 2.5rem;">
+                <p class="mb-0 fw-bold fs-7 sm:fs-6 lg:fs-5" style="color: #000;">
+                    🍖 News: The <a href="https://www.bureauofinternetculture.art/" target="_blank" rel="noopener noreferrer" style="color: #000; text-decoration: underline; font-weight: bold;">Bureau of Internet Culture (BIC)</a> has added Unicorn Meat 🍖 to their DAO treasury! <a href="https://x.com/UnicornMeatETH/status/1984058387018215652?s=20" target="_blank" rel="noopener noreferrer" style="color: #000; text-decoration: underline; font-weight: bold;">Learn More</a>.
+                </p>
+            </div>
+            <button id="close-announcement" class="btn btn-sm border border-2 border-black contrast-shadow-sm fs-7 sm:fs-6" style="position: absolute; top: 50%; right: 0; transform: translateY(-50%); background: white; color: #000; min-width: auto; padding: 0.25rem 0.5rem; flex-shrink: 0;" aria-label="Close announcement">
+                ✕
+            </button>
+        </div>
+    </div>
+
     <!--  GDPR modal -->
     <div id="uc-gdpr-notification"
         class="uc-gdpr-notification uc-notification min-w-1/2 uc-notification-bottom-left lg:m-2">
@@ -1214,7 +1266,7 @@
                             <div>
                                 <a class="btn btn-md lg:btn-xl xl:btn-2xl btn-secondary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0"
                                     href="#about">
-                                    <span>🦄 Magic is cooking!</span>
+                                    <span>🦄 Learn More!</span>
                                     <span class="fs-4 mb-narrow">🍖</span>
                                 </a>
                             </div>
@@ -1375,6 +1427,17 @@
                                                 and is wrapped to be tradable and owned by anyone!
                                             </p>
                                             <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">Unicorn Meat is a collectible meme token – no financial value, just mythical fun 🦄🍖.</p>
+                                            
+                                            <!-- PDF Pitch Deck Button -->
+                                            <div class="text-center mb-4 mt-4">
+                                                <a href="{{ url_for('static', filename='assets/pdfs/unicorn-meat-deck.pdf') }}" 
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   class="btn btn-md border border-2 border-black contrast-shadow-sm hover:-rotate-2 fw-bold"
+                                                   style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb); color: #000;">
+                                                    <span class="fs-6 sm:fs-5 xl:fs-4">🦄 Unicorn Meat Pitch Deck 🍖</span>
+                                                </a>
+                                            </div>
                                             
                                             <!-- Etherscan Contract Images -->
                                             <div class="panel mt-4 mb-4 text-center" data-anime="onview: -200; translateY: [24, 0]; opacity: [0, 1]; delay: 300;">
@@ -2538,6 +2601,55 @@
             setDarkMode(0);
         }
 
+        // Announcement Banner
+        document.addEventListener('DOMContentLoaded', function() {
+            const announcementBanner = document.getElementById('announcement-banner');
+            const closeAnnouncement = document.getElementById('close-announcement');
+            
+            // Function to update navbar position based on announcement banner
+            function updateNavbarPosition() {
+                const navbar = document.querySelector('.uc-navbar-sticky-wrap');
+                if (announcementBanner && navbar) {
+                    if (announcementBanner.style.display === 'none' || announcementBanner.offsetHeight === 0) {
+                        // Banner is hidden, reset navbar position
+                        document.documentElement.style.setProperty('--announcement-height', '0px');
+                    } else {
+                        // Banner is visible, set navbar position to banner height
+                        const bannerHeight = announcementBanner.offsetHeight;
+                        document.documentElement.style.setProperty('--announcement-height', bannerHeight + 'px');
+                    }
+                }
+            }
+            
+            if (closeAnnouncement && announcementBanner) {
+                closeAnnouncement.addEventListener('click', function() {
+                    announcementBanner.style.display = 'none';
+                    // Optionally save to localStorage so it doesn't show again
+                    localStorage.setItem('announcement-dismissed', 'true');
+                    // Update navbar position after hiding
+                    setTimeout(updateNavbarPosition, 10);
+                });
+                
+                // Check if announcement was previously dismissed
+                if (localStorage.getItem('announcement-dismissed') === 'true') {
+                    announcementBanner.style.display = 'none';
+                }
+                
+                // Update navbar position on load and resize
+                updateNavbarPosition();
+                window.addEventListener('resize', updateNavbarPosition);
+                
+                // Use MutationObserver to watch for banner visibility changes
+                const observer = new MutationObserver(updateNavbarPosition);
+                observer.observe(announcementBanner, { 
+                    attributes: true, 
+                    attributeFilter: ['style'],
+                    childList: false,
+                    subtree: false
+                });
+            }
+        });
+
         // Grind Unicorn functionality
         document.addEventListener('DOMContentLoaded', function() {
             const grindButton = document.getElementById('grind-button');
@@ -2689,6 +2801,7 @@
                 });
                 */
             }
+
         });
     </script>
     
