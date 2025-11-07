@@ -15,10 +15,6 @@ WRAPPED_CONTRACT_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'
 def index():
     return render_template('index.html')
 
-@app.route('/pitch')
-def pitch():
-    """Serve the Unicorn Meat pitch deck page with social media metadata"""
-    return render_template('pitch.html')
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():

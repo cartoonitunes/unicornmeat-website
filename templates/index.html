@@ -1127,6 +1127,7 @@
                     <li><a href="#join-herd">🦄 Herd</a></li>
                     <li><a href="#roadmap">Timeline</a></li>
                     <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#pitch-deck">Deck</a></li>
                     <li><a href="#references">Links</a></li>
                 </ul>
                 <div class="mt-4">
@@ -1222,6 +1223,7 @@
                                 <li><a href="#join-herd">🦄 Herd</a></li>
                                 <li><a href="#roadmap">Timeline</a></li>
                                 <li><a href="#faq">FAQ</a></li>
+                                <li><a href="#pitch-deck">Deck</a></li>
                             </ul>
                         </div>
                         <div class="uc-navbar-right">
@@ -1429,8 +1431,8 @@
                                             <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">Unicorn Meat is a collectible meme token – no financial value, just mythical fun 🦄🍖.</p>
                                             
                                             <!-- PDF Pitch Deck Button -->
-                                            <div class="text-center mb-4 mt-4">
-                                                <a href="{{ url_for('pitch') }}" 
+                                            <div id="pitch-deck" class="text-center mb-4 mt-4">
+                                                <a href="{{ url_for('static', filename='assets/pdfs/unicorn-meat-deck.pdf') }}" 
                                                    target="_blank"
                                                    rel="noopener noreferrer"
                                                    class="btn btn-md border border-2 border-black contrast-shadow-sm hover:-rotate-2 fw-bold"
@@ -2531,6 +2533,7 @@
                         <li><a href="#join-herd">🦄 Herd</a></li>
                         <li><a href="#roadmap">Timeline</a></li>
                         <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#pitch-deck">Deck</a></li>
                     </ul>
                 </div>
             </div>
@@ -2802,6 +2805,61 @@
                 */
             }
 
+        });
+        
+        // Handle pitch-deck anchor scroll with centering
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle clicks on #pitch-deck links
+            const pitchDeckLinks = document.querySelectorAll('a[href="#pitch-deck"]');
+            pitchDeckLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetElement = document.getElementById('pitch-deck');
+                    if (targetElement) {
+                        // Get navbar height (sticky navbar)
+                        const navbar = document.querySelector('.uc-navbar-sticky-wrap');
+                        const navbarHeight = navbar ? navbar.offsetHeight : 100;
+                        
+                        // Get viewport height
+                        const viewportHeight = window.innerHeight;
+                        
+                        // Get target element position
+                        const targetRect = targetElement.getBoundingClientRect();
+                        const targetTop = targetRect.top + window.pageYOffset;
+                        
+                        // Calculate scroll position to center the button in viewport
+                        // Center = target position - (viewport height / 2) + (button height / 2)
+                        const buttonHeight = targetElement.offsetHeight;
+                        const scrollPosition = targetTop - (viewportHeight / 2) + (buttonHeight / 2) + navbarHeight;
+                        
+                        // Smooth scroll to calculated position
+                        window.scrollTo({
+                            top: Math.max(0, scrollPosition),
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Also handle hash in URL on page load
+            if (window.location.hash === '#pitch-deck') {
+                setTimeout(() => {
+                    const targetElement = document.getElementById('pitch-deck');
+                    if (targetElement) {
+                        const navbar = document.querySelector('.uc-navbar-sticky-wrap');
+                        const navbarHeight = navbar ? navbar.offsetHeight : 100;
+                        const viewportHeight = window.innerHeight;
+                        const targetRect = targetElement.getBoundingClientRect();
+                        const targetTop = targetRect.top + window.pageYOffset;
+                        const buttonHeight = targetElement.offsetHeight;
+                        const scrollPosition = targetTop - (viewportHeight / 2) + (buttonHeight / 2) + navbarHeight;
+                        window.scrollTo({
+                            top: Math.max(0, scrollPosition),
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 100);
+            }
         });
     </script>
     
