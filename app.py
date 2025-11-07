@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
 import os
 from web3 import Web3
 
@@ -14,6 +14,11 @@ WRAPPED_CONTRACT_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/pitch')
+def pitch():
+    """Serve the Unicorn Meat pitch deck page with social media metadata"""
+    return render_template('pitch.html')
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
