@@ -204,6 +204,123 @@
             }
         }
         
+        /*--------------------------------------------------------------
+        # Associations Section
+        --------------------------------------------------------------*/
+        .associations {
+            margin-top: 0;
+            position: relative;
+            z-index: 1;
+            clear: both;
+            display: block;
+        }
+        
+        .associations .section-outer {
+            background: rgba(255, 217, 38, 0.7);
+        }
+        
+        /* Ensure hero section doesn't overlap associations */
+        .hero-header {
+            position: relative !important;
+            z-index: 0;
+            display: block !important;
+            overflow: visible !important;
+        }
+        
+        .hero-header.overflow-hidden {
+            overflow: visible !important;
+        }
+        
+        .hero-header .section-outer {
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        /* Override hero-bg.css fixed height to prevent overlap */
+        .hero-header .hero-bg {
+            position: relative !important;
+            height: auto !important;
+            min-height: 100vh;
+        }
+        
+        /* Prevent any absolute positioning from causing overlap */
+        @media (max-width: 768px) {
+            .hero-header {
+                min-height: auto;
+            }
+            
+            .hero-header .section-outer {
+                min-height: auto;
+                height: auto;
+            }
+            
+            .hero-header .hero-bg {
+                height: auto !important;
+                min-height: auto !important;
+            }
+        }
+
+        .associations .row {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .associations .association-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex: 1 1 auto;
+            height: 160px;
+        }
+
+        .associations .association-logo img {
+            padding: 20px 40px;
+            width: auto;
+            height: 100%;
+            max-width: 90%;
+            max-height: 100%;
+            object-fit: contain;
+            object-position: center;
+            transition: 0.3s;
+            opacity: 0.5;
+            filter: grayscale(100);
+        }
+
+        .associations .association-logo img:hover {
+            filter: none;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .associations .row {
+                flex-wrap: wrap;
+                gap: 0;
+            }
+            
+            .associations .association-logo {
+                flex: 0 0 50%;
+                width: 50%;
+                max-width: 50%;
+                min-width: 50%;
+                padding: 0.5rem;
+                box-sizing: border-box;
+                height: 80px;
+            }
+            
+            .associations .association-logo img {
+                padding: 10px;
+                width: auto;
+                height: 100%;
+                max-width: 90%;
+                max-height: 100%;
+                object-fit: contain;
+                object-position: center;
+            }
+        }
+        
     </style>
     
             <script>
@@ -1334,46 +1451,50 @@
 
         <!-- Hero end -->
 
-        <!-- Text Marquee Start -->
-        <div class="h3 xl:h2 fw-medium py-4 xl:py-6 mt-16 reverse bg-secondary text-black text-uppercase ls-0"
-            data-uc-marquee="clone: 3; gap: 64; reverse: true;" style="--gap: 32px">
-            <div>
-                <div class="hstack gap-8">
-                    <div>🦄</div>
-                    <span>Meat</span>
-                    <div>🍖</div>
-                    <span>Unicorn</span>
-                    <div>🦄</div>
-                    <span>Meat</span>
-                </div>
-                <div class="hstack gap-8">
-                    <div>🍖</div>
-                    <span>Unicorn</span>
-                    <div>🦄</div>
-                    <span>Meat</span>
-                    <div>🍖</div>
-                    <span>Unicorn</span>
-                </div>
-                <div class="hstack gap-8">
-                    <div>🦄</div>
-                    <span>Meat</span>
-                    <div>🍖</div>
-                    <span>Unicorn</span>
-                    <div>🦄</div>
-                    <span>Meat</span>
-                </div>
-                <div class="hstack gap-8">
-                    <div>🍖</div>
-                    <span>Meat</span>
-                    <div>🦄</div>
-                    <span>Unicorn</span>
-                    <div>🍖</div>
-                    <span>Meat</span>
+        <!-- Associations Section Start -->
+        <div id="associations" class="associations section panel overflow-hidden">
+            <div class="section-outer panel py-3 sm:py-2">
+                <div class="container">
+                    <div class="section-inner panel">
+                        <div class="section-content panel">
+                            <div class="row gy-4">
+                                <div class="col-xl-2 col-md-3 col-6 association-logo">
+                                    <img src="{{ url_for('static', filename='assets/images/clients/ethereum.png') }}" 
+                                         class="img-fluid" 
+                                         alt="Ethereum">
+                                </div><!-- End Association Item -->
+                                <div class="col-xl-2 col-md-3 col-6 association-logo">
+                                    <img src="{{ url_for('static', filename='assets/images/clients/ethereum-foundation.png') }}" 
+                                         class="img-fluid" 
+                                         alt="Ethereum Foundation">
+                                </div><!-- End Association Item -->
+                                <div class="col-xl-2 col-md-3 col-6 association-logo">
+                                    <img src="{{ url_for('static', filename='assets/images/clients/coinbase-base.png') }}" 
+                                         class="img-fluid" 
+                                         alt="Base">
+                                </div><!-- End Association Item -->
+                                <div class="col-xl-2 col-md-3 col-6 association-logo">
+                                    <img src="{{ url_for('static', filename='assets/images/clients/uni.png') }}" 
+                                         class="img-fluid" 
+                                         alt="Uniswap">
+                                </div><!-- End Association Item -->
+                                <div class="col-xl-2 col-md-3 col-6 association-logo">
+                                    <img src="{{ url_for('static', filename='assets/images/clients/gecko.png') }}" 
+                                         class="img-fluid" 
+                                         alt="CoinGecko">
+                                </div><!-- End Association Item -->
+                                <div class="col-xl-2 col-md-3 col-6 association-logo">
+                                    <img src="{{ url_for('static', filename='assets/images/clients/bic-type.svg') }}" 
+                                         class="img-fluid" 
+                                         alt="Bureau of Internet Culture">
+                                </div><!-- End Association Item -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Text Marquee end -->
+        <!-- Associations Section end -->
 
         <!-- Section start -->
         <div id="about" class="about section panel overflow-hidden">
