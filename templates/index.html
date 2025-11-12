@@ -728,7 +728,8 @@
                             try {
                                 const userLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
                                 hasSubdomain = userLabel && userLabel.trim() !== '';
-                                console.log('User subdomain check:', { userLabel, hasSubdomain });
+                                // User subdomain check (logging disabled to reduce console noise)
+                                // console.log('User subdomain check:', { userLabel, hasSubdomain });
                             } catch (error) {
                                 console.log('Error checking user subdomain:', error);
                                 hasSubdomain = false;
@@ -1239,8 +1240,8 @@
             <div class="panel">
                 <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
                     <li><a href="#about">About</a></li>
-                    <li><a href="#trading">Buy 🦄🍖</a></li>
-                    <li><a href="#grinder">Grinder</a></li>
+                    <li><a href="#trading">Buy 🍖</a></li>
+                    <li><a href="#wrap">Wrap 🦄🍖</a></li>
                     <li><a href="#join-herd">🦄 Herd</a></li>
                     <li><a href="#roadmap">Timeline</a></li>
                     <li><a href="#faq">FAQ</a></li>
@@ -1335,8 +1336,8 @@
                             <ul class="uc-navbar-nav fs-5 xl:fs-4 gap-3 lg:gap-4 d-none lg:d-flex fw-semibold"
                                 data-uc-scrollspy-nav="closet: > *; offset: 48; scroll: true;">
                                 <li><a href="#about">About</a></li>
-                                <li><a href="#trading">Buy 🦄🍖</a></li>
-                                <li><a href="#grinder">Grinder</a></li>
+                                <li><a href="#trading">Buy 🍖</a></li>
+                                <li><a href="#wrap">Wrap 🦄🍖</a></li>
                                 <li><a href="#join-herd">🦄 Herd</a></li>
                                 <li><a href="#roadmap">Timeline</a></li>
                                 <li><a href="#faq">FAQ</a></li>
@@ -1571,7 +1572,7 @@
                                                             <img src="{{ url_for('static', filename='assets/images/home-two/unicorns_etherscan.jpg') }}" alt="Etherscan Unicorns Token" 
                                                                  class="img-fluid border border-2 border-black contrast-shadow-sm" 
                                                                  style="max-width: 100%; height: auto;">
-                                                            <p class="fs-7 mt-2 mb-0">Legendary Ethereum Unicorns</p>
+                                                            <p class="fs-7 mt-2 mb-0"><a href="https://etherscan.io/token/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: inherit;">Legendary Ethereum Unicorns</a></p>
                                                         </div>
                                                     </div>
                                                     <div class="col">
@@ -1580,7 +1581,7 @@
                                                             <img src="{{ url_for('static', filename='assets/images/home-two/tipjar_etherscan.jpg') }}" alt="Ethereum Foundation Tip Jar Contract" 
                                                                  class="img-fluid border border-2 border-black contrast-shadow-sm" 
                                                                  style="max-width: 100%; height: auto;">
-                                                            <p class="fs-7 mt-2 mb-0">Ethereum Foundation donation contract</p>
+                                                            <p class="fs-7 mt-2 mb-0"><a href="https://etherscan.io/address/0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: inherit;">Ethereum Foundation donation contract</a></p>
                                                         </div>
                                                     </div>
                                                     <div class="col">
@@ -1589,7 +1590,7 @@
                                                             <img src="{{ url_for('static', filename='assets/images/home-two/unicornmeat_etherscan.jpg') }}" alt="Etherscan Unicorn Meat Token" 
                                                                  class="img-fluid border border-2 border-black contrast-shadow-sm" 
                                                                  style="max-width: 100%; height: auto;">
-                                                            <p class="fs-7 mt-2 mb-0">Legendary Ethereum Unicorn Meat</p>
+                                                            <p class="fs-7 mt-2 mb-0"><a href="https://etherscan.io/token/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: inherit;">Legendary Ethereum Unicorn Meat</a></p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1904,16 +1905,85 @@
        
 
         <!-- Section start -->
-        <div id="grinder" class="web3-actions section panel">
+        <div id="wrap" class="web3-actions section panel">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff">
                 <center>
-                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Unicorn Meat Grinder</h2>
+                    <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">Wrap 🦄🍖</h2>
                 </center><br>
                 <div class="container sm:max-w-lg xl:max-w-2xl">
                     <div
                         class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
 
                         <div class="row justify-content-center">
+                            <!-- Wrap/Unwrap Panel -->
+                            <div class="col-lg-6 col-md-8 col-sm-10 mb-4">
+                                <div
+                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
+                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
+                                        Wrap Unicorn Meat 🍖</h3>
+
+                                </div>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100 text-center">Want
+                                    to wrap or unwrap Unicorn Meat between the <a href="https://etherscan.io/token/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline;">original 2016 contract</a> and the <a href="https://etherscan.io/token/0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline;">wrapper</a>?
+                                </p><br>
+                                <input id="wrap-unwrap-amount" type="number" min="0" step="any"
+                                    class="form-control fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
+                                    placeholder="Unicorn Meat" required
+                                    style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">
+                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
+                                    <button
+                                        id="wrap-button"
+                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Wrap 🍖 to w🍖</button>
+                                    <button
+                                        id="unwrap-button"
+                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Unwrap w🍖      🍖</button>
+                                </div>
+                                <!-- Wrap/Unwrap Error Message Area -->
+                                <div id="wrap-error"
+                                    class="panel mt-3 p-2 border border-2 border-danger text-danger bg-white text-center d-none"
+                                    style="width: 250px; margin-left: auto; margin-right: auto;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center">
+                            <!-- Wrap Unicorns Panel -->
+                            <div class="col-lg-6 col-md-8 col-sm-10">
+                                <div
+                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
+                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
+                                        Wrap Unicorns 🦄</h3>
+
+                                </div>
+                                <p class="fs-6 xl:fs-5 mb-3 w-100 text-center">Want to wrap or unwrap Unicorns 🦄 between the <a href="https://etherscan.io/token/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline;">original 2016 contract</a> and the <a href="https://etherscan.io/address/0x38a9af1bd00f9988977095b31eb18d6d3d5dca00" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline;">wrapper</a>?
+                                </p>
+                                <p class="fs-7 text-muted mb-3 w-100 text-center" style="font-size: 0.85rem;">Note: Wrapping requires two transactions (approve + wrap). The button will handle both for you automatically.</p><br>
+                                <input id="wrap-unicorns-amount" type="number" min="0" step="1"
+                                    class="form-control fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
+                                    placeholder="# of Unicorns" required
+                                    style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">
+                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
+                                    <button
+                                        id="wrap-unicorns-button"
+                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Wrap 🦄 to w🦄</button>
+                                    <button
+                                        id="unwrap-unicorns-button"
+                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
+                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Unwrap w🦄 to 🦄</button>
+                                </div>
+                                <!-- Wrap Unicorns Error Message Area -->
+                                <div id="wrap-unicorns-error"
+                                    class="panel mt-3 p-2 border border-2 border-danger text-danger bg-white text-center d-none"
+                                    style="width: 250px; margin-left: auto; margin-right: auto;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden Grind Section -->
+                        <div class="row justify-content-center" style="display: none;">
                             <!-- Grind Unicorn Panel -->
                             <div class="col-lg-6 col-md-8 col-sm-10 mb-4">
                                 <div
@@ -1944,40 +2014,6 @@
                                 </div>
                                 <!-- Grind Error Message Area -->
                                 <div id="grind-error"
-                                    class="panel mt-3 p-2 border border-2 border-danger text-danger bg-white text-center d-none"
-                                    style="width: 250px; margin-left: auto; margin-right: auto;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row justify-content-center">
-                            <!-- Wrap/Unwrap Panel -->
-                            <div class="col-lg-6 col-md-8 col-sm-10">
-                                <div
-                                    class="h-100 d-flex flex-column align-items-center text-center justify-content-center">
-                                    <h3 class="h5 sm:h4 xl:h3 mb-3 text-uppercase ls-0 w-100" style="margin-top: 0;">
-                                        Wrap Unicorn Meat</h3>
-
-                                </div>
-                                <p class="fs-6 xl:fs-5 mb-3 w-100 text-center">Want
-                                    to wrap or unwrap Unicorn Meat between the original 2016 contract and the wrapper?
-                                </p><br>
-                                <input id="wrap-unwrap-amount" type="number" min="0" step="any"
-                                    class="form-control fs-6 xl:fs-4 border border-2 border-black contrast-shadow-sm text-black bg-white text-center mb-3"
-                                    placeholder="Unicorn Meat" required
-                                    style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">
-                                <div class="vstack gap-2 w-100 mt-2 align-items-center">
-                                    <button
-                                        id="wrap-button"
-                                        class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm hover:-rotate-2"
-                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Wrap</button>
-                                    <button
-                                        id="unwrap-button"
-                                        class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
-                                        type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Unwrap</button>
-                                </div>
-                                <!-- Wrap/Unwrap Error Message Area -->
-                                <div id="wrap-error"
                                     class="panel mt-3 p-2 border border-2 border-danger text-danger bg-white text-center d-none"
                                     style="width: 250px; margin-left: auto; margin-right: auto;">
                                 </div>
@@ -2649,8 +2685,8 @@
                     <p>Unicorn Meat © 2025, All rights reserved.</p>
                     <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
                         <li><a href="#about">About</a></li>
-                        <li><a href="#trading">Buy 🦄🍖</a></li>
-                        <li><a href="#grinder">Grinder</a></li>
+                        <li><a href="#trading">Buy 🍖</a></li>
+                        <li><a href="#wrap">Wrap 🦄🍖</a></li>
                         <li><a href="#join-herd">🦄 Herd</a></li>
                         <li><a href="#roadmap">Timeline</a></li>
                         <li><a href="#faq">FAQ</a></li>
@@ -2700,8 +2736,7 @@
     
                 <!-- include Web3.js for subdomain claimer -->
         <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-        <!-- include ethers.js for ENS resolution -->
-        <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+        <!-- ethers.js already loaded above from unpkg.com, no need for duplicate -->
     
     <!-- include WalletKit library -->
     <script src="{{ url_for('static', filename='assets/js/walletkit.umd.js') }}"></script>
@@ -2926,6 +2961,241 @@
                 */
             }
 
+        });
+
+        // Wrap/Unwrap Unicorns functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const wrapUnicornsButton = document.getElementById('wrap-unicorns-button');
+            const unwrapUnicornsButton = document.getElementById('unwrap-unicorns-button');
+            const wrapUnicornsAmountInput = document.getElementById('wrap-unicorns-amount');
+            const wrapUnicornsError = document.getElementById('wrap-unicorns-error');
+
+            // Unicorns contract address (0 decimals)
+            const UNICORNS_CONTRACT = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7';
+            // Wrapped Unicorns contract address
+            const WRAPPED_UNICORNS_CONTRACT = '0x38a9af1bd00f9988977095b31eb18d6d3d5dca00';
+
+            function showUnicornsWrapError(message) {
+                wrapUnicornsError.textContent = message;
+                wrapUnicornsError.classList.remove('d-none');
+                setTimeout(() => {
+                    wrapUnicornsError.classList.add('d-none');
+                }, 5000);
+            }
+
+            function showUnicornsWrapSuccess(message) {
+                wrapUnicornsError.textContent = message;
+                wrapUnicornsError.classList.remove('d-none', 'text-danger');
+                wrapUnicornsError.classList.add('text-success');
+                setTimeout(() => {
+                    wrapUnicornsError.classList.add('d-none');
+                    wrapUnicornsError.classList.remove('text-success');
+                    wrapUnicornsError.classList.add('text-danger');
+                }, 5000);
+            }
+
+            // Wrap Unicorns button handler
+            if (wrapUnicornsButton && wrapUnicornsAmountInput) {
+                wrapUnicornsButton.addEventListener('click', async () => {
+                    const amount = wrapUnicornsAmountInput.value;
+                    if (!amount || amount <= 0) {
+                        showUnicornsWrapError('Please enter a valid amount of Unicorns to wrap');
+                        return;
+                    }
+
+                    try {
+                        // Check if wallet is connected
+                        if (!window.ethereum || !window.ethereum.selectedAddress) {
+                            showUnicornsWrapError('Please connect your wallet first');
+                            return;
+                        }
+
+                        // Get the contract instances
+                        const web3 = new Web3(window.ethereum);
+                        const accounts = await web3.eth.getAccounts();
+                        const userAddress = accounts[0];
+
+                        // Unicorn token contract ABI (0 decimals)
+                        const unicornTokenABI = [
+                            {
+                                "constant": true,
+                                "inputs": [{"name": "_owner", "type": "address"}],
+                                "name": "balanceOf",
+                                "outputs": [{"name": "balance", "type": "uint256"}],
+                                "type": "function"
+                            },
+                            {
+                                "constant": true,
+                                "inputs": [
+                                    {"name": "_owner", "type": "address"},
+                                    {"name": "_spender", "type": "address"}
+                                ],
+                                "name": "allowance",
+                                "outputs": [{"name": "", "type": "uint256"}],
+                                "type": "function"
+                            },
+                            {
+                                "constant": false,
+                                "inputs": [
+                                    {"name": "_spender", "type": "address"},
+                                    {"name": "_value", "type": "uint256"}
+                                ],
+                                "name": "approve",
+                                "outputs": [{"name": "success", "type": "bool"}],
+                                "type": "function"
+                            }
+                        ];
+
+                        // Wrapped Unicorns contract ABI (minimal for direct call)
+                        const wrappedUnicornsABI = [
+                            {
+                                "constant": false,
+                                "inputs": [{"name": "amount", "type": "uint256"}],
+                                "name": "wrap",
+                                "outputs": [],
+                                "type": "function"
+                            }
+                        ];
+
+                        const unicornTokenContract = new web3.eth.Contract(unicornTokenABI, UNICORNS_CONTRACT);
+                        const wrappedUnicornsContract = new web3.eth.Contract(wrappedUnicornsABI, WRAPPED_UNICORNS_CONTRACT);
+
+                        // Convert amount to BN (0 decimals, so just the number)
+                        const amountBN = web3.utils.toBN(amount.toString());
+
+                        // Check balance (read-only, doesn't affect transaction gas)
+                        const balance = await unicornTokenContract.methods.balanceOf(userAddress).call();
+                        const balanceBN = web3.utils.toBN(balance);
+                        
+                        if (balanceBN.lt(amountBN)) {
+                            showUnicornsWrapError(`Insufficient Unicorn tokens. You have ${balance.toString()} but need ${amount}.`);
+                            return;
+                        }
+
+                        // Check existing allowance to avoid unnecessary approve transaction (read-only)
+                        const currentAllowance = await unicornTokenContract.methods.allowance(userAddress, WRAPPED_UNICORNS_CONTRACT).call();
+                        const currentAllowanceBN = web3.utils.toBN(currentAllowance);
+                        
+                        // Only approve if current allowance is insufficient
+                        if (currentAllowanceBN.lt(amountBN)) {
+                            // Direct approve call - minimal transaction like Etherscan
+                            await unicornTokenContract.methods.approve(WRAPPED_UNICORNS_CONTRACT, amountBN).send({ 
+                                from: userAddress
+                            });
+                        }
+
+                        // Direct wrap call - manually encode like Etherscan does (bypasses Contract wrapper)
+                        // Function selector for wrap(uint256): 0x6a627842 (first 4 bytes of keccak256("wrap(uint256)"))
+                        const wrapFunctionABI = {
+                            name: 'wrap',
+                            type: 'function',
+                            inputs: [{ type: 'uint256', name: 'amount' }]
+                        };
+                        const encodedData = web3.eth.abi.encodeFunctionCall(wrapFunctionABI, [amountBN.toString()]);
+                        
+                        const wrapTx = await web3.eth.sendTransaction({
+                            from: userAddress,
+                            to: WRAPPED_UNICORNS_CONTRACT,
+                            data: encodedData
+                        });
+
+                        showUnicornsWrapSuccess(`Successfully wrapped ${amount} Unicorns! Transaction: ${wrapTx.transactionHash}`);
+
+                    } catch (error) {
+                        console.error('Wrap Unicorns error:', error);
+                        if (error.code === 4001) {
+                            showUnicornsWrapError('Transaction was rejected by user');
+                        } else if (error.message && error.message.includes('insufficient funds')) {
+                            showUnicornsWrapError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
+                        } else {
+                            showUnicornsWrapError(`Failed to wrap Unicorns: ${error.message}`);
+                        }
+                    }
+                });
+            }
+
+            // Unwrap Unicorns button handler
+            if (unwrapUnicornsButton && wrapUnicornsAmountInput) {
+                unwrapUnicornsButton.addEventListener('click', async () => {
+                    const amount = wrapUnicornsAmountInput.value;
+                    if (!amount || amount <= 0) {
+                        showUnicornsWrapError('Please enter a valid amount of wrapped Unicorns to unwrap');
+                        return;
+                    }
+
+                    try {
+                        // Check if wallet is connected
+                        if (!window.ethereum || !window.ethereum.selectedAddress) {
+                            showUnicornsWrapError('Please connect your wallet first');
+                            return;
+                        }
+
+                        // Get the contract instance
+                        const web3 = new Web3(window.ethereum);
+                        const accounts = await web3.eth.getAccounts();
+                        const userAddress = accounts[0];
+
+                        // Wrapped Unicorns contract ABI (minimal for direct call)
+                        const wrappedUnicornsABI = [
+                            {
+                                "constant": false,
+                                "inputs": [{"name": "amount", "type": "uint256"}],
+                                "name": "unwrap",
+                                "outputs": [],
+                                "type": "function"
+                            },
+                            {
+                                "constant": true,
+                                "inputs": [{"name": "owner", "type": "address"}],
+                                "name": "balanceOf",
+                                "outputs": [{"name": "", "type": "uint256"}],
+                                "type": "function"
+                            }
+                        ];
+
+                        const wrappedUnicornsContract = new web3.eth.Contract(wrappedUnicornsABI, WRAPPED_UNICORNS_CONTRACT);
+
+                        // Convert amount to BN (0 decimals)
+                        const amountBN = web3.utils.toBN(amount.toString());
+
+                        // Check balance (read-only, doesn't affect transaction gas)
+                        const balance = await wrappedUnicornsContract.methods.balanceOf(userAddress).call();
+                        const balanceBN = web3.utils.toBN(balance);
+                        
+                        if (balanceBN.lt(amountBN)) {
+                            showUnicornsWrapError(`Insufficient wrapped Unicorn tokens. You have ${balance.toString()} but need ${amount}.`);
+                            return;
+                        }
+
+                        // Direct unwrap call - manually encode like Etherscan does (bypasses Contract wrapper)
+                        // Function selector for unwrap(uint256): 0x439890af (first 4 bytes of keccak256("unwrap(uint256)"))
+                        const unwrapFunctionABI = {
+                            name: 'unwrap',
+                            type: 'function',
+                            inputs: [{ type: 'uint256', name: 'amount' }]
+                        };
+                        const encodedData = web3.eth.abi.encodeFunctionCall(unwrapFunctionABI, [amountBN.toString()]);
+                        
+                        const unwrapTx = await web3.eth.sendTransaction({
+                            from: userAddress,
+                            to: WRAPPED_UNICORNS_CONTRACT,
+                            data: encodedData
+                        });
+
+                        showUnicornsWrapSuccess(`Successfully unwrapped ${amount} Unicorns! Transaction: ${unwrapTx.transactionHash}`);
+
+                    } catch (error) {
+                        console.error('Unwrap Unicorns error:', error);
+                        if (error.code === 4001) {
+                            showUnicornsWrapError('Transaction was rejected by user');
+                        } else if (error.message && error.message.includes('insufficient funds')) {
+                            showUnicornsWrapError('Insufficient ETH for gas fees. Please add more ETH to your wallet.');
+                        } else {
+                            showUnicornsWrapError(`Failed to unwrap Unicorns: ${error.message}`);
+                        }
+                    }
+                });
+            }
         });
         
         // Handle pitch-deck anchor scroll with centering

@@ -45,9 +45,9 @@ class UnicornMeatWalletKit {
             // Check for existing wallet connections
             this.checkExistingConnections();
             
-            // Load claim statistics and status immediately (no wallet needed)
-            await this.loadClaimStats();
-            await this.loadClaimStatus();
+            // Claim stats/status loading disabled - no active claims
+            // await this.loadClaimStats();
+            // await this.loadClaimStatus();
             
             console.log('WalletKit integration initialized');
         } catch (error) {
@@ -314,7 +314,8 @@ class UnicornMeatWalletKit {
         await this.updateConnectButton();
         this.showSuccess('Wallet connected successfully!');
         this.loadContractData();
-        this.loadClaimData();
+        // Claim data loading disabled - no active claims
+        // this.loadClaimData();
     }
     
     async handleDisconnection() {
@@ -507,7 +508,8 @@ class UnicornMeatWalletKit {
                 const truncatedAddress = `${this.account.address.slice(0, 6)}...${this.account.address.slice(-4)}`;
                 this.showSuccess(`Connected to ${truncatedAddress}!`);
                 this.loadContractData();
-                this.loadClaimData();
+                // Claim data loading disabled - no active claims
+        // this.loadClaimData();
                 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('magicFeaturesModal'));
@@ -574,7 +576,8 @@ class UnicornMeatWalletKit {
             
             // Load contract data
             this.loadContractData();
-            this.loadClaimData();
+            // Claim data loading disabled - no active claims
+            // this.loadClaimData();
             
             // Listen for account changes
             window.ethereum.on('accountsChanged', (accounts) => {
@@ -584,7 +587,8 @@ class UnicornMeatWalletKit {
                     this.account = { address: accounts[0] };
                     this.updateConnectButton();
                     this.loadContractData();
-                    this.loadClaimData();
+                    // Claim data loading disabled - no active claims
+                    // this.loadClaimData();
                 }
             });
         }
@@ -1126,6 +1130,99 @@ class UnicornMeatWalletKit {
         }
     }
     
+    async getUnicornsBalance() {
+        if (!this.isConnected || !this.account || !this.provider) return '0';
+        
+        try {
+            // Unicorns contract (0 decimals)
+            const UNICORNS_CONTRACT = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7';
+            const unicornsABI = [
+                {
+                    "constant": true,
+                    "inputs": [{"name": "_owner", "type": "address"}],
+                    "name": "balanceOf",
+                    "outputs": [{"name": "balance", "type": "uint256"}],
+                    "type": "function"
+                }
+            ];
+            
+            const contract = new window.ethers.Contract(UNICORNS_CONTRACT, unicornsABI, this.provider);
+            const balance = await contract.balanceOf(this.account.address);
+            return balance.toString();
+        } catch (error) {
+            console.error('Error getting Unicorns balance:', error);
+            return '0';
+        }
+    }
+    
+    async getWrappedUnicornsBalance() {
+        if (!this.isConnected || !this.account || !this.provider) return '0';
+        
+        try {
+            // Wrapped Unicorns contract (0 decimals)
+            const WRAPPED_UNICORNS_CONTRACT = '0x38a9af1bd00f9988977095b31eb18d6d3d5dca00';
+            const wrappedUnicornsABI = [
+                {
+                    "constant": true,
+                    "inputs": [{"name": "owner", "type": "address"}],
+                    "name": "balanceOf",
+                    "outputs": [{"name": "", "type": "uint256"}],
+                    "type": "function"
+                }
+            ];
+            
+            const contract = new window.ethers.Contract(WRAPPED_UNICORNS_CONTRACT, wrappedUnicornsABI, this.provider);
+            const balance = await contract.balanceOf(this.account.address);
+            return balance.toString();
+        } catch (error) {
+            console.error('Error getting Wrapped Unicorns balance:', error);
+            return '0';
+        }
+    }
+    
+    async getBaseMeatBalance() {
+        if (!this.isConnected || !this.account) return '0';
+        
+        try {
+            // Base meat contract on Base network (likely 3 decimals like other meat contracts)
+            const BASE_MEAT_CONTRACT = '0xa0ff877E3d4f3a108B1B3d5eB3e4369301D2b2D7';
+            const baseMeatABI = [
+                {
+                    "constant": true,
+                    "inputs": [{"name": "_owner", "type": "address"}],
+                    "name": "balanceOf",
+                    "outputs": [{"name": "balance", "type": "uint256"}],
+                    "type": "function"
+                }
+            ];
+            
+            // Use Base network provider (Base uses same EVM structure)
+            // Public Base RPC endpoint with timeout
+            const baseProvider = new window.ethers.providers.JsonRpcProvider('https://mainnet.base.org');
+            const contract = new window.ethers.Contract(BASE_MEAT_CONTRACT, baseMeatABI, baseProvider);
+            
+            // Add timeout to prevent hanging
+            const balancePromise = contract.balanceOf(this.account.address);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Base network timeout')), 5000)
+            );
+            
+            const balance = await Promise.race([balancePromise, timeoutPromise]);
+            const balanceStr = balance.toString();
+            
+            // Validate the result is a valid number string
+            if (!balanceStr || isNaN(balanceStr) || balanceStr === 'NaN' || balanceStr === 'undefined') {
+                console.warn('Invalid Base meat balance returned:', balanceStr);
+                return '0';
+            }
+            
+            return balanceStr;
+        } catch (error) {
+            console.error('Error getting Base meat balance:', error);
+            return '0';
+        }
+    }
+    
     async wrapTokens() {
         if (!this.isConnected || !this.account) {
             this.showWrapError('Please connect your wallet first');
@@ -1268,15 +1365,69 @@ class UnicornMeatWalletKit {
         
         for (const button of connectButtons) {
             if (this.isConnected && this.account) {
-                // Get w🍖 balance
-                const wrappedBalance = await this.getWrappedBalance();
-                const formattedBalance = this.formatLargeNumber(wrappedBalance);
+                // Get all balances with proper error handling
+                let unicornsBalance = '0';
+                let wrappedUnicornsBalance = '0';
+                let unicornMeatBalance = '0';
+                let wrappedMeatBalance = '0';
+                let baseMeatBalance = '0';
+                
+                try {
+                    [unicornsBalance, wrappedUnicornsBalance, unicornMeatBalance, wrappedMeatBalance, baseMeatBalance] = await Promise.all([
+                        this.getUnicornsBalance().catch(() => '0'),
+                        this.getWrappedUnicornsBalance().catch(() => '0'),
+                        this.getUnicornMeatBalance().catch(() => '0'),
+                        this.getWrappedBalance().catch(() => '0'),
+                        this.getBaseMeatBalance().catch(() => '0')
+                    ]);
+                } catch (error) {
+                    console.error('Error fetching balances:', error);
+                }
+                
+                // Ensure all values are strings and valid, filter out invalid values
+                const sanitizeBalance = (val) => {
+                    const str = String(val || '0').trim();
+                    if (!str || str === 'undefined' || str === 'null' || str === 'NaN' || isNaN(str)) {
+                        return '0';
+                    }
+                    // Remove any non-numeric characters except minus sign at start
+                    const cleaned = str.replace(/[^\d-]/g, '');
+                    return cleaned || '0';
+                };
+                
+                unicornsBalance = sanitizeBalance(unicornsBalance);
+                wrappedUnicornsBalance = sanitizeBalance(wrappedUnicornsBalance);
+                unicornMeatBalance = sanitizeBalance(unicornMeatBalance);
+                wrappedMeatBalance = sanitizeBalance(wrappedMeatBalance);
+                baseMeatBalance = sanitizeBalance(baseMeatBalance);
+                
+                // Sum Unicorns (both wrapped and unwrapped) - 0 decimals
+                const totalUnicorns = (BigInt(unicornsBalance) + BigInt(wrappedUnicornsBalance)).toString();
+                
+                // Sum Unicorn Meat (wrapped, unwrapped, and Base) - 3 decimals
+                const totalMeat = (BigInt(unicornMeatBalance) + BigInt(wrappedMeatBalance) + BigInt(baseMeatBalance)).toString();
+                
+                // Format balances
+                // Unicorns have 0 decimals, so format directly
+                const unicornsNum = BigInt(totalUnicorns);
+                let formattedUnicorns;
+                if (unicornsNum >= 1000000n) {
+                    formattedUnicorns = (Number(unicornsNum) / 1000000).toFixed(1) + 'M';
+                } else if (unicornsNum >= 1000n) {
+                    formattedUnicorns = (Number(unicornsNum) / 1000).toFixed(1) + 'K';
+                } else {
+                    formattedUnicorns = unicornsNum.toString();
+                }
+                
+                // Unicorn Meat has 3 decimals, use existing formatter
+                const formattedMeat = this.formatLargeNumber(totalMeat);
+                
                 const truncatedAddress = `${this.account.address.slice(0, 6)}...${this.account.address.slice(-4)}`;
                 
                 button.innerHTML = `
-                    <div class="d-flex flex-column align-items-center">
-                        <small class="text-muted mb-1" style="font-size: 10px;">${truncatedAddress}</small>
-                        <span class="fw-bold">${formattedBalance} w🍖</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; line-height: 1.2;">
+                        <div style="font-size: 10px; color: #6c757d; margin-bottom: 4px; display: block;">${truncatedAddress}</div>
+                        <div style="font-weight: bold; display: block; white-space: nowrap;">${formattedUnicorns}🦄 ${formattedMeat}🍖</div>
                     </div>
                 `;
                 button.classList.remove('btn-secondary');
