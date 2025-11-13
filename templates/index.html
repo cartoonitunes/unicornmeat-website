@@ -1191,7 +1191,7 @@
         <div class="container" style="position: relative;">
             <div class="text-center w-100" style="padding-right: 2.5rem;">
                 <p class="mb-0 fw-bold fs-7 sm:fs-6 lg:fs-5" style="color: #000;">
-                    🍖 News: The <a href="https://www.bureauofinternetculture.art/" target="_blank" rel="noopener noreferrer" style="color: #000; text-decoration: underline; font-weight: bold;">Bureau of Internet Culture (BIC)</a> has added Unicorn Meat 🍖 to their DAO treasury! <a href="https://x.com/UnicornMeatETH/status/1984058387018215652?s=20" target="_blank" rel="noopener noreferrer" style="color: #000; text-decoration: underline; font-weight: bold;">Learn More</a>.
+                    🍖 News: The <a href="https://www.bureauofinternetculture.art/" target="_blank" rel="noopener noreferrer" style="color: #000; text-decoration: underline; font-weight: bold;">Bureau of Internet Culture (BIC)</a> has added Unicorn Meat 🍖 to their DAO treasury! <a href="https://www.bureauofinternetculture.art/liquid-assets/unicorn-meat" target="_blank" rel="noopener noreferrer" style="color: #000; text-decoration: underline; font-weight: bold;">Learn More</a>.
                 </p>
             </div>
             <button id="close-announcement" class="btn btn-sm border border-2 border-black contrast-shadow-sm fs-7 sm:fs-6" style="position: absolute; top: 50%; right: 0; transform: translateY(-50%); background: white; color: #000; min-width: auto; padding: 0.25rem 0.5rem; flex-shrink: 0;" aria-label="Close announcement">
@@ -1489,9 +1489,9 @@
                                          class="img-fluid" 
                                          alt="Bureau of Internet Culture">
                                 </div><!-- End Association Item -->
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -3078,14 +3078,23 @@
                         
                         // Only approve if current allowance is insufficient
                         if (currentAllowanceBN.lt(amountBN)) {
-                            // Direct approve call - minimal transaction like Etherscan
-                            await unicornTokenContract.methods.approve(WRAPPED_UNICORNS_CONTRACT, amountBN).send({ 
-                                from: userAddress
+                            // Direct approve call - use wallet's request method for accurate gas estimates
+                            const approveEncoded = web3.eth.abi.encodeFunctionCall(
+                                { name: 'approve', type: 'function', inputs: [{ type: 'address', name: '_spender' }, { type: 'uint256', name: '_value' }] },
+                                [WRAPPED_UNICORNS_CONTRACT, amountBN.toString()]
+                            );
+                            
+                            await window.ethereum.request({
+                                method: 'eth_sendTransaction',
+                                params: [{
+                                    from: userAddress,
+                                    to: UNICORNS_CONTRACT,
+                                    data: approveEncoded
+                                }]
                             });
                         }
 
-                        // Direct wrap call - manually encode like Etherscan does (bypasses Contract wrapper)
-                        // Function selector for wrap(uint256): 0x6a627842 (first 4 bytes of keccak256("wrap(uint256)"))
+                        // Direct wrap call - use wallet's request method for accurate gas estimates (matches Etherscan)
                         const wrapFunctionABI = {
                             name: 'wrap',
                             type: 'function',
@@ -3093,11 +3102,17 @@
                         };
                         const encodedData = web3.eth.abi.encodeFunctionCall(wrapFunctionABI, [amountBN.toString()]);
                         
-                        const wrapTx = await web3.eth.sendTransaction({
-                            from: userAddress,
-                            to: WRAPPED_UNICORNS_CONTRACT,
-                            data: encodedData
+                        // Use wallet's request method directly - this gives accurate gas estimates like Etherscan
+                        const wrapTxHash = await window.ethereum.request({
+                            method: 'eth_sendTransaction',
+                            params: [{
+                                from: userAddress,
+                                to: WRAPPED_UNICORNS_CONTRACT,
+                                data: encodedData
+                            }]
                         });
+                        
+                        const wrapTx = { transactionHash: wrapTxHash };
 
                         showUnicornsWrapSuccess(`Successfully wrapped ${amount} Unicorns! Transaction: ${wrapTx.transactionHash}`);
 
@@ -3167,8 +3182,7 @@
                             return;
                         }
 
-                        // Direct unwrap call - manually encode like Etherscan does (bypasses Contract wrapper)
-                        // Function selector for unwrap(uint256): 0x439890af (first 4 bytes of keccak256("unwrap(uint256)"))
+                        // Direct unwrap call - use wallet's request method for accurate gas estimates (matches Etherscan)
                         const unwrapFunctionABI = {
                             name: 'unwrap',
                             type: 'function',
@@ -3176,11 +3190,17 @@
                         };
                         const encodedData = web3.eth.abi.encodeFunctionCall(unwrapFunctionABI, [amountBN.toString()]);
                         
-                        const unwrapTx = await web3.eth.sendTransaction({
-                            from: userAddress,
-                            to: WRAPPED_UNICORNS_CONTRACT,
-                            data: encodedData
+                        // Use wallet's request method directly - this gives accurate gas estimates like Etherscan
+                        const unwrapTxHash = await window.ethereum.request({
+                            method: 'eth_sendTransaction',
+                            params: [{
+                                from: userAddress,
+                                to: WRAPPED_UNICORNS_CONTRACT,
+                                data: encodedData
+                            }]
                         });
+                        
+                        const unwrapTx = { transactionHash: unwrapTxHash };
 
                         showUnicornsWrapSuccess(`Successfully unwrapped ${amount} Unicorns! Transaction: ${unwrapTx.transactionHash}`);
 
