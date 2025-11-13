@@ -1974,6 +1974,11 @@
                                         class="btn btn-md btn-primary-200 border border-2 border-black contrast-shadow-sm hover:-rotate-2"
                                         type="button" style="width: 250px; height: 48px; margin-left: auto; margin-right: auto;">Unwrap w🦄 to 🦄</button>
                                 </div>
+                                <!-- Wrap Unicorns Status Message Area -->
+                                <div id="wrap-unicorns-status"
+                                    class="panel mt-3 p-2 border border-2 border-info text-info bg-white text-center d-none"
+                                    style="width: 250px; margin-left: auto; margin-right: auto;">
+                                </div>
                                 <!-- Wrap Unicorns Error Message Area -->
                                 <div id="wrap-unicorns-error"
                                     class="panel mt-3 p-2 border border-2 border-danger text-danger bg-white text-center d-none"
@@ -2969,15 +2974,29 @@
             const unwrapUnicornsButton = document.getElementById('unwrap-unicorns-button');
             const wrapUnicornsAmountInput = document.getElementById('wrap-unicorns-amount');
             const wrapUnicornsError = document.getElementById('wrap-unicorns-error');
+            const wrapUnicornsStatus = document.getElementById('wrap-unicorns-status');
 
             // Unicorns contract address (0 decimals)
             const UNICORNS_CONTRACT = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7';
             // Wrapped Unicorns contract address
             const WRAPPED_UNICORNS_CONTRACT = '0x38a9af1bd00f9988977095b31eb18d6d3d5dca00';
 
+            function showUnicornsWrapStatus(message) {
+                wrapUnicornsStatus.textContent = message;
+                wrapUnicornsStatus.classList.remove('d-none');
+                // Hide error when showing status
+                wrapUnicornsError.classList.add('d-none');
+            }
+
+            function hideUnicornsWrapStatus() {
+                wrapUnicornsStatus.classList.add('d-none');
+            }
+
             function showUnicornsWrapError(message) {
                 wrapUnicornsError.textContent = message;
                 wrapUnicornsError.classList.remove('d-none');
+                // Hide status when showing error
+                hideUnicornsWrapStatus();
                 setTimeout(() => {
                     wrapUnicornsError.classList.add('d-none');
                 }, 5000);
@@ -2987,6 +3006,7 @@
                 wrapUnicornsError.textContent = message;
                 wrapUnicornsError.classList.remove('d-none', 'text-danger');
                 wrapUnicornsError.classList.add('text-success');
+                hideUnicornsWrapStatus();
                 setTimeout(() => {
                     wrapUnicornsError.classList.add('d-none');
                     wrapUnicornsError.classList.remove('text-success');
@@ -2997,15 +3017,22 @@
             // Wrap Unicorns button handler
             if (wrapUnicornsButton && wrapUnicornsAmountInput) {
                 wrapUnicornsButton.addEventListener('click', async () => {
-                    const amount = wrapUnicornsAmountInput.value;
-                    if (!amount || amount <= 0) {
+                    const amountInput = wrapUnicornsAmountInput.value;
+                    if (!amountInput || amountInput <= 0) {
                         showUnicornsWrapError('Please enter a valid amount of Unicorns to wrap');
                         return;
                     }
 
+                    // Disable button and show initial status
+                    wrapUnicornsButton.disabled = true;
+                    wrapUnicornsButton.innerHTML = 'Processing...';
+                    hideUnicornsWrapStatus();
+
                     try {
                         // Check if wallet is connected
                         if (!window.ethereum || !window.ethereum.selectedAddress) {
+                            wrapUnicornsButton.disabled = false;
+                            wrapUnicornsButton.innerHTML = 'Wrap 🦄 to w🦄';
                             showUnicornsWrapError('Please connect your wallet first');
                             return;
                         }
@@ -3016,6 +3043,7 @@
                         const userAddress = accounts[0];
 
                         // Unicorn token contract ABI (0 decimals)
+                        // Note: This contract uses spentAllowance mapping (non-standard ERC20)
                         const unicornTokenABI = [
                             {
                                 "constant": true,
@@ -3031,6 +3059,16 @@
                                     {"name": "_spender", "type": "address"}
                                 ],
                                 "name": "allowance",
+                                "outputs": [{"name": "", "type": "uint256"}],
+                                "type": "function"
+                            },
+                            {
+                                "constant": true,
+                                "inputs": [
+                                    {"name": "_owner", "type": "address"},
+                                    {"name": "_spender", "type": "address"}
+                                ],
+                                "name": "spentAllowance",
                                 "outputs": [{"name": "", "type": "uint256"}],
                                 "type": "function"
                             },
@@ -3060,28 +3098,60 @@
                         const unicornTokenContract = new web3.eth.Contract(unicornTokenABI, UNICORNS_CONTRACT);
                         const wrappedUnicornsContract = new web3.eth.Contract(wrappedUnicornsABI, WRAPPED_UNICORNS_CONTRACT);
 
+                        // Parse amount as integer to avoid any floating point issues (0 decimals)
+                        const amount = Math.floor(parseFloat(amountInput));
+                        if (isNaN(amount) || amount <= 0) {
+                            wrapUnicornsButton.disabled = false;
+                            wrapUnicornsButton.innerHTML = 'Wrap 🦄 to w🦄';
+                            showUnicornsWrapError('Please enter a valid positive integer amount');
+                            return;
+                        }
+                        
                         // Convert amount to BN (0 decimals, so just the number)
                         const amountBN = web3.utils.toBN(amount.toString());
 
                         // Check balance (read-only, doesn't affect transaction gas)
+                        showUnicornsWrapStatus('Checking balance...');
                         const balance = await unicornTokenContract.methods.balanceOf(userAddress).call();
                         const balanceBN = web3.utils.toBN(balance);
                         
                         if (balanceBN.lt(amountBN)) {
+                            wrapUnicornsButton.disabled = false;
+                            wrapUnicornsButton.innerHTML = 'Wrap 🦄 to w🦄';
                             showUnicornsWrapError(`Insufficient Unicorn tokens. You have ${balance.toString()} but need ${amount}.`);
                             return;
                         }
 
-                        // Check existing allowance to avoid unnecessary approve transaction (read-only)
+                        // Check existing allowance and spentAllowance (read-only)
+                        // This contract uses spentAllowance, so available = allowance - spentAllowance
+                        showUnicornsWrapStatus('Checking allowance...');
                         const currentAllowance = await unicornTokenContract.methods.allowance(userAddress, WRAPPED_UNICORNS_CONTRACT).call();
+                        const currentSpentAllowance = await unicornTokenContract.methods.spentAllowance(userAddress, WRAPPED_UNICORNS_CONTRACT).call();
                         const currentAllowanceBN = web3.utils.toBN(currentAllowance);
+                        const currentSpentAllowanceBN = web3.utils.toBN(currentSpentAllowance);
+                        const availableAllowanceBN = currentAllowanceBN.sub(currentSpentAllowanceBN);
                         
-                        // Only approve if current allowance is insufficient
-                        if (currentAllowanceBN.lt(amountBN)) {
+                        // Check if available allowance is sufficient
+                        if (availableAllowanceBN.lt(amountBN)) {
+                            // Need to approve the amount they want to wrap
+                            // The approve will set a new allowance, and spentAllowance remains the same
+                            // So we need to approve: amount + spentAllowance to ensure available >= amount
+                            // But the user wants to see just the amount they're wrapping in the message
+                            const approveAmountBN = amountBN.add(currentSpentAllowanceBN);
+                            
+                            // Show clear message about current state and what needs to be approved
+                            let approvalMessage = `You have ${currentAllowance.toString()} approved`;
+                            if (currentSpentAllowanceBN.gt(web3.utils.toBN(0))) {
+                                approvalMessage += ` and have spent ${currentSpentAllowance.toString()} approved allowance`;
+                            }
+                            approvalMessage += `. You'll need to re-approve ${amount} to wrap ${amount}. Please approve in your wallet...`;
+                            
+                            showUnicornsWrapStatus(approvalMessage);
+                            
                             // Direct approve call - use wallet's request method for accurate gas estimates
                             const approveEncoded = web3.eth.abi.encodeFunctionCall(
                                 { name: 'approve', type: 'function', inputs: [{ type: 'address', name: '_spender' }, { type: 'uint256', name: '_value' }] },
-                                [WRAPPED_UNICORNS_CONTRACT, amountBN.toString()]
+                                [WRAPPED_UNICORNS_CONTRACT, approveAmountBN.toString()]
                             );
                             
                             await window.ethereum.request({
@@ -3092,9 +3162,36 @@
                                     data: approveEncoded
                                 }]
                             });
+                            
+                            // Wait for the approve transaction to be mined
+                            showUnicornsWrapStatus('Waiting for approval to be confirmed...');
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            
+                            // Re-check allowance and spentAllowance after approve to ensure it's sufficient
+                            const newAllowance = await unicornTokenContract.methods.allowance(userAddress, WRAPPED_UNICORNS_CONTRACT).call();
+                            const newSpentAllowance = await unicornTokenContract.methods.spentAllowance(userAddress, WRAPPED_UNICORNS_CONTRACT).call();
+                            const newAllowanceBN = web3.utils.toBN(newAllowance);
+                            const newSpentAllowanceBN = web3.utils.toBN(newSpentAllowance);
+                            const newAvailableAllowanceBN = newAllowanceBN.sub(newSpentAllowanceBN);
+                            
+                            if (newAvailableAllowanceBN.lt(amountBN)) {
+                                wrapUnicornsButton.disabled = false;
+                                wrapUnicornsButton.innerHTML = 'Wrap 🦄 to w🦄';
+                                showUnicornsWrapError(`Available allowance is still insufficient after approval. Available: ${newAvailableAllowanceBN.toString()}, Needed: ${amount}`);
+                                return;
+                            }
+                        } else {
+                            // Verify available allowance is sufficient even if we didn't need to approve
+                            if (availableAllowanceBN.lt(amountBN)) {
+                                wrapUnicornsButton.disabled = false;
+                                wrapUnicornsButton.innerHTML = 'Wrap 🦄 to w🦄';
+                                showUnicornsWrapError(`Insufficient available allowance. Total allowance: ${currentAllowance.toString()}, Already spent: ${currentSpentAllowance.toString()}, Available: ${availableAllowanceBN.toString()}, Needed: ${amount}`);
+                                return;
+                            }
                         }
 
                         // Direct wrap call - use wallet's request method for accurate gas estimates (matches Etherscan)
+                        showUnicornsWrapStatus('Wrapping Unicorns... Please confirm in your wallet.');
                         const wrapFunctionABI = {
                             name: 'wrap',
                             type: 'function',
@@ -3114,10 +3211,14 @@
                         
                         const wrapTx = { transactionHash: wrapTxHash };
 
+                        wrapUnicornsButton.disabled = false;
+                        wrapUnicornsButton.innerHTML = 'Wrap 🦄 to w🦄';
                         showUnicornsWrapSuccess(`Successfully wrapped ${amount} Unicorns! Transaction: ${wrapTx.transactionHash}`);
 
                     } catch (error) {
                         console.error('Wrap Unicorns error:', error);
+                        wrapUnicornsButton.disabled = false;
+                        wrapUnicornsButton.innerHTML = 'Wrap 🦄 to w🦄';
                         if (error.code === 4001) {
                             showUnicornsWrapError('Transaction was rejected by user');
                         } else if (error.message && error.message.includes('insufficient funds')) {
