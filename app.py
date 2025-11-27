@@ -15,6 +15,9 @@ WRAPPED_CONTRACT_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'
 def index():
     return render_template('index.html')
 
+@app.route('/grinder-association')
+def grinder_association():
+    return render_template('grinder-association.html')
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
