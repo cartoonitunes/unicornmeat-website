@@ -139,7 +139,6 @@
 
     // RPC endpoint - using Rarible's Ethereum node
     const RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node';
-    const ETHERSCAN_API_KEY = 'AHMV3WAI75TQVJI2XEFUUKFKK1KJTFY1BD';
 
     // Store contract instance for DAO interactions
     let contractInstance = null;
@@ -1247,32 +1246,8 @@
                             }
                         }
                     } else {
-                        // Fallback: Use Etherscan API
-                        const etherscanUrl = `https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${txnHash}&apikey=${ETHERSCAN_API_KEY}`;
-                        const response = await fetch(etherscanUrl);
-                        const data = await response.json();
-                        
-                        if (data.result && data.result.from && data.result.blockNumber) {
-                            // Get block to get timestamp
-                            const blockUrl = `https://api.etherscan.io/api?module=proxy&action=eth_getBlockByNumber&tag=${data.result.blockNumber}&boolean=true&apikey=${ETHERSCAN_API_KEY}`;
-                            const blockResponse = await fetch(blockUrl);
-                            const blockData = await blockResponse.json();
-                            
-                            if (blockData.result && blockData.result.timestamp) {
-                                timestamp = parseInt(blockData.result.timestamp, 16);
-                                const fromAddress = data.result.from.toLowerCase();
-                                const existing = killerData.get(fromAddress);
-                                if (existing) {
-                                    existing.count += 1;
-                                    // Keep the earliest timestamp
-                                    if (timestamp < existing.earliestTimestamp) {
-                                        existing.earliestTimestamp = timestamp;
-                                    }
-                                } else {
-                                    killerData.set(fromAddress, { count: 1, earliestTimestamp: timestamp });
-                                }
-                            }
-                        }
+                        // Neither ethers.js nor Web3.js available - skip this transaction
+                        console.warn(`Cannot fetch transaction ${txnHash}: neither ethers.js nor Web3.js available`);
                     }
                 } catch (error) {
                     console.warn(`Error fetching transaction ${txnHash}:`, error);
