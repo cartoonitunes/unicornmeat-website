@@ -1243,9 +1243,8 @@
                     <li><a href="#trading">Buy 🍖</a></li>
                     <li><a href="#wrap">Wrap 🦄🍖</a></li>
                     <li><a href="#join-herd">🦄 Herd</a></li>
-                    <li><a href="#roadmap">Timeline</a></li>
+                    <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
                     <li><a href="#faq">FAQ</a></li>
-                    <li><a href="#pitch-deck">Deck</a></li>
                     <li><a href="#references">Links</a></li>
                 </ul>
                 <div class="mt-4">
@@ -1339,9 +1338,8 @@
                                 <li><a href="#trading">Buy 🍖</a></li>
                                 <li><a href="#wrap">Wrap 🦄🍖</a></li>
                                 <li><a href="#join-herd">🦄 Herd</a></li>
-                                <li><a href="#roadmap">Timeline</a></li>
+                                <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
                                 <li><a href="#faq">FAQ</a></li>
-                                <li><a href="#pitch-deck">Deck</a></li>
                             </ul>
                         </div>
                         <div class="uc-navbar-right">
@@ -2071,7 +2069,117 @@
 
         <!-- Section end -->
 
+        <!-- Grinder Association Section Start -->
+        <div id="grinder-association" class="grinder-association section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #fff4e6;">
+                <div class="container sm:max-w-lg xl:max-w-4xl">
+                    <center>
+                        <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0 mb-4">Unicorn Meat Grinder Association 🦄🍖</h2>
+                    </center>
+                    <div class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
+                        <div class="text-center mb-4">
+                            <p class="fs-6 xl:fs-5 mb-3">
+                                The Unicorn Meat Grinder Association is a historic DAO contract created in 2016 that allows Unicorn holders to grind their Unicorns for Unicorn Meat and participate in governance proposals.
+                            </p>
+                            <p class="fs-7 text-muted mb-4">
+                                Contract Address: <a href="https://etherscan.io/address/0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline;">0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32</a>
+                            </p>
+                        </div>
 
+                        <!-- Loading State -->
+                        <div id="grinder-loading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 fs-6">Loading DAO information...</p>
+                        </div>
+
+                        <!-- Error State -->
+                        <div id="grinder-error" class="panel p-3 border border-2 border-danger text-danger bg-white text-center d-none mb-4">
+                            <p class="mb-0">Failed to load DAO information. Please make sure you have a Web3 provider (like MetaMask) connected, or try refreshing the page.</p>
+                        </div>
+
+                        <!-- DAO Information Display -->
+                        <div id="grinder-info" class="d-none">
+                            <!-- Statistics Row -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
+                                        <h6 class="h6 mb-2 text-uppercase fw-bold">Total Proposals</h6>
+                                        <p class="fs-4 mb-0 fw-bold" id="total-proposals">-</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
+                                        <h6 class="h6 mb-2 text-uppercase fw-bold">Total Unicorns Killed</h6>
+                                        <p class="fs-4 mb-0 fw-bold" id="total-unicorns-killed">-</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
+                                        <h6 class="h6 mb-2 text-uppercase fw-bold">Minimum Quorum</h6>
+                                        <p class="fs-4 mb-0 fw-bold" id="minimum-quorum">-</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Voting Rules -->
+                            <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
+                                <h5 class="h5 mb-3 text-uppercase fw-bold">Voting Rules</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Debating Period:</strong> <span id="debating-period">-</span> minutes</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Rejection Multiplier:</strong> <span id="rejection-multiplier">-</span>x</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contract Addresses -->
+                            <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
+                                <h5 class="h5 mb-3 text-uppercase fw-bold">Contract Addresses</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Unicorn Token:</strong></p>
+                                        <p class="mb-2 fs-7">
+                                            <a href="#" id="unicorn-token-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Meat Token:</strong></p>
+                                        <p class="mb-2 fs-7">
+                                            <a href="#" id="meat-token-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Meat Provider:</strong></p>
+                                        <p class="mb-2 fs-7">
+                                            <a href="#" id="meat-provider-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Owner:</strong></p>
+                                        <p class="mb-2 fs-7">
+                                            <a href="#" id="owner-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Proposals List -->
+                            <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white">
+                                <h5 class="h5 mb-3 text-uppercase fw-bold">Proposals</h5>
+                                <div id="proposals-list" class="vstack gap-3">
+                                    <p class="text-muted text-center">No proposals found.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Grinder Association Section End -->
 
         <div class="d-none xl:d-block">
             <img class="text-secondary-100"
@@ -2693,9 +2801,8 @@
                         <li><a href="#trading">Buy 🍖</a></li>
                         <li><a href="#wrap">Wrap 🦄🍖</a></li>
                         <li><a href="#join-herd">🦄 Herd</a></li>
-                        <li><a href="#roadmap">Timeline</a></li>
+                        <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
                         <li><a href="#faq">FAQ</a></li>
-                        <li><a href="#pitch-deck">Deck</a></li>
                     </ul>
                 </div>
             </div>
@@ -2748,6 +2855,9 @@
     
     <!-- include WalletKit integration -->
     <script defer src="{{ url_for('static', filename='assets/js/walletkit-integration.js') }}"></script>
+    
+    <!-- include Grinder Association DAO loader -->
+    <script defer src="{{ url_for('static', filename='assets/js/grinder-association.js') }}"></script>
     
 
 
