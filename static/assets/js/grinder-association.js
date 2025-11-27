@@ -1149,11 +1149,6 @@
                     const row = document.createElement('tr');
                     row.className = 'border-bottom';
                     
-                    // Add subtle background for top 3
-                    if (rank <= 3) {
-                        row.style.backgroundColor = rank === 1 ? 'rgba(255, 215, 0, 0.1)' : rank === 2 ? 'rgba(192, 192, 192, 0.1)' : 'rgba(205, 127, 50, 0.1)';
-                    }
-                    
                     row.innerHTML = `
                         <td class="text-center py-3 px-2 align-middle">
                             <span class="fw-bold fs-5">${rank}</span>
