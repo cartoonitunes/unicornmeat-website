@@ -139,6 +139,20 @@
 
     // RPC endpoint - using Rarible's Ethereum node
     const RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node';
+    
+    // Proposal transaction hashes in order (oldest to newest)
+    const PROPOSAL_TX_HASHES = [
+        '0x4a599406f09d6217c8cee835993570b44616c38c5c69bb6e9debdf08469fb743',
+        '0xff421649f71a14648dc9876bfc45eee33fc26696500d3687d59cacd3b43b45af',
+        '0x208bff05bc2d315dacf29d958390cfc25ad8429a379413d48ef575ff4770035f',
+        '0xfa1df1087adf1292cd168e62f290cff48c6ddb476e85800c6591649c4f09a9e2',
+        '0xd48a84bd702ec736409ab9d50fbc4d8a3361782872358f27330e125f3279790e', // Failed transaction
+        '0x5064e324bd93e811d035ed352d0e2632ff30b15ada341fecff8df9780a07474b',
+        '0x78b92f3952e72e4714fdb4124da6bb367fad03b77c46e71b4f73045d0c78e1c4',
+        '0xb9c3ef46288df5a5153dc2e21329c1b87f9a9a908cf89fbf4c65fc5901ed22b6',
+        '0x7bf0cefc8d201d653bc2c68b2bfb9057491b67592a5198d7cfc9850791fe7f20',
+        '0xb017486a6663035f0a541eb7ee4d42138b1e8d411686900155214bcd27e6b7a9'
+    ];
 
     // Store contract instance for DAO interactions
     let contractInstance = null;
@@ -350,24 +364,40 @@
                         }
                     }
 
-                    // Fetch proposer addresses from event logs
-                    const proposerAddresses = await fetchProposersEthers(contract, numProposalsInt);
+                    // Fetch proposer addresses from transaction hashes
+                    const proposerData = await fetchProposersFromTxHashes(contract.provider, numProposalsInt, true);
 
-                    // Create proposal elements
+                    // Create proposal elements with ENS resolution
                     proposalsList.innerHTML = '';
-                    proposals.forEach((result, index) => {
+                    const elementPromises = proposals.map(async (result, index) => {
                         if (result.status === 'fulfilled') {
                             const proposal = result.value;
-                            const proposer = proposerAddresses[index] || 'Unknown';
-                            const proposalDiv = createProposalElement(proposal, index, true, proposer, null);
-                            proposalsList.appendChild(proposalDiv);
+                            const proposerInfo = proposerData[index] || { address: 'Unknown', ensName: null };
+                            const txHash = PROPOSAL_TX_HASHES[index] || null;
+                            
+                            // Resolve ENS for beneficiary
+                            let recipientENS = null;
+                            try {
+                                recipientENS = await resolveENS(proposal.recipient, contract.provider);
+                            } catch (err) {
+                                // If ENS resolution fails, just use the address
+                                console.error(`Error resolving ENS for recipient ${proposal.recipient}:`, err);
+                            }
+                            
+                            const proposalDiv = createProposalElement(proposal, index, true, proposerInfo, null, txHash, recipientENS);
+                            return proposalDiv;
                         } else {
                             // Show error for failed proposal
                             const errorDiv = document.createElement('div');
                             errorDiv.className = 'panel p-3 border border-2 border-danger text-danger bg-white mb-2';
                             errorDiv.innerHTML = `<p class="mb-0">Failed to load proposal #${index}</p>`;
-                            proposalsList.appendChild(errorDiv);
+                            return errorDiv;
                         }
+                    });
+                    
+                    const proposalElements = await Promise.all(elementPromises);
+                    proposalElements.forEach(element => {
+                        proposalsList.appendChild(element);
                     });
                 } catch (error) {
                     console.error('Error loading proposals:', error);
@@ -410,24 +440,40 @@
                         }
                     }
 
-                    // Fetch proposer addresses from event logs
-                    const proposerAddresses = await fetchProposersWeb3(contract, numProposals, web3);
+                    // Fetch proposer addresses from transaction hashes
+                    const proposerData = await fetchProposersFromTxHashes(web3, numProposals, false);
 
-                    // Create proposal elements
+                    // Create proposal elements with ENS resolution
                     proposalsList.innerHTML = '';
-                    proposals.forEach((result, index) => {
+                    const elementPromises = proposals.map(async (result, index) => {
                         if (result.status === 'fulfilled') {
                             const proposal = result.value;
-                            const proposer = proposerAddresses[index] || 'Unknown';
-                            const proposalDiv = createProposalElement(proposal, index, false, proposer, web3);
-                            proposalsList.appendChild(proposalDiv);
+                            const proposerInfo = proposerData[index] || { address: 'Unknown', ensName: null };
+                            const txHash = PROPOSAL_TX_HASHES[index] || null;
+                            
+                            // Resolve ENS for beneficiary
+                            let recipientENS = null;
+                            try {
+                                recipientENS = await resolveENS(proposal.recipient, web3);
+                            } catch (err) {
+                                // If ENS resolution fails, just use the address
+                                console.error(`Error resolving ENS for recipient ${proposal.recipient}:`, err);
+                            }
+                            
+                            const proposalDiv = createProposalElement(proposal, index, false, proposerInfo, web3, txHash, recipientENS);
+                            return proposalDiv;
                         } else {
                             // Show error for failed proposal
                             const errorDiv = document.createElement('div');
                             errorDiv.className = 'panel p-3 border border-2 border-danger text-danger bg-white mb-2';
                             errorDiv.innerHTML = `<p class="mb-0">Failed to load proposal #${index}</p>`;
-                            proposalsList.appendChild(errorDiv);
+                            return errorDiv;
                         }
+                    });
+                    
+                    const proposalElements = await Promise.all(elementPromises);
+                    proposalElements.forEach(element => {
+                        proposalsList.appendChild(element);
                     });
                 } catch (error) {
                     console.error('Error loading proposals:', error);
@@ -438,178 +484,56 @@
             }
         }
 
-        async function fetchProposersEthers(contract, numProposals) {
+        async function fetchProposersFromTxHashes(provider, numProposals, isEthers) {
             const proposers = [];
             try {
-                const provider = contract.provider;
-                const START_BLOCK = 1400000; // Approximate deployment block
-                const CHUNK_SIZE = 2000; // Larger chunks for public RPC
-                const currentBlock = await provider.getBlockNumber();
+                console.log(`Fetching proposers from ${numProposals} transaction hashes...`);
                 
-                // Query ProposalAdded events in chunks
-                const eventFilter = contract.filters.ProposalAdded();
-                let allEvents = [];
-                
-                console.log(`Fetching ProposalAdded events from block ${START_BLOCK} to ${currentBlock}...`);
-                
-                // Try querying in larger chunks first (public RPCs usually allow more)
-                try {
-                    const events = await contract.queryFilter(eventFilter, START_BLOCK, currentBlock);
-                    allEvents = events;
-                    console.log(`Found ${events.length} ProposalAdded events`);
-                } catch (error) {
-                    // If that fails, try chunked queries
-                    console.log('Full range query failed, trying chunked queries...');
-                    let fromBlock = START_BLOCK;
+                // Fetch proposer from each transaction hash
+                for (let i = 0; i < Math.min(PROPOSAL_TX_HASHES.length, numProposals); i++) {
+                    const txHash = PROPOSAL_TX_HASHES[i];
+                    if (!txHash) {
+                        proposers.push({ address: 'Unknown', ensName: null });
+                        continue;
+                    }
                     
-                    while (fromBlock <= currentBlock) {
-                        const toBlock = Math.min(fromBlock + CHUNK_SIZE - 1, currentBlock);
-                        try {
-                            const chunkEvents = await contract.queryFilter(eventFilter, fromBlock, toBlock);
-                            allEvents = allEvents.concat(chunkEvents);
-                            fromBlock = toBlock + 1;
-                            
-                            // Small delay to avoid rate limiting
-                            if (fromBlock % 10000 === 0) {
-                                await new Promise(resolve => setTimeout(resolve, 100));
-                            }
-                        } catch (chunkError) {
-                            console.warn(`Error querying blocks ${fromBlock}-${toBlock}:`, chunkError.message);
-                            fromBlock = toBlock + 1;
+                    try {
+                        let tx;
+                        if (isEthers) {
+                            tx = await provider.getTransaction(txHash);
+                        } else {
+                            tx = await provider.eth.getTransaction(txHash);
                         }
                         
-                        // Safety limit
-                        if (fromBlock - START_BLOCK > 1000000) {
-                            break;
+                        if (tx && tx.from) {
+                            // Resolve ENS name for proposer
+                            const ensName = await resolveENS(tx.from, provider);
+                            proposers.push({ address: tx.from, ensName: ensName });
+                        } else {
+                            proposers.push({ address: 'Unknown', ensName: null });
                         }
+                    } catch (err) {
+                        console.error(`Error fetching transaction ${txHash} for proposal ${i}:`, err);
+                        proposers.push({ address: 'Unknown', ensName: null });
                     }
                 }
                 
-                // Sort by block number and transaction index to match proposal order
-                allEvents.sort((a, b) => {
-                    if (a.blockNumber !== b.blockNumber) {
-                        return a.blockNumber - b.blockNumber;
-                    }
-                    return a.transactionIndex - b.transactionIndex;
-                });
-
-                // Get proposer from transaction sender using provider
-                for (let i = 0; i < Math.min(allEvents.length, numProposals); i++) {
-                    const event = allEvents[i];
-                    try {
-                        const tx = await provider.getTransaction(event.transactionHash);
-                        if (tx && tx.from) {
-                            proposers.push(tx.from);
-                        } else {
-                            proposers.push('Unknown');
-                        }
-                    } catch (err) {
-                        console.error(`Error fetching transaction for proposal ${i}:`, err);
-                        proposers.push('Unknown');
-                    }
+                // Fill remaining slots with Unknown if we have fewer hashes than proposals
+                while (proposers.length < numProposals) {
+                    proposers.push({ address: 'Unknown', ensName: null });
                 }
             } catch (error) {
-                console.error('Error fetching proposers from events:', error);
+                console.error('Error fetching proposers from transaction hashes:', error);
                 // Return array of Unknown if we can't fetch
                 for (let i = 0; i < numProposals; i++) {
-                    proposers.push('Unknown');
+                    proposers.push({ address: 'Unknown', ensName: null });
                 }
             }
             return proposers;
         }
 
-        async function fetchProposersWeb3(contract, numProposals, web3) {
-            const proposers = [];
-            try {
-                const START_BLOCK = 1400000; // Approximate deployment block
-                const CHUNK_SIZE = 2000; // Larger chunks for public RPC
-                const currentBlock = await web3.eth.getBlockNumber();
-                
-                // ProposalAdded event signature
-                const eventSignature = web3.utils.keccak256('ProposalAdded(uint256,address,uint256,string)');
-                let allEvents = [];
-                
-                console.log(`Fetching ProposalAdded events from block ${START_BLOCK} to ${currentBlock}...`);
-                
-                // Try querying in larger chunks first
-                try {
-                    const events = await web3.eth.getPastLogs({
-                        address: GRINDER_CONTRACT_ADDRESS,
-                        fromBlock: START_BLOCK,
-                        toBlock: currentBlock,
-                        topics: [eventSignature]
-                    });
-                    allEvents = events;
-                    console.log(`Found ${events.length} ProposalAdded events`);
-                } catch (error) {
-                    // If that fails, try chunked queries
-                    console.log('Full range query failed, trying chunked queries...');
-                    let fromBlock = START_BLOCK;
-                    
-                    while (fromBlock <= currentBlock) {
-                        const toBlock = Math.min(fromBlock + CHUNK_SIZE - 1, currentBlock);
-                        try {
-                            const chunkEvents = await web3.eth.getPastLogs({
-                                address: GRINDER_CONTRACT_ADDRESS,
-                                fromBlock: fromBlock,
-                                toBlock: toBlock,
-                                topics: [eventSignature]
-                            });
-                            allEvents = allEvents.concat(chunkEvents);
-                            fromBlock = toBlock + 1;
-                            
-                            // Small delay to avoid rate limiting
-                            if (fromBlock % 10000 === 0) {
-                                await new Promise(resolve => setTimeout(resolve, 100));
-                            }
-                        } catch (chunkError) {
-                            console.warn(`Error querying blocks ${fromBlock}-${toBlock}:`, chunkError.message);
-                            fromBlock = toBlock + 1;
-                        }
-                        
-                        // Safety limit
-                        if (fromBlock - START_BLOCK > 1000000) {
-                            break;
-                        }
-                    }
-                }
-                
-                const events = allEvents;
 
-                // Sort by block number and log index
-                events.sort((a, b) => {
-                    if (parseInt(a.blockNumber) !== parseInt(b.blockNumber)) {
-                        return parseInt(a.blockNumber) - parseInt(b.blockNumber);
-                    }
-                    return parseInt(a.logIndex) - parseInt(b.logIndex);
-                });
-
-                // Get proposer from transaction sender
-                for (let i = 0; i < Math.min(events.length, numProposals); i++) {
-                    const event = events[i];
-                    try {
-                        const tx = await web3.eth.getTransaction(event.transactionHash);
-                        if (tx && tx.from) {
-                            proposers.push(tx.from);
-                        } else {
-                            proposers.push('Unknown');
-                        }
-                    } catch (err) {
-                        console.error(`Error fetching transaction for proposal ${i}:`, err);
-                        proposers.push('Unknown');
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching proposers from events:', error);
-                // Return array of Unknown if we can't fetch
-                for (let i = 0; i < numProposals; i++) {
-                    proposers.push('Unknown');
-                }
-            }
-            return proposers;
-        }
-
-        function createProposalElement(proposal, index, isEthers, proposer, web3) {
+        function createProposalElement(proposal, index, isEthers, proposerInfo, web3, txHash, recipientENS) {
             const proposalCard = document.createElement('div');
             proposalCard.className = 'proposal-card panel border border-2 border-black contrast-shadow-sm bg-white';
             
@@ -637,6 +561,16 @@
             }
             
             const description = proposal.description || 'N/A';
+            const txLink = txHash ? `<p class="mb-1"><strong>Transaction:</strong> <a href="https://etherscan.io/tx/${txHash}" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">${txHash.substring(0, 10)}...${txHash.substring(txHash.length - 8)}</a></p>` : '';
+            
+            // Format proposer display (ENS if available, otherwise address)
+            const proposerAddress = proposerInfo.address || 'Unknown';
+            const proposerDisplay = proposerInfo.ensName || proposerAddress;
+            const proposerLink = proposerAddress !== 'Unknown' ? `<p class="mb-1"><strong>Proposer:</strong> <a href="https://etherscan.io/address/${proposerAddress}" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">${proposerDisplay}</a></p>` : '';
+            
+            // Format recipient display (ENS if available, otherwise address)
+            const recipientDisplay = recipientENS || proposal.recipient;
+            
             proposalCard.innerHTML = `
                 <div class="proposal-header p-2 d-flex justify-content-between align-items-start" style="cursor: pointer;">
                     <div class="d-flex flex-column gap-0" style="flex: 1;">
@@ -650,8 +584,9 @@
                 </div>
                 <div class="proposal-content">
                     <div class="fs-7">
-                        ${proposer !== 'Unknown' ? `<p class="mb-1"><strong>Proposer:</strong> <a href="https://etherscan.io/address/${proposer}" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">${proposer}</a></p>` : ''}
-                        <p class="mb-1"><strong>Recipient:</strong> <a href="https://etherscan.io/address/${proposal.recipient}" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">${proposal.recipient}</a></p>
+                        ${txLink}
+                        ${proposerLink}
+                        <p class="mb-1"><strong>Recipient:</strong> <a href="https://etherscan.io/address/${proposal.recipient}" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">${recipientDisplay}</a></p>
                         <p class="mb-1"><strong>Amount:</strong> ${amount} ETH</p>
                         <p class="mb-1"><strong>Votes:</strong> ${votes}</p>
                         <p class="mb-2"><strong>Deadline:</strong> ${deadline.toLocaleString()}</p>
@@ -1190,6 +1125,7 @@
             '0xd4f62ab6acaba60529fe23c1c96b90902ce3846ae11e2d14a84b85502a09e5f3',
             '0x310e418a533ed2a49ba7e45a092e6b1dfac8072633ea55cadaf1e80c4e55a00e',
             '0x3e0cdf86e789aa791aea64bae28b183639a38af6d833d175960b81ec25c3d71e',
+            '0x42041e3f59318b9481831074e352fba2121b2d22d130c1fab9216aa7be492f48',
             '0x39c5f952da5b89e041d00143e16b67f16c93985178004b6e1f924eef5c233040',
             '0x25aa9444d46d051b97d6212ae7469316d346391f3c0307afc8fb14b7efcd4970',
             '0xe7ab66c6fe9936d05b97e2b2a34a93e26f13aa3c3ecb8d5d8f586a30de30eb36',

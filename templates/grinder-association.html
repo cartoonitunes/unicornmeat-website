@@ -257,6 +257,113 @@
                 max-width: 200px !important;
             }
         }
+        
+        /* Mobile Hero Section Spacing Fixes */
+        @media (max-width: 767px) {
+            /* Account for navbar height - navbar is min-h-64px + mt-3 + container padding, so ~100-110px total */
+            #hero_header.hero-header {
+                padding-top: 0 !important;
+                margin-top: 0 !important;
+            }
+            
+            #hero_header.hero-header .section-outer.min-h-screen {
+                min-height: 100vh !important;
+                height: 100vh !important;
+                padding-top: 8rem !important;
+                padding-bottom: 1.5rem !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+            
+            #hero_header.hero-header .section-outer {
+                min-height: 100vh !important;
+                height: 100vh !important;
+                padding-top: 8rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+            
+            /* Override py-9 class on mobile */
+            #hero_header.hero-header .section-outer.py-9 {
+                padding-top: 8rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+            
+            #hero_header .container {
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                padding-top: 0 !important;
+            }
+            
+            #hero_header .section-inner {
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                padding-top: 0 !important;
+            }
+            
+            #hero_header .panel.vstack {
+                margin-top: 6rem !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+                gap: 1rem !important;
+                width: 100% !important;
+            }
+            
+            /* Ensure content is visible below navbar */
+            #hero_header .hero-logo {
+                margin-top: 0 !important;
+            }
+            
+            #hero_header .hero-button {
+                margin-bottom: 0 !important;
+                margin-top: 0.75rem !important;
+            }
+            
+            #hero_header .hero-button .btn {
+                margin-bottom: 0 !important;
+            }
+            
+            /* Disable height viewport on mobile - let min-height handle it */
+            #hero_header [data-uc-height-viewport] {
+                min-height: auto !important;
+                height: auto !important;
+            }
+            
+            /* Reduce section header spacing on mobile */
+            .section-header {
+                margin-bottom: 1.5rem !important;
+                margin-top: 1rem !important;
+            }
+            
+            /* Consistent section padding on mobile - but don't override all sections */
+            .about .section-outer,
+            .association .section-outer,
+            .grind .section-outer,
+            .association-governance .section-outer,
+            .propose .section-outer,
+            .faq .section-outer {
+                padding-top: 2rem !important;
+                padding-bottom: 2rem !important;
+            }
+            
+            /* Reduce gap between hero and about section */
+            #about.about.section {
+                margin-top: 0 !important;
+                padding-top: 0 !important;
+            }
+            
+            /* Remove any extra spacing from section-outer on about */
+            #about .section-outer {
+                padding-top: 1rem !important;
+            }
+        }
+        
+        @media (min-width: 768px) and (max-width: 991px) {
+            .hero-header .section-outer {
+                padding-bottom: 3rem !important;
+            }
+        }
     </style>
 </head>
 
@@ -353,7 +460,7 @@
             <div class="section-outer min-h-screen py-9 lg:py-10">
                 <div class="container" style="position: relative; z-index: 1;">
                     <div class="section-inner panel">
-                        <div class="panel vstack items-center gap-2 lg:gap-3 xl:gap-4 max-w-md mx-auto text-center px-2 lg:px-0 mt-6 lg:mt-8 xl:mt-9"
+                        <div class="panel vstack items-center gap-2 lg:gap-3 xl:gap-4 max-w-md mx-auto text-center px-2 lg:px-0 mt-6 lg:mt-8 xl:mt-9 mb-0"
                             data-uc-height-viewport="media: @xl;"
                             data-anime="targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
                             <img src="{{ url_for('static', filename='assets/images/home-two/unicornmeat-logo.png') }}"
@@ -363,7 +470,7 @@
                             <h1 class="h2 xl:h1 mb-0 ls-0 hero-title">
                                 The Unicorn Meat Grinder Association 🦄🍖
                             </h1>
-                            <p class="fs-5 sm:fs-4 xl:fs-3 hero-subtitle">A historic Ethereum DAO from March 2016.<br class="d-none sm:d-block">Introduced Token Swaps, Upgrades, and Quadratic Voting.</p>
+                            <p class="fs-5 sm:fs-4 xl:fs-3 hero-subtitle">A historic Ethereum DAO from March 2016. <br class="d-none sm:d-block">Introduced Token Swaps, Upgrades, and Quadratic Voting.</p>
                             <div class="hero-button">
                                 <a class="btn btn-sm sm:btn-md btn-secondary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0"
                                     href="#about">
@@ -915,6 +1022,114 @@
             }
         });
     </script>
+
+    <!-- Footer start -->
+    <footer id="uc-footer" class="uc-footer panel overflow-hidden" style="background-color: #dbf2ff">
+        <div id="references" class="footer-outer">
+            <div
+                class="footer-cta panel py-6 sm:py-8 lg:py-9 xl:py-10 min-h-850px sm:min-h-950px lg:min-h-1000px xl:min-h-1320px">
+                <img class="position-absolute start-0 bottom-0 w-100"
+                    src="{{ url_for('static', filename='assets/images/home-two/footer.svg') }}" alt="Image">
+                <div class="container sm:max-w-md">
+                    <div class="footer-inner panel vstack gap-4 sm:gap-6 xl:gap-9"
+                        data-anime="onview: -100; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
+                        <div class="panel text-center">
+                            <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">
+                                References
+                            </h2>
+                        </div>
+                        <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
+                            <ul class="vstack gap-2 list-unstyled m-0">
+                                <li>
+                                    <a href="https://etherscan.io/address/0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Grinder Association Contract</a>
+                                </li>
+                                <li>
+                                    <a href="https://etherscan.io/address/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Unicorn Meat Contract</a>
+                                </li>
+                                <li>
+                                    <a href="https://x.com/ethereum/status/715821110722433024" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Ethereum
+                                        Twitter Announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://gist.github.com/alexvandesande/eca0b87da89ab28fa50c"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Alex Van de Sande's Announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://gist.github.com/alexvandesande/3abc9f741471e08a6356"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Alex Van de Sande's Contract Code</a>
+                                </li>
+                                <li>
+                                    <a href="https://x.com/pipermerriam/status/718546708641124353" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Piper
+                                        Merriam Takeover announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://x.com/cartoonitunes/status/1942244684513923330" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">cart00n's
+                                        Takeover announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://etherscan.io/tx/0x78b92f3952e72e4714fdb4124da6bb367fad03b77c46e71b4f73045d0c78e1c4"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">"Meatiny" DAO Proposal</a>
+                                </li>
+                                <li>
+                                    <a href="https://etherscan.io/tx/0x974a2c588199c1d245d704b9a184aee66c19f3c056afec869bd786f94e75b71c"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Unicorn Meat Contract Renouncement</a>
+                                </li>
+                                <li>
+                                    <a href="https://web.archive.org/web/20160405014834/ethereum.org/donate"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">Ethereum Foundation 2016 Donation Page</a>
+                                </li>
+                                <li>
+                                    <a href="https://www.reddit.com/r/ethereum/comments/4csw29/so_you_liked_unicorns_but_always_wished_they/"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">r/ethereum Unicorn Meat Grinder
+                                        Announcement</a>
+                                </li>
+                                <li>
+                                    <a href="https://www.reddit.com/r/ethereum/comments/4ma8ts/unicorn_token/"
+                                        target="_blank" class="fw-semibold text-primary"
+                                        style="text-decoration: underline;">r/ethereum Unicorn Token</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/ethereum/ethereum-org/issues/648" target="_blank"
+                                        class="fw-semibold text-primary" style="text-decoration: underline;">Update the
+                                        Unicorn Token price</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-content panel bg-primary-400 text-white" style="margin-top: -1px">
+            <div class="container">
+                <div
+                    class="footer-inner panel vstack lg:hstack gap-4 justify-between fs-5 xl:fs-4 text-center py-4 lg:py-6">
+                    <p>Unicorn Meat © 2025, All rights reserved.</p>
+                    <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#association">The DAO</a></li>
+                        <li><a href="#grind">Grind</a></li>
+                        <li><a href="#propose">Propose</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Footer end -->
 </body>
 
 </html>
