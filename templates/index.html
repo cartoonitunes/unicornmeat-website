@@ -1242,9 +1242,9 @@
                     <li><a href="#about">About</a></li>
                     <li><a href="#trading">Buy 🍖</a></li>
                     <li><a href="#wrap">Wrap 🦄🍖</a></li>
+                    <li><a href="#proof-of-steak">Steak 🍖</a></li>
                     <li><a href="#join-herd">🦄 Herd</a></li>
                     <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
-                    <li><a href="#faq">FAQ</a></li>
                     <li><a href="#references">Links</a></li>
                 </ul>
                 <div class="mt-4">
@@ -1337,9 +1337,9 @@
                                 <li><a href="#about">About</a></li>
                                 <li><a href="#trading">Buy 🍖</a></li>
                                 <li><a href="#wrap">Wrap 🦄🍖</a></li>
+                                <li><a href="#proof-of-steak">Steak 🍖</a></li>
                                 <li><a href="#join-herd">🦄 Herd</a></li>
                                 <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
-                                <li><a href="#faq">FAQ</a></li>
                             </ul>
                         </div>
                         <div class="uc-navbar-right">
@@ -2069,117 +2069,150 @@
 
         <!-- Section end -->
 
-        <!-- Grinder Association Section Start -->
-        <div id="grinder-association" class="grinder-association section panel overflow-hidden">
+        <!-- Proof of Steak Section Start -->
+        <div id="proof-of-steak" class="proof-of-steak section panel overflow-hidden">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #fff4e6;">
                 <div class="container sm:max-w-lg xl:max-w-4xl">
                     <center>
-                        <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0 mb-4">Unicorn Meat Grinder Association 🦄🍖</h2>
+                        <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0 mb-4">Proof of Steak 🥩 Season 1</h2>
                     </center>
                     <div class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
                         <div class="text-center mb-4">
                             <p class="fs-6 xl:fs-5 mb-3">
-                                The Unicorn Meat Grinder Association is a historic DAO contract created in 2016 that allows Unicorn holders to grind their Unicorns for Unicorn Meat and participate in governance proposals.
+                                Stake your Unicorn Meat (w🍖) to earn rewards! Steak-time accumulates as amount multiplied by duration. 
+                                Rewards are distributed from a fixed pool at the end of Season 1.
                             </p>
                             <p class="fs-7 text-muted mb-4">
-                                Contract Address: <a href="https://etherscan.io/address/0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline;">0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32</a>
+                                Contract Address: <a href="https://etherscan.io/address/0x715d50635fE3CDe8A4b7f4601D266459bee60EcA" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline;">0x715d50635fE3CDe8A4b7f4601D266459bee60EcA</a>
                             </p>
                         </div>
 
                         <!-- Loading State -->
-                        <div id="grinder-loading" class="text-center py-4">
+                        <div id="steak-loading" class="text-center py-4">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <p class="mt-2 fs-6">Loading DAO information...</p>
+                            <p class="mt-2 fs-6">Loading staking information...</p>
                         </div>
 
                         <!-- Error State -->
-                        <div id="grinder-error" class="panel p-3 border border-2 border-danger text-danger bg-white text-center d-none mb-4">
-                            <p class="mb-0">Failed to load DAO information. Please make sure you have a Web3 provider (like MetaMask) connected, or try refreshing the page.</p>
+                        <div id="steak-error" class="panel p-3 border border-2 border-danger text-danger bg-white text-center d-none mb-4">
+                            <p class="mb-0" id="steak-error-message">Failed to load staking information. Please make sure you have a Web3 provider (like MetaMask) connected, or try refreshing the page.</p>
                         </div>
 
-                        <!-- DAO Information Display -->
-                        <div id="grinder-info" class="d-none">
-                            <!-- Statistics Row -->
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-4">
-                                    <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
-                                        <h6 class="h6 mb-2 text-uppercase fw-bold">Total Proposals</h6>
-                                        <p class="fs-4 mb-0 fw-bold" id="total-proposals">-</p>
+                        <!-- Staking Information Display -->
+                        <div id="steak-info" class="d-none">
+                            <!-- Season Information and Steak Stats Row -->
+                            <div class="row child-cols-1 lg:child-cols-2 g-3 lg:g-4 mb-4"
+                                data-anime="onview: -400; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 300});">
+                                <!-- Season Information -->
+                                <div class="col order-1 order-lg-1">
+                                    <div class="panel p-3 sm:p-4 border border-2 border-black contrast-shadow-lg bg-white -rotate-1">
+                                        <h3 class="h6 sm:h5 xl:h4 m-0 mb-3 text-uppercase ls-0 text-center">Season Information</h3>
+                                        <div>
+                                            <p class="mb-2 fs-7 sm:fs-6"><strong>Season Status:</strong> <span id="season-status">-</span></p>
+                                            <p class="mb-2 fs-7 sm:fs-6"><strong>Season Length:</strong> <span id="season-length">-</span></p>
+                                            <p class="mb-2 fs-7 sm:fs-6"><strong>Season Start:</strong> <span id="season-start">-</span></p>
+                                            <p class="mb-2 fs-7 sm:fs-6"><strong>Season End:</strong> <span id="season-end">-</span></p>
+                                            <p class="mb-2 fs-7 sm:fs-6"><strong>Time Remaining:</strong> <span id="time-remaining">-</span></p>
+                                            <p class="mb-2 fs-7 sm:fs-6"><strong>Total Steaked:</strong> <span id="total-steaked">-</span></p>
+                                            <p class="mb-0 fs-7 sm:fs-6"><strong>Reward Pool:</strong> <span id="reward-pool">-</span></p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
-                                        <h6 class="h6 mb-2 text-uppercase fw-bold">Total Unicorns Killed</h6>
-                                        <p class="fs-4 mb-0 fw-bold" id="total-unicorns-killed">-</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white text-center">
-                                        <h6 class="h6 mb-2 text-uppercase fw-bold">Minimum Quorum</h6>
-                                        <p class="fs-4 mb-0 fw-bold" id="minimum-quorum">-</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Voting Rules -->
-                            <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
-                                <h5 class="h5 mb-3 text-uppercase fw-bold">Voting Rules</h5>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <p class="mb-2"><strong>Debating Period:</strong> <span id="debating-period">-</span> minutes</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-2"><strong>Rejection Multiplier:</strong> <span id="rejection-multiplier">-</span>x</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Contract Addresses -->
-                            <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
-                                <h5 class="h5 mb-3 text-uppercase fw-bold">Contract Addresses</h5>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <p class="mb-2"><strong>Unicorn Token:</strong></p>
-                                        <p class="mb-2 fs-7">
-                                            <a href="#" id="unicorn-token-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-2"><strong>Meat Token:</strong></p>
-                                        <p class="mb-2 fs-7">
-                                            <a href="#" id="meat-token-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-2"><strong>Meat Provider:</strong></p>
-                                        <p class="mb-2 fs-7">
-                                            <a href="#" id="meat-provider-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-2"><strong>Owner:</strong></p>
-                                        <p class="mb-2 fs-7">
-                                            <a href="#" id="owner-link" target="_blank" rel="noopener noreferrer" class="text-primary" style="text-decoration: underline; word-break: break-all;">-</a>
-                                        </p>
+                                
+                                <!-- Steak Stats -->
+                                <div class="col order-2 order-lg-2">
+                                    <div class="panel p-3 sm:p-4 border border-2 border-black contrast-shadow-lg bg-white rotate-1">
+                                        <h3 class="h6 sm:h5 xl:h4 m-0 mb-3 text-uppercase ls-0 text-center">Steak Stats</h3>
+                                        
+                                        <!-- Not Logged In Message -->
+                                        <div id="steak-stats-not-logged-in" class="text-center">
+                                            <p class="fs-7 sm:fs-6 mb-0">Connect your wallet to see your steak stats.</p>
+                                        </div>
+                                        
+                                        <!-- Logged In Stats -->
+                                        <div id="steak-stats-content" class="d-none">
+                                            <div>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Steaked Meat:</strong> <span id="user-steaked-amount">-</span></p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Max Steaked:</strong> <span id="user-max-amount">-</span></p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Last Update:</strong> <span id="user-last-update">-</span></p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Share of Pool:</strong> <span id="user-pool-share">-</span></p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Estimated Reward:</strong> <span id="user-estimated-reward">-</span></p>
+                                                <p class="mb-2 fs-7 sm:fs-6"><strong>Claimed:</strong> <span id="user-claimed">-</span></p>
+                                            </div>
+                                            
+                                            <!-- Refresh Button -->
+                                            <div class="text-center mt-3">
+                                                <button id="refresh-steak-stats-btn" class="btn btn-sm border border-2 border-black contrast-shadow-sm" style="background-color: #fff4e6; color: #000;">
+                                                    <i class="icon icon-refresh me-2"></i>Refresh Stats
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Pending Rewards Section -->
+                                            <div class="panel p-3 border border-2 border-success contrast-shadow-sm bg-light mt-3 mb-0" style="background-color: #f0f9f0 !important;">
+                                                <h6 class="h6 mb-2 text-uppercase fw-bold text-success">Pending Rewards</h6>
+                                                <p class="fs-4 mb-0 fw-bold text-success" id="user-pending-reward">-</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Proposals List -->
-                            <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white">
-                                <h5 class="h5 mb-3 text-uppercase fw-bold">Proposals</h5>
-                                <div id="proposals-list" class="vstack gap-3">
-                                    <p class="text-muted text-center">No proposals found.</p>
+                            <!-- Connect Wallet Section -->
+                            <div id="steak-connect-wallet" class="text-center mb-4">
+                                <button id="steak-connect-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md px-5" style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb); color: #000;">
+                                    <i class="icon icon-wallet me-2"></i>Connect Wallet to Stake
+                                </button>
+                            </div>
+
+                            <!-- Steak/Unsteak Actions -->
+                            <div id="steak-actions" class="d-none">
+                                <!-- Note about pending rewards -->
+                                <p class="fs-7 text-muted mb-3">
+                                    <small>
+                                        <strong>Note:</strong> Your pending reward is calculated based on your share of total steak time. 
+                                        This value will decrease as more participants join and stake their Meat, since the reward pool is 
+                                        distributed proportionally among all stakers. Final rewards are only available after the season ends 
+                                        and you maintain at least your peak staked amount.
+                                    </small>
+                                </p>
+                                
+                                <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
+                                    <h5 class="h5 mb-3 text-uppercase fw-bold">Steak Your Meat 🥩</h5>
+                                    <div class="mb-3">
+                                        <label for="steak-amount" class="form-label fw-bold">Amount to Stake (w🍖)</label>
+                                        <input type="number" id="steak-amount" class="form-control border border-2 border-black text-center" 
+                                               placeholder="0" min="0" step="0.001" style="font-size: 16px; height: 48px;">
+                                        <small class="text-muted d-block mt-2">You have: <span id="user-meat-balance">-</span> w🍖</small>
+                                    </div>
+                                    <button id="steak-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md w-100" style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb); color: #000;" disabled>
+                                        <i class="icon icon-check me-2"></i>Steak 🥩
+                                    </button>
+                                </div>
+
+                                <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
+                                    <h5 class="h5 mb-3 text-uppercase fw-bold">Unsteak Your Meat</h5>
+                                    <p class="fs-6 mb-3">Unsteak your staked Unicorn Meat. If the season has ended and you're eligible, you'll automatically claim your rewards after unsteaking.</p>
+                                    <button id="unsteak-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md w-100" style="background-color: #dbf2ff; color: #000;" disabled>
+                                        <i class="icon icon-check me-2"></i>Unsteak
+                                    </button>
                                 </div>
                             </div>
+
+                            <!-- Transaction Status -->
+                            <div id="steak-tx-status" class="panel p-3 border border-2 border-warning text-warning bg-white text-center d-none mb-4">
+                                <p class="mb-0" id="steak-tx-message">Transaction in progress... Please wait.</p>
+                            </div>
+
+                            <!-- Success/Error Messages -->
+                            <div id="steak-result-messages"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Grinder Association Section End -->
+        <!-- Proof of Steak Section End -->
 
         <div class="d-none xl:d-block">
             <img class="text-secondary-100"
@@ -2270,7 +2303,7 @@
                                         
                                         <!-- Connect Wallet Button -->
                                         <div id="connect-wallet-section" class="mb-4">
-                                            <button id="connect-wallet-btn" class="btn btn-lg btn-primary border border-2 border-black contrast-shadow-md px-5">
+                                            <button id="connect-wallet-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md px-5" style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb); color: #000;">
                                                 <i class="icon icon-wallet me-2"></i>Connect Wallet to Start
                                             </button>
                                             
@@ -2800,9 +2833,9 @@
                         <li><a href="#about">About</a></li>
                         <li><a href="#trading">Buy 🍖</a></li>
                         <li><a href="#wrap">Wrap 🦄🍖</a></li>
+                        <li><a href="#proof-of-steak">Steak 🍖</a></li>
                         <li><a href="#join-herd">🦄 Herd</a></li>
                         <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
-                        <li><a href="#faq">FAQ</a></li>
                     </ul>
                 </div>
             </div>
@@ -2856,8 +2889,8 @@
     <!-- include WalletKit integration -->
     <script defer src="{{ url_for('static', filename='assets/js/walletkit-integration.js') }}"></script>
     
-    <!-- include Grinder Association DAO loader -->
-    <script defer src="{{ url_for('static', filename='assets/js/grinder-association.js') }}"></script>
+    <!-- include Proof of Steak loader -->
+    <script defer src="{{ url_for('static', filename='assets/js/proof-of-steak.js') }}"></script>
     
 
 
@@ -3489,4 +3522,5 @@
     </div>
 </body>
 
+</html>
 </html>
