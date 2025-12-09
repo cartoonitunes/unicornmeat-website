@@ -3,10 +3,37 @@
 
 (function() {
     'use strict';
+    
+    // Suppress expected wallet extension errors
+    const originalConsoleError = console.error;
+    console.error = function(...args) {
+        const message = args.join(' ');
+        // Suppress known wallet extension errors
+        if (message.includes('Permissions policy violation') ||
+            message.includes('ObjectMultiplex') ||
+            message.includes('malformed chunk') ||
+            message.includes('ENOENT') ||
+            message.includes('geth.ipc')) {
+            return; // Suppress these expected errors
+        }
+        originalConsoleError.apply(console, args);
+    };
+    
+    const originalConsoleWarn = console.warn;
+    console.warn = function(...args) {
+        const message = args.join(' ');
+        // Suppress known wallet extension warnings
+        if (message.includes('Permissions policy violation') ||
+            message.includes('ObjectMultiplex') ||
+            message.includes('malformed chunk')) {
+            return; // Suppress these expected warnings
+        }
+        originalConsoleWarn.apply(console, args);
+    };
 
     const PROOF_OF_STEAK_CONTRACT_ADDRESS = '0x715d50635fE3CDe8A4b7f4601D266459bee60EcA';
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
-    const RPC_ENDPOINT = 'https://eth.llamarpc.com';
+    const RPC_ENDPOINT = 'https://eth-mainnet.g.alchemy.com/v2/FF0GUedsNSBgY9vgIPWUbJqjkPeFwVsO';
 
     // Proof of Steak Contract ABI
     const PROOF_OF_STEAK_ABI = [
@@ -22,13 +49,6 @@
             "name": "unsteak",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
-            "name": "pendingReward",
-            "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-            "stateMutability": "view",
             "type": "function"
         },
         {
@@ -425,7 +445,7 @@
                 await loadUserStats();
             }
         } catch (error) {
-            console.error('Error refreshing stats:', error);
+            // Silently handle refresh errors
         } finally {
             if (refreshBtn) {
                 refreshBtn.disabled = false;
@@ -442,13 +462,14 @@
 
         try {
             // Get all user steak information and related data
-            const [steakInfo, pendingReward, balance, seasonEnd, seasonStarted, totalSteakTime, rewardPool] = await Promise.all([
+            const [steakInfo, balance, seasonEnd, seasonStarted, seasonStart, totalSteakTime, totalSteaked, rewardPool] = await Promise.all([
                 contract.steaks(userAddress),
-                contract.pendingReward(userAddress),
                 tokenContract.balanceOf(userAddress),
                 contract.seasonEnd(),
                 contract.seasonStarted(),
+                contract.seasonStart(),
                 contract.totalSteakTime(),
+                contract.totalSteaked(),
                 contract.rewardPool()
             ]);
 
@@ -460,7 +481,14 @@
             const userMaxAmount = steakInfo.maxAmount._hex ? window.ethers.BigNumber.from(steakInfo.maxAmount._hex) : steakInfo.maxAmount;
             const lastUpdate = steakInfo.lastUpdate._hex ? window.ethers.BigNumber.from(steakInfo.lastUpdate._hex) : steakInfo.lastUpdate;
             const totalSteakTimeBN = totalSteakTime._hex ? window.ethers.BigNumber.from(totalSteakTime._hex) : totalSteakTime;
+            const totalSteakedBN = totalSteaked._hex ? window.ethers.BigNumber.from(totalSteaked._hex) : totalSteaked;
             const rewardPoolBN = rewardPool._hex ? window.ethers.BigNumber.from(rewardPool._hex) : rewardPool;
+            
+            // Get season timing
+            const now = Math.floor(Date.now() / 1000);
+            const endTime = seasonEnd.toNumber();
+            const startTime = seasonStart.toNumber();
+            const isStarted = seasonStarted;
             
             // Display basic user stats
             document.getElementById('user-steaked-amount').textContent = formatTokenAmount(userSteakAmount, decimals) + ' w🍖';
@@ -476,31 +504,81 @@
                 document.getElementById('user-last-update').textContent = 'Never';
             }
             
-            // Calculate user's percentage of the pool
+            // Simulate steak times for accurate calculations
+            let simulatedTotalSteakTime = totalSteakTimeBN;
+            let simulatedUserSteakTime = userSteakTime;
+            
+            if (isStarted && startTime > 0) {
+                const effectiveNow = Math.min(now, endTime);
+                const lastGlobalUpdate = startTime; // Base estimate (contract sets this at season start)
+                
+                // Global steakTime update
+                const timeDiff = effectiveNow - lastGlobalUpdate;
+                if (timeDiff > 0 && totalSteakedBN.gt(0)) {
+                    const additionalGlobal = totalSteakedBN.mul(timeDiff);
+                    simulatedTotalSteakTime = totalSteakTimeBN.add(additionalGlobal);
+                }
+                
+                // User steakTime update
+                const userLastUpdate = lastUpdate.toNumber();
+                const userLastUpdateTime = userLastUpdate > 0 ? userLastUpdate : startTime;
+                const userTimeDiff = effectiveNow - userLastUpdateTime;
+                if (userTimeDiff > 0 && userSteakAmount.gt(0)) {
+                    const additionalUser = userSteakAmount.mul(userTimeDiff);
+                    simulatedUserSteakTime = userSteakTime.add(additionalUser);
+                }
+            }
+            
+            // Calculate user's percentage of the pool using simulated values
             let poolSharePercent = '0.00%';
             let estimatedReward = '0 w🍖';
             
-            if (totalSteakTimeBN.gt(0) && userSteakTime.gt(0)) {
-                // Calculate percentage: (userSteakTime / totalSteakTime) * 100
-                const shareBN = userSteakTime.mul(10000).div(totalSteakTimeBN); // Multiply by 10000 for 2 decimal precision
+            if (simulatedTotalSteakTime.gt(0) && simulatedUserSteakTime.gt(0)) {
+                // Calculate percentage: (simulatedUserSteakTime / simulatedTotalSteakTime) * 100
+                const shareBN = simulatedUserSteakTime.mul(10000).div(simulatedTotalSteakTime); // Multiply by 10000 for 2 decimal precision
                 poolSharePercent = (shareBN.toNumber() / 100).toFixed(2) + '%';
                 
-                // Calculate estimated reward: (userSteakTime / totalSteakTime) * rewardPool
-                const estimatedRewardBN = rewardPoolBN.mul(userSteakTime).div(totalSteakTimeBN);
+                // Calculate estimated reward: (simulatedUserSteakTime / simulatedTotalSteakTime) * rewardPool
+                const estimatedRewardBN = rewardPoolBN.mul(simulatedUserSteakTime).div(simulatedTotalSteakTime);
                 estimatedReward = formatTokenAmount(estimatedRewardBN, decimals) + ' w🍖';
             }
             
             document.getElementById('user-pool-share').textContent = poolSharePercent;
             document.getElementById('user-estimated-reward').textContent = estimatedReward;
             
-            // Display pending reward (only available after season ends)
-            const pendingRewardBN = pendingReward._hex ? window.ethers.BigNumber.from(pendingReward._hex) : pendingReward;
-            const now = Math.floor(Date.now() / 1000);
-            const endTime = seasonEnd.toNumber();
-            const isSeasonEnded = seasonStarted && now >= endTime;
+            // Simulate pending reward with eligibility checks
+            let simulatedPendingReward = window.ethers.BigNumber.from(0);
             
-            if (pendingRewardBN.gt(0)) {
-                document.getElementById('user-pending-reward').textContent = formatTokenAmount(pendingReward, decimals) + ' w🍖';
+            // Eligibility checks (must pass all in order)
+            const userAmountBN = userSteakAmount;
+            const userMaxAmountBN = userMaxAmount;
+            
+            // Check eligibility rules (early returns)
+            if (userAmountBN.isZero()) {
+                // amount == 0, return 0
+                simulatedPendingReward = window.ethers.BigNumber.from(0);
+            } else if (userAmountBN.lt(userMaxAmountBN)) {
+                // amount < maxAmount, return 0
+                simulatedPendingReward = window.ethers.BigNumber.from(0);
+            } else if (!isStarted) {
+                // !seasonStarted, return 0
+                simulatedPendingReward = window.ethers.BigNumber.from(0);
+            } else if (now < endTime) {
+                // now < seasonEnd, return 0
+                simulatedPendingReward = window.ethers.BigNumber.from(0);
+            } else if (simulatedTotalSteakTime.isZero()) {
+                // simulatedTotalSteakTime == 0, return 0
+                simulatedPendingReward = window.ethers.BigNumber.from(0);
+            } else {
+                // All eligibility checks passed, calculate reward using simulated values
+                // reward = rewardPool * simulatedUserSteakTime / simulatedTotalSteakTime
+                simulatedPendingReward = rewardPoolBN.mul(simulatedUserSteakTime).div(simulatedTotalSteakTime);
+            }
+            
+            // Display pending reward
+            const isSeasonEnded = isStarted && now >= endTime;
+            if (simulatedPendingReward.gt(0)) {
+                document.getElementById('user-pending-reward').textContent = formatTokenAmount(simulatedPendingReward, decimals) + ' w🍖';
             } else if (isSeasonEnded) {
                 document.getElementById('user-pending-reward').textContent = '0 w🍖 (Not eligible - see requirements)';
             } else {
@@ -519,7 +597,7 @@
                 unsteakBtn.disabled = amount.isZero ? amount.isZero() : (amount.toString() === '0');
             }
         } catch (error) {
-            console.error('Error loading user stats:', error);
+            // Silently handle user stats loading errors
         }
     }
 
@@ -552,7 +630,6 @@
 
             steakBtn.disabled = false;
         } catch (error) {
-            console.error('Error validating steak amount:', error);
             steakBtn.disabled = true;
         }
     }
@@ -624,7 +701,6 @@
             await validateSteakAmount();
 
         } catch (error) {
-            console.error('Error staking:', error);
             hideTransactionStatus();
             if (error.code === 4001) {
                 showError('Transaction was rejected by user');
@@ -672,7 +748,6 @@
             await loadUserStats();
 
         } catch (error) {
-            console.error('Error unstaking:', error);
             hideTransactionStatus();
             if (error.code === 4001) {
                 showError('Transaction was rejected by user');

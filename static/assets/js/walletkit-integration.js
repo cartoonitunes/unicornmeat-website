@@ -23,17 +23,12 @@ class UnicornMeatWalletKit {
         try {
             // Check if ethers.js is loaded
             if (typeof window.ethers === 'undefined') {
-                console.log('Ethers.js not loaded yet, waiting...');
                 // Wait a bit for scripts to load
                 setTimeout(() => {
                     if (typeof window.ethers === 'undefined') {
-                        console.warn('Ethers.js still not loaded after timeout');
-                    } else {
-                        console.log('Ethers.js loaded successfully');
+                        // Ethers.js still not loaded after timeout
                     }
                 }, 2000);
-            } else {
-                console.log('Ethers.js already loaded');
             }
             
             // Set up event listeners
@@ -49,9 +44,8 @@ class UnicornMeatWalletKit {
             // await this.loadClaimStats();
             // await this.loadClaimStatus();
             
-            console.log('WalletKit integration initialized');
         } catch (error) {
-            console.error('Error initializing WalletKit:', error);
+            // Silently handle initialization errors
         }
     }
     
@@ -59,7 +53,6 @@ class UnicornMeatWalletKit {
         try {
             // Check if WalletKit is available
             if (typeof window.WalletKit === 'undefined') {
-                console.log('WalletKit not available, using fallback');
                 this.createFallbackModal();
                 return;
             }
@@ -561,7 +554,6 @@ class UnicornMeatWalletKit {
     checkExistingConnections() {
         // Check if MetaMask is already connected
         if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
-            console.log('Found existing MetaMask connection:', window.ethereum.selectedAddress);
             this.account = { address: window.ethereum.selectedAddress };
             this.isConnected = true;
             
@@ -793,65 +785,30 @@ class UnicornMeatWalletKit {
                     this.currentClaimData.claimableAmount,
                     this.currentClaimData.merkleProof
                 );
-                console.log('Contract verification:', {
-                    ourAmount: amount,
-                    contractAmount: expectedAmount.toString(),
-                    match: amount === expectedAmount.toNumber(),
-                    difference: amount - expectedAmount.toNumber()
-                });
                 
                 // If there's a mismatch, use the contract's amount
                 if (amount !== expectedAmount.toNumber()) {
-                    console.log('Using contract amount instead of our calculation');
                     amount = expectedAmount.toNumber();
                 }
             } catch (verifyError) {
-                console.error('Amount verification failed:', verifyError);
+                // Silently handle verification errors
             }
             
-            console.log('Amount for claim:', {
-                original: this.currentClaimData.claimableAmount,
-                amount: amount,
-                expectedTokens: this.currentClaimData.claimableAmount / 1000,
-                note: 'Amount in smallest unit (3 decimals) - will display as tokens'
-            });
-            
-            console.log('Claiming with:', {
-                amount: amount,
-                proofLength: this.currentClaimData.merkleProof.length,
-                address: this.account.address
-            });
-            
             this.showLoading('Waiting for wallet approval...');
-            
-            // Call the claim function with better gas estimation for OKX and other wallets
-            console.log('Sending transaction with:', {
-                recipient: this.account.address,
-                amount: amount.toString(),
-                amountHex: '0x' + amount.toString(16),
-                proofLength: this.currentClaimData.merkleProof.length
-            });
             
             // Try to estimate gas first, then use a buffer for OKX compatibility
             let gasEstimate;
             try {
                 gasEstimate = await claimContract.estimateGas.claim(this.account.address, amount, this.currentClaimData.merkleProof);
-                console.log('Gas estimate:', gasEstimate.toString());
             } catch (estimateError) {
-                console.log('Gas estimation failed, using default:', estimateError);
                 gasEstimate = window.ethers.BigNumber.from(300000);
             }
             
-            // Single, reliable approach for all wallets including OKX
-            console.log('Attempting claim with optimized settings...');
-            
             // Use a reasonable gas limit
             const gasLimit = gasEstimate.mul(120).div(100); // 20% buffer
-            console.log('Using gas limit:', gasLimit.toString());
             
             // Use legacy gasPrice method for better wallet compatibility
             const gasPrice = await provider.getGasPrice();
-            console.log('Using legacy gasPrice method for better wallet compatibility');
             
             const tx = await claimContract.claim(this.account.address, amount, this.currentClaimData.merkleProof, {
                 gasLimit: gasLimit,
@@ -863,7 +820,6 @@ class UnicornMeatWalletKit {
             // Wait for transaction confirmation
             const receipt = await tx.wait();
             
-            console.log('Transaction receipt:', receipt);
             
             if (receipt.status === 1) {
                 this.showSuccess(`Claim successful! Transaction: ${receipt.transactionHash}`);
@@ -871,20 +827,10 @@ class UnicornMeatWalletKit {
                 await this.loadClaimData();
                 await this.updateConnectButton(); // Refresh the wallet balance display
             } else {
-                // Transaction failed - let's try to get more details
-                console.error('Transaction failed with status 0');
-                console.log('Failed transaction details:', {
-                    hash: receipt.transactionHash,
-                    gasUsed: receipt.gasUsed.toString(),
-                    blockNumber: receipt.blockNumber
-                });
-                
-                // Try to simulate the transaction to get the revert reason
+                // Transaction failed - try to get the revert reason
                 try {
-                    const simulation = await claimContract.callStatic.claim(amount, this.currentClaimData.merkleProof);
-                    console.log('Simulation result:', simulation);
+                    await claimContract.callStatic.claim(amount, this.currentClaimData.merkleProof);
                 } catch (simError) {
-                    console.error('Simulation error:', simError);
                     if (simError.reason) {
                         this.showError(`Claim failed: ${simError.reason}`);
                     } else {
@@ -1285,7 +1231,6 @@ class UnicornMeatWalletKit {
             );
             await wrapTx.wait();
             
-            console.log('Wrap transaction successful:', wrapTx.hash);
             this.showWrapSuccess(`Successfully wrapped ${amount} Unicorn Meat tokens! Transaction: ${wrapTx.hash}`);
             await this.loadContractData();
             await this.updateConnectButton();
