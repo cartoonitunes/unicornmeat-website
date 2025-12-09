@@ -33,7 +33,8 @@
 
     const PROOF_OF_STEAK_CONTRACT_ADDRESS = '0x715d50635fE3CDe8A4b7f4601D266459bee60EcA';
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
-    const RPC_ENDPOINT = 'https://eth-mainnet.g.alchemy.com/v2/FF0GUedsNSBgY9vgIPWUbJqjkPeFwVsO';
+    const READ_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For read operations
+    const WRITE_RPC_ENDPOINT = 'https://eth-mainnet.g.alchemy.com/v2/FF0GUedsNSBgY9vgIPWUbJqjkPeFwVsO'; // For write operations
 
     // Proof of Steak Contract ABI
     const PROOF_OF_STEAK_ABI = [
@@ -167,9 +168,12 @@
         }
     ];
 
-    let provider;
-    let contract;
-    let tokenContract;
+    let readProvider; // For read operations (Rarible)
+    let writeProvider; // For write operations (Alchemy, but actually uses wallet provider)
+    let readContract; // Contract instance for read operations
+    let writeContract; // Contract instance for write operations (uses wallet provider)
+    let readTokenContract; // Token contract for read operations
+    let writeTokenContract; // Token contract for write operations (uses wallet provider)
     let userAddress = null;
 
     // Initialize on DOM ready
@@ -180,22 +184,29 @@
     function init() {
         // Wait for ethers.js to be available
         if (typeof window.ethers === 'undefined') {
-            console.error('Ethers.js not available');
             showError('Ethers.js library is required. Please refresh the page.');
             return;
         }
 
-        // Try to use wallet provider, fallback to public RPC
+        // Set up read provider (Rarible) for read operations
+        readProvider = new window.ethers.providers.JsonRpcProvider(READ_RPC_ENDPOINT);
+        
+        // Set up write provider (will use wallet provider when available, fallback to Alchemy)
         if (window.ethereum) {
-            provider = new window.ethers.providers.Web3Provider(window.ethereum);
+            writeProvider = new window.ethers.providers.Web3Provider(window.ethereum);
             // Listen for account changes
             window.ethereum.on('accountsChanged', handleAccountsChanged);
         } else {
-            provider = new window.ethers.providers.JsonRpcProvider(RPC_ENDPOINT);
+            writeProvider = new window.ethers.providers.JsonRpcProvider(WRITE_RPC_ENDPOINT);
         }
 
-        contract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, provider);
-        tokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, provider);
+        // Create read contract instances (using Rarible for reads)
+        readContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, readProvider);
+        readTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, readProvider);
+        
+        // Create write contract instances (using wallet provider or Alchemy for writes)
+        writeContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, writeProvider);
+        writeTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, writeProvider);
 
         // Setup event listeners
         setupEventListeners();
@@ -354,15 +365,15 @@
             hideError();
             showLoading();
 
-            // Load general stats
+            // Load general stats (using read contract with Rarible)
             const [totalSteaked, rewardPool, seasonStart, seasonEnd, seasonStarted, rewardPoolFunded, seasonLengthSeconds] = await Promise.all([
-                contract.totalSteaked(),
-                contract.rewardPool(),
-                contract.seasonStart(),
-                contract.seasonEnd(),
-                contract.seasonStarted(),
-                contract.rewardPoolFunded(),
-                contract.seasonLengthSeconds()
+                readContract.totalSteaked(),
+                readContract.rewardPool(),
+                readContract.seasonStart(),
+                readContract.seasonEnd(),
+                readContract.seasonStarted(),
+                readContract.rewardPoolFunded(),
+                readContract.seasonLengthSeconds()
             ]);
 
             // Format and display in Season Information section
@@ -461,16 +472,16 @@
         }
 
         try {
-            // Get all user steak information and related data
+            // Get all user steak information and related data (using read contract with Rarible)
             const [steakInfo, balance, seasonEnd, seasonStarted, seasonStart, totalSteakTime, totalSteaked, rewardPool] = await Promise.all([
-                contract.steaks(userAddress),
-                tokenContract.balanceOf(userAddress),
-                contract.seasonEnd(),
-                contract.seasonStarted(),
-                contract.seasonStart(),
-                contract.totalSteakTime(),
-                contract.totalSteaked(),
-                contract.rewardPool()
+                readContract.steaks(userAddress),
+                readTokenContract.balanceOf(userAddress),
+                readContract.seasonEnd(),
+                readContract.seasonStarted(),
+                readContract.seasonStart(),
+                readContract.totalSteakTime(),
+                readContract.totalSteaked(),
+                readContract.rewardPool()
             ]);
 
             const decimals = 3;
@@ -618,7 +629,8 @@
         }
 
         try {
-            const balance = await tokenContract.balanceOf(userAddress);
+            // Use read contract for balance check
+            const balance = await readTokenContract.balanceOf(userAddress);
             const decimals = 3;
             const amountWei = window.ethers.utils.parseUnits(amount.toString(), decimals);
             
@@ -658,24 +670,24 @@
             steakBtn.disabled = true;
             showTransactionStatus('Preparing transaction...');
 
-            // Get signer from wallet provider
+            // Get signer from wallet provider (for write operations)
             const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
             const signer = walletProvider.getSigner();
-            const contractWithSigner = contract.connect(signer);
-            const tokenContractWithSigner = tokenContract.connect(signer);
+            const contractWithSigner = writeContract.connect(signer);
+            const tokenContractWithSigner = writeTokenContract.connect(signer);
 
             const decimals = 3;
             const amountWei = window.ethers.utils.parseUnits(amount.toString(), decimals);
 
-            // Check balance
-            const balance = await tokenContract.balanceOf(userAddress);
+            // Check balance (using read contract)
+            const balance = await readTokenContract.balanceOf(userAddress);
             const balanceBN = balance._hex ? window.ethers.BigNumber.from(balance._hex) : balance;
             if (amountWei.gt(balanceBN)) {
                 throw new Error('Insufficient balance');
             }
 
-            // Check and handle approval
-            const allowance = await tokenContract.allowance(userAddress, PROOF_OF_STEAK_CONTRACT_ADDRESS);
+            // Check and handle approval (using read contract for check, write contract for transaction)
+            const allowance = await readTokenContract.allowance(userAddress, PROOF_OF_STEAK_CONTRACT_ADDRESS);
             const allowanceBN = allowance._hex ? window.ethers.BigNumber.from(allowance._hex) : allowance;
             if (allowanceBN.lt(amountWei)) {
                 showTransactionStatus('Approval needed. Please approve in your wallet...');
@@ -684,7 +696,7 @@
                 await approveTx.wait();
             }
 
-            // Execute steak
+            // Execute steak (using write contract with signer)
             showTransactionStatus('Staking your Meat... Please confirm in your wallet.');
             const steakTx = await contractWithSigner.steak(amountWei);
             showTransactionStatus('Transaction submitted. Waiting for confirmation...');
@@ -729,10 +741,10 @@
             unsteakBtn.disabled = true;
             showTransactionStatus('Preparing unsteak transaction...');
 
-            // Get signer from wallet provider
+            // Get signer from wallet provider (for write operations)
             const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
             const signer = walletProvider.getSigner();
-            const contractWithSigner = contract.connect(signer);
+            const contractWithSigner = writeContract.connect(signer);
 
             showTransactionStatus('Unstaking your Meat... Please confirm in your wallet.');
             const unsteakTx = await contractWithSigner.unsteak();
