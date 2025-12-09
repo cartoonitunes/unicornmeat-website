@@ -414,10 +414,8 @@
                             const claimBtn = document.getElementById('claim-btn');
                             
                             if (validationMessages && validationText && claimBtn) {
-                                console.log('DOM elements ready, setting up event listeners');
                                 this.setupEventListeners();
                             } else {
-                                console.log('DOM elements not ready yet, waiting...');
                                 setTimeout(waitForDOM, 100);
                             }
                         };
@@ -429,17 +427,12 @@
                     },
                     
                     setupEventListeners() {
-                        console.log('setupEventListeners called');
                         const connectWalletBtn = document.getElementById('connect-wallet-btn');
                         const claimBtn = document.getElementById('claim-btn');
                         const subdomainInput = document.getElementById('subdomain-label');
                         
-                        console.log('Found elements:', { connectWalletBtn: !!connectWalletBtn, claimBtn: !!claimBtn, subdomainInput: !!subdomainInput });
-                        
                         if (connectWalletBtn) {
-                            console.log('Setting up connect wallet button event listener');
                             connectWalletBtn.addEventListener('click', () => {
-                                console.log('Connect wallet button clicked');
                                 this.connectWallet();
                             });
                         }
@@ -598,21 +591,16 @@
                     },
                     
                     async connectWallet() {
-                        console.log('connectWallet called');
                         try {
                             // Use the existing walletkit connection
                             if (window.unicornMeatWalletKit) {
-                                console.log('WalletKit found, checking connection status');
                                 if (window.unicornMeatWalletKit.isConnected) {
-                                    console.log('WalletKit already connected, handling connection');
                                     this.handleWalletkitConnection();
                                 } else {
-                                    console.log('WalletKit not connected, opening modal');
                                     // Open the walletkit modal
                                     window.unicornMeatWalletKit.openWalletModal();
                                 }
                             } else {
-                                console.log('WalletKit not found, falling back to MetaMask');
                                 // Fallback to direct MetaMask
                                 if (typeof window.ethereum !== 'undefined') {
                                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -638,7 +626,6 @@
                                 }
                             }
                         } catch (error) {
-                            console.error('Error in connectWallet:', error);
                             this.showError('Failed to connect wallet: ' + error.message);
                         }
                     },
@@ -728,10 +715,7 @@
                             try {
                                 const userLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
                                 hasSubdomain = userLabel && userLabel.trim() !== '';
-                                // User subdomain check (logging disabled to reduce console noise)
-                                // console.log('User subdomain check:', { userLabel, hasSubdomain });
                             } catch (error) {
-                                console.log('Error checking user subdomain:', error);
                                 hasSubdomain = false;
                             }
                         }
@@ -785,28 +769,23 @@
                             if (this.userAddress) {
                                 try {
                                     const userLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
-                                    console.log('Current user owns label:', userLabel);
                                     
                                     if (userLabel === label.trim()) {
-                                        console.log('Current user already owns this label');
                                         return false; // User already owns this label
                                     }
                                 } catch (contractError) {
-                                    console.log('Smart contract user label check failed:', contractError);
+                                    // Silently handle contract errors
                                 }
                             }
                             
                             // Check if this label is owned by anyone through the smart contract
                             try {
                                 const labelOwner = await this.contract.methods.getLabelOwner(label.trim()).call();
-                                console.log('Label owner from smart contract:', labelOwner);
                                 
                                 if (labelOwner && labelOwner !== '0x0000000000000000000000000000000000000000') {
-                                    console.log('Label is owned by someone through smart contract:', labelOwner);
                                     return false; // Already owned by someone
                                 }
                             } catch (contractError) {
-                                console.log('Smart contract label owner check failed:', contractError);
                                 // If this method doesn't exist, we'll fall back to ENS checks
                             }
                             
@@ -815,29 +794,23 @@
                                 try {
                                     const provider = new window.ethers.providers.Web3Provider(window.ethereum);
                                     const subdomain = `${label.trim()}.the🦄.eth`;
-                                    console.log('Checking ENS for subdomain:', subdomain);
                                     
                                     // First try to get the resolver
                                     const ensResolver = await provider.getResolver(subdomain);
-                                    console.log('ENS resolver result:', ensResolver);
                                     
                                     if (ensResolver) {
                                         // Check if the resolver has an address (meaning it's claimed)
                                         try {
                                             const address = await ensResolver.getAddress();
-                                            console.log('ENS address result:', address);
                                             
                                             if (address && address !== '0x0000000000000000000000000000000000000000') {
-                                                console.log('Subdomain already claimed by ENS:', address);
                                                 return false; // Already claimed by someone
                                             }
                                             
                                             // If we have a resolver but no address, the subdomain is still claimed
                                             // A resolver existing means someone has set it up, even if not fully configured
-                                            console.log('Resolver exists but no address - subdomain is claimed');
                                             return false; // Already claimed
                                         } catch (addressError) {
-                                            console.log('ENS address check failed:', addressError);
                                             // If we can't get the address but resolver exists, assume claimed
                                             return false; // Conservative approach
                                         }
@@ -847,7 +820,6 @@
                                     // We rely on resolver checks which are more accurate
                                     
                                 } catch (ensError) {
-                                    console.error('ENS check failed:', ensError);
                                     // If ENS check fails, be conservative and assume it's not available
                                     return false;
                                 }
@@ -855,26 +827,20 @@
                             
                             return true; // Available to claim
                         } catch (error) {
-                            console.error('Error checking subdomain availability:', error);
                             // If we can't check, be conservative and assume it's not available
                             return false;
                         }
                     },
                     
                     async validateLabelWithElements(label, elements) {
-                        console.log('validateLabelWithElements called with:', label, 'and elements:', elements);
-                        
                         // Safety check - ensure elements exist
                         if (!elements.validationMessages || !elements.claimBtn) {
-                            console.error('Validation elements not found in validateLabelWithElements');
-                            
                             // Try to find elements again as fallback
                             const fallbackValidationMessages = document.getElementById('validation-messages');
                             const fallbackValidationText = document.getElementById('validation-text');
                             const fallbackClaimBtn = document.getElementById('claim-btn');
                             
                             if (fallbackValidationMessages && fallbackValidationText && fallbackClaimBtn) {
-                                console.log('Found elements on fallback, retrying validation');
                                 const fallbackElements = { validationMessages: fallbackValidationMessages, validationText: fallbackValidationText, claimBtn: fallbackClaimBtn };
                                 return this.validateLabelWithElements(label, fallbackElements);
                             }
@@ -922,18 +888,11 @@
                             }
                         }
                         
-                        console.log('Basic validation result:', { isValid, messages, labelLength: label.length });
-                        
                         // Check availability if label is valid and has sufficient length
                         if (isValid && label.trim() && label.trim().length >= 2) {
-                            console.log('Checking availability for:', label.trim());
-                            
                             this.checkSubdomainAvailability(label.trim()).then(isAvailable => {
-                                console.log('Availability check result:', isAvailable);
-                                
                                 // Use the stored element references
                                 if (!elements.validationText || !elements.claimBtn) {
-                                    console.error('Validation elements no longer exist in callback');
                                     return;
                                 }
                                 
@@ -947,9 +906,7 @@
                                     elements.validationText.innerHTML = '<i class="icon icon-check me-2"></i>Available to claim!';
                                     elements.validationText.className = 'text-success fw-bold';
                                     
-                                    console.log('Enabling claim button for available subdomain');
                                     elements.claimBtn.disabled = false;
-                                    console.log('Button disabled state after enabling:', elements.claimBtn.disabled);
                                     
                                     // Update button text and ensure it's enabled
                                     this.updateClaimButtonText();
@@ -957,11 +914,10 @@
                                     // Double-check button is enabled (in case updateClaimButtonText disabled it)
                                     if (elements.claimBtn) {
                                         elements.claimBtn.disabled = false;
-                                        console.log('Button disabled state after double-check:', elements.claimBtn.disabled);
                                     }
                                 }
                             }).catch(error => {
-                                console.error('Error in availability check:', error);
+                                // Silently handle availability check errors
                             });
                         } else if (label.length === 0) {
                             // Reset validation text when input is empty
@@ -1034,14 +990,6 @@
                             const gasPrice = await this.web3.eth.getGasPrice();
                             const estimatedCost = (gasLimit * gasPrice) / 1e18;
                             
-                            console.log('Gas estimation:', {
-                                gasEstimate: gasEstimate.toString(),
-                                gasLimit: gasLimit,
-                                gasPrice: gasPrice,
-                                estimatedCost: estimatedCost.toFixed(6),
-                                savings: `Reduced buffer from 20% to 10% (saved ~${Math.ceil(gasEstimate * 0.1)} gas units)`
-                            });
-                            
                             // Show gas cost to user before transaction
                             if (estimatedCost > 0.01) { // If more than 1 cent
                                 if (!confirm(`Gas cost estimated at ~$${estimatedCost.toFixed(4)} (${gasLimit} gas × ${(gasPrice / 1e9).toFixed(2)} gwei). Continue?`)) {
@@ -1054,12 +1002,6 @@
                             // Get current gas price and use 90% of it for potential savings
                             const currentGasPrice = await this.web3.eth.getGasPrice();
                             const optimizedGasPrice = Math.floor(Number(currentGasPrice) * 0.9); // 10% reduction
-                            
-                            console.log('Gas price optimization:', {
-                                currentGasPrice: currentGasPrice.toString(),
-                                optimizedGasPrice: optimizedGasPrice.toString(),
-                                potentialSavings: `${((currentGasPrice - optimizedGasPrice) / currentGasPrice * 100).toFixed(1)}%`
-                            });
                             
                             const result = await this.contract.methods.claim(label).send({
                                 from: this.userAddress,
@@ -2871,12 +2813,79 @@
     <!-- include ethers.js for blockchain interactions -->
     <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
     <script>
-        // Verify ethers.js loaded
-        if (typeof window.ethers !== 'undefined') {
-            console.log('✅ Ethers.js loaded successfully:', window.ethers.version);
-        } else {
-            console.error('❌ Ethers.js failed to load');
-        }
+        // Suppress expected wallet extension and third-party widget errors globally
+        (function() {
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            
+            // Helper to check if error should be suppressed
+            function shouldSuppress(args) {
+                const message = args.map(arg => String(arg)).join(' ');
+                const fullStack = args.map(arg => String(arg)).join('\n');
+                const allText = message + '\n' + fullStack;
+                
+                // Check message content
+                if (message.includes('Permissions policy violation') ||
+                    message.includes('ObjectMultiplex') ||
+                    message.includes('malformed chunk') ||
+                    message.includes('ENOENT') ||
+                    message.includes('geth.ipc') ||
+                    message.includes('Hydration failed') ||
+                    message.includes('Text content does not match') ||
+                    message.includes('Text content did not match') ||
+                    message.includes('Hydration failed because') ||
+                    message.includes('There was an error while hydrating') ||
+                    message.includes('Switched to client rendering') ||
+                    message.match(/^\d+$/)) { // Suppress numeric-only errors
+                    return true;
+                }
+                
+                // Check stack traces (more comprehensive)
+                if (allText.includes('pages_catch-all') ||
+                    allText.includes('AMMPairDetailChart') ||
+                    allText.includes('library.97ddeff81f861d17f06e') ||
+                    allText.includes('runtime.b283dc97286bf865cf08') ||
+                    allText.includes('inpage.js') ||
+                    allText.includes('content-script.js') ||
+                    allText.includes('contentscript.js') ||
+                    allText.includes('vendors-4dd8bfcd5399b162d60d6506969de9b79350cbe1') ||
+                    allText.includes('vendors-1466c808e9f67776e5f215acd77d048258182b69') ||
+                    allText.includes('dexscreener.com') ||
+                    allText.includes('dex-pair-details') ||
+                    allText.includes('pair-details-page')) {
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            // Also suppress global error events for violations
+            const originalOnError = window.onerror;
+            window.onerror = function(message, source, lineno, colno, error) {
+                const errorText = String(message || '') + ' ' + (source || '') + ' ' + (error ? error.stack : '');
+                if (shouldSuppress([errorText])) {
+                    return true; // Suppress the error
+                }
+                if (originalOnError) {
+                    return originalOnError.apply(this, arguments);
+                }
+                return false;
+            };
+            
+            console.error = function(...args) {
+                if (shouldSuppress(args)) {
+                    return; // Suppress expected errors
+                }
+                originalError.apply(console, args);
+            };
+            
+            console.warn = function(...args) {
+                if (shouldSuppress(args)) {
+                    return; // Suppress expected warnings
+                }
+                originalWarn.apply(console, args);
+            };
+        })();
     </script>
     
                 <!-- include Web3.js for subdomain claimer -->
@@ -3102,7 +3111,6 @@
                         showGrindSuccess(`Successfully ground ${amount} Unicorns! Check your wallet for Unicorn Meat tokens.`);
 
                     } catch (error) {
-                        console.error('Grind error:', error);
                         showGrindError(`Failed to grind Unicorns: ${error.message}`);
                     }
                 });
@@ -3449,7 +3457,6 @@
                         showUnicornsWrapSuccess(`Successfully unwrapped ${amount} Unicorns! Transaction: ${unwrapTx.transactionHash}`);
 
                     } catch (error) {
-                        console.error('Unwrap Unicorns error:', error);
                         if (error.code === 4001) {
                             showUnicornsWrapError('Transaction was rejected by user');
                         } else if (error.message && error.message.includes('insufficient funds')) {
