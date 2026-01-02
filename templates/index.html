@@ -402,9 +402,88 @@
                             "type": "function"
                         }
                     ],
+                    // ENS contract constants
+                    RESOLVER: '0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63',
+                    NAMEWRAPPER_ADDRESS: '0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401',
+                    ENS_REGISTRY: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+                    ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
+                    // ENS wants Unicode, not punycode - always use Unicode for ENS operations
+                    PARENT_DOMAIN: 'the🦄.eth',
+                    RESOLVER_SETADDR_ABI: [
+                        {
+                            "constant": false,
+                            "inputs": [
+                                {"name": "node", "type": "bytes32"},
+                                {"name": "addr", "type": "address"}
+                            ],
+                            "name": "setAddr",
+                            "outputs": [],
+                            "type": "function"
+                        },
+                        {
+                            "constant": false,
+                            "inputs": [
+                                {"name": "node", "type": "bytes32"},
+                                {"name": "coinType", "type": "uint256"},
+                                {"name": "addr", "type": "bytes"}
+                            ],
+                            "name": "setAddr",
+                            "outputs": [],
+                            "type": "function"
+                        }
+                    ],
+                    NAMEWRAPPER_ABI: [
+                        {
+                            "inputs": [
+                                {"name": "node", "type": "bytes32"},
+                                {"name": "resolver", "type": "address"}
+                            ],
+                            "name": "setResolver",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [{"name": "tokenId", "type": "uint256"}],
+                            "name": "ownerOf",
+                            "outputs": [{"name": "", "type": "address"}],
+                            "stateMutability": "view",
+                            "type": "function"
+                        }
+                    ],
+                    ENS_REGISTRY_ABI: [
+                        {
+                            "constant": true,
+                            "inputs": [{"name": "node", "type": "bytes32"}],
+                            "name": "resolver",
+                            "outputs": [{"name": "", "type": "address"}],
+                            "type": "function"
+                        },
+                        {
+                            "constant": false,
+                            "inputs": [
+                                {"name": "node", "type": "bytes32"},
+                                {"name": "resolver", "type": "address"}
+                            ],
+                            "name": "setResolver",
+                            "outputs": [],
+                            "type": "function"
+                        },
+                        {
+                            "constant": true,
+                            "inputs": [{"name": "node", "type": "bytes32"}],
+                            "name": "owner",
+                            "outputs": [{"name": "", "type": "address"}],
+                            "type": "function"
+                        }
+                    ],
                     web3: null,
                     contract: null,
                     userAddress: null,
+                    ensName: null,
+                    currentSubdomain: null,
+                    subdomainState: 'NONE', // NONE, CLAIMED_NO_RESOLVER, RESOLVER_SET_NO_ADDR, FULLY_ACTIVE
+                    activatingEns: false,
                     
                     init() {
                         // Wait for DOM to be fully ready before setting up event listeners
@@ -439,6 +518,12 @@
                         
                         if (claimBtn) {
                             claimBtn.addEventListener('click', () => this.claimSubdomain());
+                        }
+                        
+                        // Add activate ENS button listener
+                        const activateEnsBtn = document.getElementById('activate-ens-btn');
+                        if (activateEnsBtn) {
+                            activateEnsBtn.addEventListener('click', () => this.handleActivateEns());
                         }
                         
                         // Add validation functionality
@@ -578,6 +663,7 @@
                         this.showClaimForm();
                         this.checkCurrentSubdomain();
                         this.updateGasPriceDisplay();
+                            this.resolveEnsName(this.userAddress);
                         }
                     },
                     
@@ -611,6 +697,7 @@
                                     this.showWalletStatus();
                                     this.showClaimForm();
                                     this.checkCurrentSubdomain();
+                                    this.resolveEnsName(this.userAddress);
                                     
                                     // Listen for account changes
                                     window.ethereum.on('accountsChanged', (accounts) => {
@@ -667,11 +754,24 @@
                         
                         try {
                             const currentLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
-                            if (currentLabel && currentLabel.length > 0) {
-                                this.showCurrentSubdomain(currentLabel);
+                            if (currentLabel && currentLabel.length > 0 && currentLabel.trim() !== '' && currentLabel !== 'null' && currentLabel !== 'undefined') {
+                                // Normalize label: trim and lowercase (ENS labels are case-insensitive)
+                                const normalizedLabel = currentLabel.trim().toLowerCase();
+                                this.currentSubdomain = normalizedLabel;
+                                this.showCurrentSubdomain(normalizedLabel);
+                                
+                                // Get subdomain state (uses normalized label internally)
+                                const state = await this.getSubdomainState(normalizedLabel, this.userAddress);
+                                this.subdomainState = state;
+                                this.updateSubdomainStateUI();
                             } else {
+                                this.currentSubdomain = null;
+                                this.subdomainState = 'NONE';
                                 this.hideCurrentSubdomain();
                             }
+                            
+                            // Resolve ENS name for the user
+                            await this.resolveEnsName(this.userAddress);
                         } catch (error) {
                             console.error('Error checking current subdomain:', error);
                         }
@@ -685,16 +785,56 @@
                         }
                         
                         // Update the wallet status display
-                        const walletStatus = document.getElementById('wallet-status');
-                        if (walletStatus.style.display !== 'none') {
-                            const subdomainDisplay = walletStatus.querySelector('#subdomain-display');
-                            if (subdomainDisplay) {
-                                subdomainDisplay.textContent = label + '.the🦄.eth';
-                            }
-                        }
+                        this.updateWalletStatusDisplay();
                         
                         // Update button text based on current state
                         await this.updateClaimButtonText();
+                        
+                        // Update subdomain state UI
+                        this.updateSubdomainStateUI();
+                    },
+                    
+                    // Update UI based on subdomain state
+                    updateSubdomainStateUI() {
+                        const activateEnsSection = document.getElementById('activate-ens-section');
+                        const fullyActiveStatus = document.getElementById('fully-active-status');
+                        
+                        if (this.subdomainState === 'FULLY_ACTIVE') {
+                            if (activateEnsSection) activateEnsSection.style.display = 'none';
+                            if (fullyActiveStatus) fullyActiveStatus.style.display = 'block';
+                        } else if (this.subdomainState === 'CLAIMED_NO_RESOLVER' || this.subdomainState === 'RESOLVER_SET_NO_ADDR') {
+                            if (activateEnsSection) {
+                                activateEnsSection.style.display = 'block';
+                                
+                                const statusText = activateEnsSection.querySelector('#ens-status-text');
+                                const activateBtn = activateEnsSection.querySelector('#activate-ens-btn');
+                                const tx1Desc = activateEnsSection.querySelector('#tx-1-desc');
+                                const tx2Desc = activateEnsSection.querySelector('#tx-2-desc');
+                                
+                                if (statusText) {
+                                    if (this.subdomainState === 'CLAIMED_NO_RESOLVER') {
+                                        statusText.textContent = 'Your subdomain needs to be activated to resolve to your address. This will set the resolver (if needed) and your address.';
+                                        if (tx1Desc) tx1Desc.style.display = 'list-item';
+                                        if (tx2Desc) tx2Desc.style.display = 'list-item';
+                                    } else {
+                                        statusText.textContent = 'Your subdomain resolver is set. Click to set your address on the resolver.';
+                                        if (tx1Desc) tx1Desc.style.display = 'none';
+                                        if (tx2Desc) tx2Desc.style.display = 'list-item';
+                                    }
+                                }
+                                
+                                if (activateBtn) {
+                                    activateBtn.disabled = this.activatingEns;
+                                    activateBtn.innerHTML = this.activatingEns 
+                                        ? '<i class="icon icon-clock me-2"></i>ACTIVATING ENS...' 
+                                        : '<i class="icon icon-check me-2"></i>ACTIVATE ENS';
+                                }
+                            }
+                            if (fullyActiveStatus) fullyActiveStatus.style.display = 'none';
+                        } else {
+                            if (activateEnsSection) activateEnsSection.style.display = 'none';
+                            if (fullyActiveStatus) fullyActiveStatus.style.display = 'none';
+                        }
                     },
                     
                     async updateClaimButtonText() {
@@ -757,9 +897,12 @@
                     async checkSubdomainAvailability(label) {
                         if (!this.contract || !label.trim()) return false;
                         
+                        // Normalize label to lowercase (ENS names are case-insensitive)
+                        const normalizedLabel = label.trim().toLowerCase();
+                        
                         try {
                             // Check if the label is reserved by the smart contract
-                            const isReserved = await this.contract.methods.isReserved(label.trim()).call();
+                            const isReserved = await this.contract.methods.isReserved(normalizedLabel).call();
                             if (isReserved) {
                                 console.log('Label is reserved by smart contract');
                                 return false; // Reserved labels cannot be claimed
@@ -770,7 +913,7 @@
                                 try {
                                     const userLabel = await this.contract.methods.currentLabelOf(this.userAddress).call();
                                     
-                                    if (userLabel === label.trim()) {
+                                    if (userLabel && userLabel.trim().toLowerCase() === normalizedLabel) {
                                         return false; // User already owns this label
                                     }
                                 } catch (contractError) {
@@ -780,7 +923,7 @@
                             
                             // Check if this label is owned by anyone through the smart contract
                             try {
-                                const labelOwner = await this.contract.methods.getLabelOwner(label.trim()).call();
+                                const labelOwner = await this.contract.methods.getLabelOwner(normalizedLabel).call();
                                 
                                 if (labelOwner && labelOwner !== '0x0000000000000000000000000000000000000000') {
                                     return false; // Already owned by someone
@@ -790,34 +933,52 @@
                             }
                             
                             // Check if the subdomain is already claimed by someone else using ENS
+                            // Use direct registry calls with namehash (avoid provider.getResolver which normalizes punycode incorrectly)
                             if (typeof window.ethers !== 'undefined') {
                                 try {
-                                    const provider = new window.ethers.providers.Web3Provider(window.ethereum);
-                                    const subdomain = `${label.trim()}.the🦄.eth`;
+                                    // Construct full domain name with Unicode parent (ENS wants Unicode)
+                                    const fqdn = `${normalizedLabel}.${this.PARENT_DOMAIN}`;
                                     
-                                    // First try to get the resolver
-                                    const ensResolver = await provider.getResolver(subdomain);
+                                    // ethers.utils.namehash() handles Unicode normalization correctly
+                                    const subdomainNode = window.ethers.utils.namehash(fqdn);
                                     
-                                    if (ensResolver) {
-                                        // Check if the resolver has an address (meaning it's claimed)
-                                        try {
-                                            const address = await ensResolver.getAddress();
-                                            
-                                            if (address && address !== '0x0000000000000000000000000000000000000000') {
-                                                return false; // Already claimed by someone
-                                            }
-                                            
-                                            // If we have a resolver but no address, the subdomain is still claimed
-                                            // A resolver existing means someone has set it up, even if not fully configured
-                                            return false; // Already claimed
-                                        } catch (addressError) {
-                                            // If we can't get the address but resolver exists, assume claimed
-                                            return false; // Conservative approach
+                                    // Use direct registry call to check resolver (avoids normalization issues)
+                                    const ENS_REGISTRY_ABI = [
+                                        {
+                                            "constant": true,
+                                            "inputs": [{"name": "node", "type": "bytes32"}],
+                                            "name": "resolver",
+                                            "outputs": [{"name": "", "type": "address"}],
+                                            "type": "function"
                                         }
-                                    }
+                                    ];
                                     
-                                    // Note: Direct ENS Registry calls are unreliable for subdomains
-                                    // We rely on resolver checks which are more accurate
+                                    const provider = new window.ethers.providers.Web3Provider(window.ethereum);
+                                    const registry = new window.ethers.Contract(this.ENS_REGISTRY, ENS_REGISTRY_ABI, provider);
+                                    const resolverAddr = await registry.resolver(subdomainNode);
+                                    
+                                    if (resolverAddr && resolverAddr !== this.ZERO_ADDRESS) {
+                                        // Check if resolver has an address set
+                                        const RESOLVER_ABI = [
+                                            {
+                                                "constant": true,
+                                                "inputs": [{"name": "node", "type": "bytes32"}],
+                                                "name": "addr",
+                                                "outputs": [{"name": "", "type": "address"}],
+                                                "type": "function"
+                                            }
+                                        ];
+                                        
+                                        const resolver = new window.ethers.Contract(resolverAddr, RESOLVER_ABI, provider);
+                                        const addr = await resolver.addr(subdomainNode);
+                                        
+                                        if (addr && addr !== this.ZERO_ADDRESS) {
+                                            return false; // Already claimed by someone
+                                        }
+                                        
+                                        // If we have a resolver but no address, the subdomain is still claimed
+                                        return false; // Already claimed
+                                    }
                                     
                                 } catch (ensError) {
                                     // If ENS check fails, be conservative and assume it's not available
@@ -884,6 +1045,16 @@
                             }
                             if (!/^[a-zA-Z0-9\-]+$/.test(label)) {
                                 messages.push('Subdomain label can only contain letters, numbers, and hyphens');
+                                isValid = false;
+                            }
+                            // Cannot have consecutive hyphens
+                            if (label.includes('--')) {
+                                messages.push('Subdomain label cannot have consecutive hyphens');
+                                isValid = false;
+                            }
+                            // Cannot be only numbers (to avoid confusion with token IDs)
+                            if (/^\d+$/.test(label)) {
+                                messages.push('Subdomain label cannot be only numbers');
                                 isValid = false;
                             }
                         }
@@ -972,53 +1143,66 @@
                     },
                     
                     async claimSubdomain() {
-                        const label = document.getElementById('subdomain-label').value.trim();
+                        const label = document.getElementById('subdomain-label').value.trim().toLowerCase();
+                        
+                        // Safety check: Never allow punycode labels
+                        if (label.includes('xn--')) {
+                            this.showError('Invalid ENS label: punycode labels are not allowed. Use Unicode characters only.');
+                            return;
+                        }
                         
                         if (!(await this.validateLabel(label))) {
                             return;
                         }
                         
                         try {
-                            this.showTransactionStatus();
+                            this.showTransactionStatus('⏳ Claiming subdomain...');
                             
+                            // Estimate gas for accurate limit
                             const gasEstimate = await this.contract.methods.claim(label).estimateGas({ from: this.userAddress });
                             
-                            // Use a more conservative gas limit to reduce costs
-                            // 10% buffer instead of 20% for cost optimization
-                            const gasLimit = Math.ceil(gasEstimate * 1.1); // Reduced buffer for cost savings
+                            // Get current block to calculate minimal gas price
+                            const latestBlock = await this.web3.eth.getBlock('latest');
+                            const baseFee = latestBlock.baseFeePerGas ? this.web3.utils.toBN(latestBlock.baseFeePerGas) : null;
                             
-                            const gasPrice = await this.web3.eth.getGasPrice();
-                            const estimatedCost = (gasLimit * gasPrice) / 1e18;
-                            
-                            // Show gas cost to user before transaction
-                            if (estimatedCost > 0.01) { // If more than 1 cent
-                                if (!confirm(`Gas cost estimated at ~$${estimatedCost.toFixed(4)} (${gasLimit} gas × ${(gasPrice / 1e9).toFixed(2)} gwei). Continue?`)) {
-                                    this.hideTransactionStatus();
-                                    return;
-                                }
+                            // Use minimal gas price: baseFee + 1 gwei priority (matching Etherscan's approach)
+                            let gasPrice;
+                            if (baseFee) {
+                                const priorityFee = this.web3.utils.toBN(this.web3.utils.toWei('1', 'gwei'));
+                                gasPrice = baseFee.add(priorityFee).toString();
+                            } else {
+                                const networkGasPrice = await this.web3.eth.getGasPrice();
+                                gasPrice = networkGasPrice;
                             }
                             
-                            // Try to use a slightly lower gas price for cost savings
-                            // Get current gas price and use 90% of it for potential savings
-                            const currentGasPrice = await this.web3.eth.getGasPrice();
-                            const optimizedGasPrice = Math.floor(Number(currentGasPrice) * 0.9); // 10% reduction
-                            
+                            // Use exact gas estimate with minimal gas price
                             const result = await this.contract.methods.claim(label).send({
                                 from: this.userAddress,
-                                gas: gasLimit,
-                                gasPrice: optimizedGasPrice
+                                gas: gasEstimate,
+                                gasPrice: gasPrice
                             });
                             
                             this.hideTransactionStatus();
-                            this.showSuccess(`Successfully claimed ${label}.the🦄.eth! Transaction: ${result.transactionHash}`);
+                            this.showSuccess(`✅ Success! Subdomain claimed: ${label}.${this.PARENT_DOMAIN} (${result.transactionHash})`);
                             
                             // Clear form and refresh current subdomain
                             document.getElementById('subdomain-label').value = '';
+                            
+                            // Wait a moment for indexing, then refresh subdomain state
+                            setTimeout(() => {
                             this.checkCurrentSubdomain();
+                            }, 3000);
                             
                         } catch (error) {
                             this.hideTransactionStatus();
-                            this.showError('Failed to claim subdomain: ' + error.message);
+                            // Provide more helpful error messages
+                            if (error.message && error.message.includes("Invalid or reserved label")) {
+                                this.showError(`Error: The subdomain "${label}" is invalid or reserved. Please choose a different name.`);
+                            } else if (error.message && error.message.includes("Label required")) {
+                                this.showError(`Error: Please enter a valid subdomain name.`);
+                            } else {
+                                this.showError(`Error: ${error.message}`);
+                            }
                         }
                     },
                     
@@ -1050,10 +1234,23 @@
                         }
                     },
                     
-                    showTransactionStatus() {
-                        document.getElementById('tx-status').style.display = 'block';
-                        document.getElementById('claim-btn').disabled = true;
-
+                    showTransactionStatus(message) {
+                        const txStatus = document.getElementById('tx-status');
+                        if (txStatus) {
+                            txStatus.style.display = 'block';
+                            const txMessage = txStatus.querySelector('#tx-message') || txStatus;
+                            if (message) {
+                                if (txMessage.querySelector && txMessage.querySelector('p')) {
+                                    txMessage.querySelector('p').textContent = message;
+                                } else {
+                                    txMessage.textContent = message;
+                                }
+                            }
+                        }
+                        const claimBtn = document.getElementById('claim-btn');
+                        if (claimBtn) {
+                            claimBtn.disabled = true;
+                        }
                     },
                     
                     hideTransactionStatus() {
@@ -1100,6 +1297,457 @@
                         }
                     },
                     
+                    // Resolve ENS name for address using reverse lookup
+                    // Note: This is optional and does not gate UX - reverse records may not be set
+                    async resolveEnsName(address) {
+                        if (!this.web3 || !address) {
+                            this.ensName = null;
+                            this.updateWalletStatusDisplay();
+                            return;
+                        }
+                        
+                        try {
+                            if (typeof window.ethers === 'undefined') {
+                                this.ensName = null;
+                                this.updateWalletStatusDisplay();
+                                return;
+                            }
+                            
+                            // Use HTTP provider for ENS lookup (more reliable)
+                            const rpcUrl = 'https://eth-mainnet.g.alchemy.com/v2/FF0GUedsNSBgY9vgIPWUbJqjkPeFwVsO';
+                            const readProvider = rpcUrl 
+                                ? new window.ethers.providers.JsonRpcProvider(rpcUrl)
+                                : new window.ethers.providers.Web3Provider(window.ethereum);
+                            
+                            // Correct reverse ENS format: address (no 0x) + '.addr.reverse'
+                            // DO NOT reverse the address - this was the bug!
+                            const reverseName = address.toLowerCase().replace('0x', '') + '.addr.reverse';
+                            
+                            const ENS_REGISTRY_ABI = [
+                                {
+                                    "constant": true,
+                                    "inputs": [{"name": "node", "type": "bytes32"}],
+                                    "name": "resolver",
+                                    "outputs": [{"name": "", "type": "address"}],
+                                    "type": "function"
+                                },
+                                {
+                                    "constant": true,
+                                    "inputs": [{"name": "node", "type": "bytes32"}],
+                                    "name": "owner",
+                                    "outputs": [{"name": "", "type": "address"}],
+                                    "type": "function"
+                                }
+                            ];
+                            
+                            const RESOLVER_ABI = [
+                                {
+                                    "constant": true,
+                                    "inputs": [{"name": "node", "type": "bytes32"}],
+                                    "name": "name",
+                                    "outputs": [{"name": "", "type": "string"}],
+                                    "type": "function"
+                                },
+                                {
+                                    "constant": true,
+                                    "inputs": [{"name": "node", "type": "bytes32"}],
+                                    "name": "text",
+                                    "outputs": [{"name": "", "type": "string"}],
+                                    "type": "function",
+                                    "payable": false,
+                                    "stateMutability": "view"
+                                }
+                            ];
+                            
+                            const registry = new window.ethers.Contract(this.ENS_REGISTRY, ENS_REGISTRY_ABI, readProvider);
+                            // Use ethers.utils.namehash consistently - reverse names are already normalized
+                            const reverseNode = window.ethers.utils.namehash(reverseName);
+                            
+                            const resolverAddress = await registry.resolver(reverseNode);
+                            
+                            if (resolverAddress && resolverAddress !== this.ZERO_ADDRESS) {
+                                const resolver = new window.ethers.Contract(resolverAddress, RESOLVER_ABI, readProvider);
+                                
+                                // Try to get the name from the resolver
+                                let name = "";
+                                try {
+                                    name = await resolver.name(reverseNode);
+                                } catch (error) {
+                                    // If name() doesn't work, try text() with "name" key (for newer resolvers)
+                                    try {
+                                        name = await resolver.text(reverseNode, "name");
+                                    } catch (textError) {
+                                        // Both methods failed - reverse record not set (this is normal)
+                                    }
+                                }
+                                
+                                if (name && name.length > 0 && name.trim() !== "" && name !== "0x") {
+                                    // Verify forward resolution to ensure it's correct
+                                    try {
+                                        const forwardAddress = await readProvider.resolveName(name);
+                                        if (forwardAddress && forwardAddress.toLowerCase() === address.toLowerCase()) {
+                                            this.ensName = name;
+                                        } else {
+                                            this.ensName = null;
+                                        }
+                                    } catch (verifyError) {
+                                        // If forward verification fails, still use the name
+                                        this.ensName = name;
+                                    }
+                                } else {
+                                    this.ensName = null;
+                                }
+                            } else {
+                                this.ensName = null;
+                            }
+                            
+                            // Always update display - reverse lookup is optional and doesn't gate UX
+                            this.updateWalletStatusDisplay();
+                        } catch (error) {
+                            // Silently fail - reverse lookup is optional
+                            console.log("Reverse ENS lookup failed (this is normal if reverse record not set):", error);
+                            this.ensName = null;
+                            this.updateWalletStatusDisplay();
+                        }
+                    },
+                    
+                    // Get subdomain state (resolver + addr)
+                    async getSubdomainState(label, account) {
+                        if (!this.web3 || !label || !account) {
+                            return 'NONE';
+                        }
+                        
+                        try {
+                            if (typeof window.ethers === 'undefined') {
+                                return 'CLAIMED_NO_RESOLVER';
+                            }
+                            
+                            // Normalize label: trim and lowercase (ENS labels are case-insensitive)
+                            const normalizedLabel = label.trim().toLowerCase();
+                            
+                            // Use Unicode parent domain (ENS wants Unicode, not punycode)
+                            const subdomainName = `${normalizedLabel}.${this.PARENT_DOMAIN}`;
+                            // ethers.utils.namehash() handles Unicode normalization correctly
+                            const subdomainNode = window.ethers.utils.namehash(subdomainName);
+                            
+                            const registry = new this.web3.eth.Contract(this.ENS_REGISTRY_ABI, this.ENS_REGISTRY);
+                            const resolverAddr = await registry.methods.resolver(subdomainNode).call();
+                            
+                            if (!resolverAddr || resolverAddr === this.ZERO_ADDRESS) {
+                                return 'CLAIMED_NO_RESOLVER';
+                            }
+                            
+                            const RESOLVER_ABI = [
+                                {
+                                    "constant": true,
+                                    "inputs": [{"name": "node", "type": "bytes32"}],
+                                    "name": "addr",
+                                    "outputs": [{"name": "", "type": "address"}],
+                                    "type": "function"
+                                }
+                            ];
+                            
+                            const resolver = new this.web3.eth.Contract(RESOLVER_ABI, resolverAddr);
+                            const addr = await resolver.methods.addr(subdomainNode).call();
+                            
+                            if (!addr || addr === this.ZERO_ADDRESS) {
+                                return 'RESOLVER_SET_NO_ADDR';
+                            }
+                            
+                            if (addr.toLowerCase() === account.toLowerCase()) {
+                                return 'FULLY_ACTIVE';
+                            }
+                            
+                            return 'RESOLVER_SET_NO_ADDR';
+                        } catch (error) {
+                            console.error("Error getting subdomain state:", error);
+                            return 'CLAIMED_NO_RESOLVER'; // Default to safest state
+                        }
+                    },
+                    
+                    // Activate ENS: Set resolver + addr (check if wrapped, use appropriate method)
+                    async activateEns(subdomainLabel, userAddress) {
+                        if (!this.web3 || !this.userAddress || !subdomainLabel) {
+                            throw new Error('Missing required parameters for ENS activation');
+                        }
+                        
+                        try {
+                            if (typeof window.ethers === 'undefined') {
+                                throw new Error('Ethers.js is required for ENS activation');
+                            }
+                            
+                            // Normalize label: trim and lowercase (ENS labels are case-insensitive)
+                            const normalizedLabel = subdomainLabel.trim().toLowerCase();
+                            
+                            // Construct full domain name: label + Unicode parent (ENS wants Unicode, not punycode)
+                            // Example: "alice.the🦄.eth" - ethers handles normalization correctly
+                            const fqdn = `${normalizedLabel}.${this.PARENT_DOMAIN}`;
+                            
+                            // Safety check: Ensure we're not accidentally using punycode
+                            if (fqdn.includes('xn--')) {
+                                throw new Error('Invalid domain: punycode detected. Use Unicode domain names only.');
+                            }
+                            
+                            // ethers.utils.namehash() handles Unicode normalization correctly for ENS
+                            const subdomainNode = window.ethers.utils.namehash(fqdn);
+                            
+                            const registry = new this.web3.eth.Contract(this.ENS_REGISTRY_ABI, this.ENS_REGISTRY);
+                            let resolverAddress = await registry.methods.resolver(subdomainNode).call();
+                            
+                            // NameWrapper-aware ownership check
+                            // For wrapped names, registry.owner() returns 0x0, ownership is in NameWrapper
+                            const registryOwner = await registry.methods.owner(subdomainNode).call();
+                            const isWrapped = registryOwner.toLowerCase() === this.NAMEWRAPPER_ADDRESS.toLowerCase();
+                            
+                            let effectiveOwner;
+                            if (isWrapped) {
+                                // Wrapped → check NameWrapper ERC1155 ownership
+                                const nameWrapper = new this.web3.eth.Contract(this.NAMEWRAPPER_ABI, this.NAMEWRAPPER_ADDRESS);
+                                // Convert node (bytes32) to uint256 for ownerOf
+                                // NameWrapper uses the node directly as uint256 tokenId
+                                const nodeUint256 = this.web3.utils.toBN(subdomainNode);
+                                try {
+                                    effectiveOwner = await nameWrapper.methods.ownerOf(nodeUint256.toString()).call();
+                                } catch (ownerError) {
+                                    // If ownerOf fails, the name might not be wrapped or token doesn't exist
+                                    // Fall back to checking if user is the one who claimed it
+                                    console.log('NameWrapper.ownerOf failed, checking claimer contract:', ownerError);
+                                    // For wrapped subdomains created by claimer, the user should be the owner
+                                    // If we can't verify via NameWrapper, trust the claimer contract
+                                    effectiveOwner = this.userAddress;
+                                }
+                            } else {
+                                // Unwrapped
+                                effectiveOwner = registryOwner;
+                            }
+                            
+                            // Check if user controls the subdomain
+                            if (effectiveOwner.toLowerCase() !== this.userAddress.toLowerCase() && effectiveOwner.toLowerCase() !== this.contractAddress.toLowerCase()) {
+                                throw new Error(`You do not control this subdomain. Effective owner: ${effectiveOwner}`);
+                            }
+                            
+                            // Simplified logic: Only set resolver if it doesn't exist
+                            // If resolver exists, just set addr (subdomains may inherit parent resolver)
+                            let setResolverTxHash = null;
+                            const needsResolver = !resolverAddress || resolverAddress === this.ZERO_ADDRESS;
+                            
+                            if (needsResolver) {
+                                // Only set resolver if it doesn't exist
+                                // Get current block to calculate minimal gas price
+                                const latestBlock = await this.web3.eth.getBlock('latest');
+                                const baseFee = latestBlock.baseFeePerGas ? this.web3.utils.toBN(latestBlock.baseFeePerGas) : null;
+                                
+                                // Use minimal gas price: baseFee + 1 gwei priority
+                                let gasPrice;
+                                if (baseFee) {
+                                    const priorityFee = this.web3.utils.toBN(this.web3.utils.toWei('1', 'gwei'));
+                                    gasPrice = baseFee.add(priorityFee).toString();
+                                } else {
+                                    const networkGasPrice = await this.web3.eth.getGasPrice();
+                                    gasPrice = networkGasPrice;
+                                }
+                                
+                                if (isWrapped) {
+                                    // For wrapped names, use NameWrapper.setResolver
+                                    const nameWrapper = new this.web3.eth.Contract(this.NAMEWRAPPER_ABI, this.NAMEWRAPPER_ADDRESS);
+                                    
+                                    const setResolverGasEstimate = await nameWrapper.methods.setResolver(subdomainNode, this.RESOLVER).estimateGas({
+                                        from: this.userAddress
+                                    });
+                                    
+                                    const setResolverTx = await nameWrapper.methods.setResolver(subdomainNode, this.RESOLVER).send({
+                                        from: this.userAddress,
+                                        gas: setResolverGasEstimate,
+                                        gasPrice: gasPrice
+                                    });
+                                    
+                                    setResolverTxHash = setResolverTx.transactionHash;
+                                    resolverAddress = this.RESOLVER;
+                                } else {
+                                    // For non-wrapped names, use ENS Registry
+                                    const setResolverGasEstimate = await registry.methods.setResolver(subdomainNode, this.RESOLVER).estimateGas({
+                                        from: this.userAddress
+                                    });
+                                    
+                                    const setResolverTx = await registry.methods.setResolver(subdomainNode, this.RESOLVER).send({
+                                        from: this.userAddress,
+                                        gas: setResolverGasEstimate,
+                                        gasPrice: gasPrice
+                                    });
+                                    
+                                    setResolverTxHash = setResolverTx.transactionHash;
+                                    resolverAddress = this.RESOLVER;
+                                }
+                            } else {
+                                // Resolver exists - use it (may be parent resolver or already set)
+                                // Don't try to change it, just use it for setAddr
+                            }
+                            
+                            // Set address on resolver
+                            // If resolver exists (even if it's the parent resolver), we can set addr
+                            if (!resolverAddress || resolverAddress === this.ZERO_ADDRESS) {
+                                throw new Error('No resolver found. Cannot set address without a resolver.');
+                            }
+                            
+                            const resolver = new this.web3.eth.Contract(this.RESOLVER_SETADDR_ABI, resolverAddress);
+                            
+                            // Get current block to calculate minimal gas price
+                            const latestBlock = await this.web3.eth.getBlock('latest');
+                            const baseFee = latestBlock.baseFeePerGas ? this.web3.utils.toBN(latestBlock.baseFeePerGas) : null;
+                            
+                            // Use minimal gas price: baseFee + 1 gwei priority
+                            let gasPrice;
+                            if (baseFee) {
+                                const priorityFee = this.web3.utils.toBN(this.web3.utils.toWei('1', 'gwei'));
+                                gasPrice = baseFee.add(priorityFee).toString();
+                            } else {
+                                const networkGasPrice = await this.web3.eth.getGasPrice();
+                                gasPrice = networkGasPrice;
+                            }
+                            
+                            let setAddrTx;
+                            try {
+                                // Try legacy setAddr(node, address) first
+                                const setAddrGasEstimate = await resolver.methods.setAddr(subdomainNode, userAddress).estimateGas({
+                                    from: this.userAddress
+                                });
+                                
+                                setAddrTx = await resolver.methods.setAddr(subdomainNode, userAddress).send({
+                                    from: this.userAddress,
+                                    gas: setAddrGasEstimate,
+                                    gasPrice: gasPrice
+                                });
+                            } catch (legacyError) {
+                                // Fallback to coin-type version (coinType 60 = Ethereum)
+                                const coinType = 60; // Ethereum
+                                const addrBytes = this.web3.eth.abi.encodeParameter('address', userAddress);
+                                
+                                const setAddrGasEstimate = await resolver.methods.setAddr(subdomainNode, coinType, addrBytes).estimateGas({
+                                    from: this.userAddress
+                                });
+                                
+                                setAddrTx = await resolver.methods.setAddr(subdomainNode, coinType, addrBytes).send({
+                                    from: this.userAddress,
+                                    gas: setAddrGasEstimate,
+                                    gasPrice: gasPrice
+                                });
+                            }
+                            
+                            return { 
+                                setResolverTx: setResolverTxHash, 
+                                setAddrTx: setAddrTx.transactionHash 
+                            };
+                        } catch (error) {
+                            console.error("Error activating ENS:", error);
+                            
+                            // Check for normalization errors (should not happen if using Unicode correctly)
+                            if (error.message && error.message.includes('Invalid label')) {
+                                if (error.message.includes('xn--')) {
+                                    throw new Error('Punycode detected in domain. This should not happen - ensure you are using Unicode domain names (the🦄.eth), not punycode (xn--the-of63b.eth).');
+                                }
+                                throw new Error('Domain normalization error. Ensure you are using Unicode domain names, not punycode.');
+                            }
+                            
+                            // Provide more helpful error messages
+                            if (error.message && error.message.includes('execution reverted')) {
+                                // Check for wrapped name permission errors
+                                if (error.message.includes('Owner: 0x0000000000000000000000000000000000000000') || 
+                                    error.message.includes('You do not have permission')) {
+                                    throw new Error('Permission denied. For wrapped subdomains, you may need to wait for the claimer contract to set up the resolver, or the subdomain may need to be activated through a different method. If this persists, the claimer contract may need to handle resolver setup automatically.');
+                                }
+                                
+                                // Try to decode the error if possible
+                                if (error.data) {
+                                    // Check if it's a permission error
+                                    if (error.data.includes('0xb455aae8') || error.message.includes('permission') || error.message.includes('Unauthorized')) {
+                                        throw new Error('Permission denied. The subdomain may need to be activated through the claimer contract, or you may not have the required permissions to set the resolver.');
+                                    }
+                                }
+                                throw new Error('Transaction reverted. The subdomain may not be wrapped, or you may not have permission to set the resolver. Please ensure the subdomain was claimed correctly.');
+                            }
+                            
+                            throw error;
+                        }
+                    },
+                    
+                    // Activate ENS (set resolver if needed + set addr)
+                    async handleActivateEns() {
+                        if (!this.web3 || !this.userAddress || !this.currentSubdomain) {
+                            return;
+                        }
+                        
+                        this.activatingEns = true;
+                        
+                        try {
+                            // Check resolver status first
+                            const normalizedLabel = this.currentSubdomain.trim().toLowerCase();
+                            const fqdn = `${normalizedLabel}.${this.PARENT_DOMAIN}`;
+                            const subdomainNode = window.ethers.utils.namehash(fqdn);
+                            const registry = new this.web3.eth.Contract(this.ENS_REGISTRY_ABI, this.ENS_REGISTRY);
+                            const resolverAddress = await registry.methods.resolver(subdomainNode).call();
+                            
+                            // Conditional message based on resolver status
+                            if (!resolverAddress || resolverAddress === this.ZERO_ADDRESS) {
+                                this.showTransactionStatus('⏳ Setting resolver and address...');
+                            } else {
+                                this.showTransactionStatus('⏳ Setting address on resolver...');
+                            }
+                            
+                            const result = await this.activateEns(this.currentSubdomain, this.userAddress);
+                            
+                            // Build success message
+                            const txMessages = [];
+                            if (result.setResolverTx) {
+                                txMessages.push('Resolver set');
+                            }
+                            if (result.setAddrTx) {
+                                txMessages.push('Address set');
+                            }
+                            
+                            const txHashes = [result.setResolverTx, result.setAddrTx].filter(Boolean).join(', ');
+                            this.hideTransactionStatus();
+                            this.showSuccess(`✅ Success! ${txMessages.join(' and ')}. Transactions: ${txHashes}`);
+                            
+                            // Refresh subdomain after a delay
+                            setTimeout(() => {
+                                this.checkCurrentSubdomain();
+                            }, 3000);
+                        } catch (error) {
+                            console.error("Error activating ENS:", error);
+                            this.hideTransactionStatus();
+                            this.showError(`Error: ${error.message}`);
+                        } finally {
+                            this.activatingEns = false;
+                        }
+                    },
+                    
+                    // Update wallet status display with ENS name
+                    updateWalletStatusDisplay() {
+                        const walletStatus = document.getElementById('wallet-status');
+                        if (walletStatus) {
+                            const subdomainDisplay = walletStatus.querySelector('#subdomain-display');
+                            if (subdomainDisplay) {
+                                if (this.currentSubdomain) {
+                                    subdomainDisplay.textContent = this.currentSubdomain + '.' + this.PARENT_DOMAIN;
+                                } else {
+                                    subdomainDisplay.textContent = 'No subdomain claimed';
+                                }
+                            }
+                            
+                            // Update connected wallet display if it exists
+                            const connectedWallet = walletStatus.querySelector('#connected-wallet');
+                            if (connectedWallet) {
+                                if (this.ensName) {
+                                    connectedWallet.textContent = this.ensName;
+                                } else if (this.userAddress) {
+                                    // Show shortened address
+                                    const shortAddr = this.userAddress.substring(0, 6) + '...' + this.userAddress.substring(this.userAddress.length - 4);
+                                    connectedWallet.textContent = shortAddr;
+                                }
+                            }
+                        }
+                    },
+                    
                     checkWalletConnection() {
                         // Check if already connected via walletkit
                         if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected) {
@@ -1113,6 +1761,7 @@
                             this.showClaimForm();
                             this.checkCurrentSubdomain();
                             this.updateGasPriceDisplay();
+                            this.resolveEnsName(this.userAddress);
                         }
                     }
                 };
@@ -2059,9 +2708,9 @@
                                             <p class="mb-2 fs-7 sm:fs-6"><strong>Time Remaining:</strong> <span id="time-remaining">-</span></p>
                                             <p class="mb-2 fs-7 sm:fs-6"><strong>Total Steaked:</strong> <span id="total-steaked">-</span></p>
                                             <p class="mb-0 fs-7 sm:fs-6"><strong>Reward Pool:</strong> <span id="reward-pool">-</span></p>
-                                        </div>
                                     </div>
                                 </div>
+                                    </div>
                                 
                                 <!-- Steak Stats -->
                                 <div class="col order-2 order-lg-2">
@@ -2071,7 +2720,7 @@
                                         <!-- Not Logged In Message -->
                                         <div id="steak-stats-not-logged-in" class="text-center">
                                             <p class="fs-7 sm:fs-6 mb-0">Connect your wallet to see your steak stats.</p>
-                                        </div>
+                                </div>
                                         
                                         <!-- Logged In Stats -->
                                         <div id="steak-stats-content" class="d-none">
@@ -2082,20 +2731,20 @@
                                                 <p class="mb-2 fs-7 sm:fs-6"><strong>Share of Pool:</strong> <span id="user-pool-share">-</span></p>
                                                 <p class="mb-2 fs-7 sm:fs-6"><strong>Estimated Reward:</strong> <span id="user-estimated-reward">-</span></p>
                                                 <p class="mb-2 fs-7 sm:fs-6"><strong>Claimed:</strong> <span id="user-claimed">-</span></p>
-                                            </div>
+                                    </div>
                                             
                                             <!-- Refresh Button -->
                                             <div class="text-center mt-3">
                                                 <button id="refresh-steak-stats-btn" class="btn btn-sm border border-2 border-black contrast-shadow-sm" style="background-color: #fff4e6; color: #000;">
                                                     <i class="icon icon-refresh me-2"></i>Refresh Stats
                                                 </button>
-                                            </div>
-                                            
+                            </div>
+
                                             <!-- Pending Rewards Section -->
                                             <div class="panel p-3 border border-2 border-success contrast-shadow-sm bg-light mt-3 mb-0" style="background-color: #f0f9f0 !important;">
                                                 <h6 class="h6 mb-2 text-uppercase fw-bold text-success">Pending Rewards</h6>
                                                 <p class="fs-4 mb-0 fw-bold text-success" id="user-pending-reward">-</p>
-                                            </div>
+                                    </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2106,7 +2755,7 @@
                                 <button id="steak-connect-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md px-5" style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb); color: #000;">
                                     <i class="icon icon-wallet me-2"></i>Connect Wallet to Steak
                                 </button>
-                            </div>
+                                    </div>
 
                             <!-- Steak/Unsteak Actions -->
                             <div id="steak-actions" class="d-none">
@@ -2131,7 +2780,7 @@
                                     <button id="steak-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md w-100" style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb); color: #000;" disabled>
                                         <i class="icon icon-check me-2"></i>Steak 🥩
                                     </button>
-                                </div>
+                                    </div>
 
                                 <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
                                     <h5 class="h5 mb-3 text-uppercase fw-bold">Unsteak Your Meat</h5>
@@ -2139,8 +2788,8 @@
                                     <button id="unsteak-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md w-100" style="background-color: #dbf2ff; color: #000;" disabled>
                                         <i class="icon icon-check me-2"></i>Unsteak
                                     </button>
+                                    </div>
                                 </div>
-                            </div>
 
                             <!-- Transaction Status -->
                             <div id="steak-tx-status" class="panel p-3 border border-2 border-warning text-warning bg-white text-center d-none mb-4">
@@ -2149,11 +2798,11 @@
 
                             <!-- Success/Error Messages -->
                             <div id="steak-result-messages"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
         <!-- Proof of Steak Section End -->
 
         <div class="d-none xl:d-block">
@@ -2238,8 +2887,37 @@
                                         
                                         <!-- Wallet Connection Status -->
                                                                                   <div id="wallet-status" class="mb-4" style="display: none;">
-                                              <div class="alert alert-success border border-2 border-black contrast-shadow-sm">
+                                              <div class="alert alert-success border border-2 border-black contrast-shadow-sm mb-3">
                                                   <i class="icon icon-check me-2"></i>Your current 🦄️ herd subdomain: <strong><span id="subdomain-display"></span></strong>
+                                                  <br>
+                                                  <small class="text-muted">Connected: <span id="connected-wallet"></span></small>
+                                              </div>
+                                              
+                                              <!-- ENS Activation Section -->
+                                              <div id="activate-ens-section" class="mb-4" style="display: none;">
+                                                  <div class="alert alert-warning border border-2 border-black contrast-shadow-sm">
+                                                      <p class="mb-2 fs-7 sm:fs-6" id="ens-status-text"></p>
+                                                      <div class="mb-2">
+                                                          <small class="text-muted">
+                                                              <strong>📝 What to Expect:</strong>
+                                                              <ul class="text-start mt-2 mb-0" style="font-size: 0.85rem;">
+                                                                  <li id="tx-1-desc" style="display: none;"><strong>Transaction 1:</strong> Set the resolver - tells ENS where to store your address</li>
+                                                                  <li id="tx-2-desc" style="display: none;"><strong>Transaction 2:</strong> Set your address on the resolver - links your subdomain to your wallet</li>
+                                                              </ul>
+                                                          </small>
+                                                      </div>
+                                                      <button id="activate-ens-btn" class="btn btn-lg border border-2 border-black contrast-shadow-md w-100" 
+                                                              style="background: linear-gradient(135deg, #ffb3d1, #ffc0cb); color: #000;">
+                                                          <i class="icon icon-check me-2"></i>ACTIVATE ENS
+                                                      </button>
+                                                  </div>
+                                              </div>
+                                              
+                                              <!-- Fully Active Status -->
+                                              <div id="fully-active-status" class="mb-4" style="display: none;">
+                                                  <div class="alert alert-success border border-2 border-black contrast-shadow-sm">
+                                                      <i class="icon icon-check me-2"></i>✅ Your subdomain is fully active and resolving to your address!
+                                                  </div>
                                               </div>
                                           </div>
                                         
