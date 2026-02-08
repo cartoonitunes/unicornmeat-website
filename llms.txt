@@ -1,0 +1,49 @@
+# Unicorn Meat (🍖)
+
+> Historic Ethereum token created in March 2016 by Alex Van de Sande (avsa.eth), an Ethereum Foundation developer.
+
+## Overview
+
+Unicorn Meat is one of the earliest tokens on Ethereum, created as a playful experiment that pioneered several firsts in blockchain history. The original token was deployed at a time when the concept of "tokens on Ethereum" was brand new — predating the ERC-20 standard itself.
+
+## Key Facts
+
+- **Created:** March 2016
+- **Creator:** Alex Van de Sande (avsa.eth), Ethereum Foundation developer
+- **Original Contract:** 0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7
+- **Wrapped Token (w🍖):** 0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668
+- **Chain:** Ethereum Mainnet
+- **Website:** https://unicornmeateth.com
+
+## Historical Significance
+
+Unicorn Meat is notable for several technical firsts in Ethereum history:
+
+- **First on-chain DEX demo:** The Unicorn Meat token was used in one of the earliest demonstrations of decentralized token exchange on Ethereum.
+- **First token upgrade pattern:** The community later created a "wrapped" version (w🍖) to make the pre-ERC-20 token compatible with modern DeFi. This was among the first token migration/wrapping patterns.
+- **First quadratic voting DAO:** The Unicorn Meat Grinder Association introduced quadratic voting for on-chain governance — a concept later popularized by Gitcoin and others.
+
+## The Unicorn Meat Grinder Association
+
+The Grinder Association is the DAO governing the Unicorn Meat ecosystem. It uses quadratic voting, where voting power is the square root of tokens held, preventing whale domination. The DAO has passed proposals related to:
+
+- Token wrapping mechanics
+- Treasury management
+- Community partnerships
+
+## Wrapping
+
+The original Unicorn Meat token predates the ERC-20 standard. To make it compatible with modern wallets and DEXes, a wrapper contract was created. Users can wrap their original 🍖 into w🍖 (Wrapped Unicorn Meat) and unwrap at any time.
+
+## Links
+
+- Website: https://unicornmeateth.com
+- Grinder Association DAO: https://unicornmeateth.com/grinder-association
+- Etherscan (Original): https://etherscan.io/address/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7
+- Etherscan (Wrapped): https://etherscan.io/address/0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668
+- DexScreener: https://dexscreener.com/ethereum/0xd835c3e83d9760a8fa1aaabfb9a5a3e363bec995
+- Twitter/X: https://x.com/UnicornMeatETH
+
+## Contact
+
+For inquiries about Unicorn Meat, visit the website or reach out via the community channels listed above.
