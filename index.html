@@ -28,30 +28,6 @@
     <meta name="twitter:title" content="Unicorn Meat 🍖">
     <meta name="twitter:description" content="A magical coin made by Ethereum in March 2016. Now wrapped and revived.">
     <meta name="twitter:image" content="https://gaccdiscordimages.s3.us-east-1.amazonaws.com/unicornmeat-ogsocial.png">
-    <!-- preload head styles -->
-    <link rel="preload" href="/assets/css/unicons.min.css" as="style">
-    <link rel="preload" href="/assets/css/swiper-bundle.min.css" as="style">
-    <link rel="preload" href="/assets/css/magic-cursor.min.css" as="style">
-    <!-- preload footer scripts -->
-    <link rel="preload" href="/assets/js/libs/jquery.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/scrollmagic.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/swiper-bundle.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/anime.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/typed.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/tilt.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/split-type.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/prettify.min.js" as="script">
-    <link rel="preload" href="/assets/js/libs/gsap.min.js" as="script">
-    <link rel="preload" href="/assets/js/core/magic-cursor.js" as="script">
-    <link rel="preload" href="/assets/js/helpers/data-attr-helper.js" as="script">
-    <link rel="preload" href="/assets/js/helpers/swiper-helper.js" as="script">
-    <link rel="preload" href="/assets/js/helpers/splitype-helper.js" as="script">
-    <link rel="preload" href="/assets/js/helpers/anime-helper.js" as="script">
-    <link rel="preload" href="/assets/js/helpers/typed-helper.js" as="script">
-    <link rel="preload" href="/assets/js/helpers/tilt-helper.js" as="script">
-    <link rel="preload" href="/assets/js/core/marquee.js" as="script">
-    <link rel="preload" href="/assets/js/uikit-components-bs.js" as="script">
-    <link rel="preload" href="/assets/js/app.js" as="script">
     <!-- app head for bootstrap core -->
     <script src="/assets/js/app-head-bs.js"></script>
     <!-- include uni-core components -->
@@ -1825,6 +1801,62 @@
         ]
     }
     </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is this the real historical Unicorn Meat?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! This is the original Unicorn Meat created in March 2016 by Ethereum's Alex Van de Sande. The contract was claimed through the Unicorn Meat Grinder Association, 100M Unicorn Meat were minted and the contract renounced. The historic ERC-20 contract is now wrapped and its tokens ownable by anyone. The meat is 100% authentic from the historic 2016 contract."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Why is Unicorn Meat significant?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Unicorn Meat is a historic token created by Ethereum core contributor Alex Van de Sande as an on-chain April Fools' joke. It allowed anyone to 'grind' their Unicorn token to receive Unicorn Meat — making it one of the first demonstrations of token mutation on Ethereum. Beyond the humor, it's also one of the few tradable tokens directly created by the Ethereum team."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Why acquire Unicorn Meat and make it tradable?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The Unicorn Meat contract was acquired through a DAO proposal that reached quorum. Anyone holding even one Unicorn could have done the same — and eventually, someone would have. Both the Unicorn Meat Grinder Association and the contract had been dormant for years. The Grinder Association saw just 23 transactions, the last in 2017. The Unicorn Meat contract itself had only 7, ending in 2016."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Why renounce the contract?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "As long as the Unicorn Meat Grinder Association isn't the owner of the Unicorn Meat contract, the Unicorn Grinder remains unusable. Renouncing the contract ensures no one can mint additional tokens, preventing meatflation and making the token safely tradable."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Why was Unicorn Meat wrapped?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The original Unicorn and Unicorn Meat contracts deviate slightly from the modern ERC-20 standard, making them incompatible with most centralized and decentralized exchanges. Wrapping Unicorn Meat makes it tradable on modern platforms. For those who prefer the original, wrapped tokens can be unwrapped 1:1 at any time."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I unwrap Wrapped Unicorn Meat?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! Wrapped Unicorn Meat (w🍖) is fully interoperable with the original 2016 Unicorn Meat contract. You can freely wrap and unwrap tokens 1:1 at any time. To wrap, use the approveAndCall function on the original Unicorn Meat token contract on Etherscan, or use the Wrap button on this website. To unwrap, use the unwrap function on the Wrapped Unicorn Meat contract."
+                }
+            }
+        ]
+    }
+    </script>
 </head>
 
 <body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
@@ -2024,13 +2056,15 @@
                             <h1 class="h2 xl:h1 mb-0 ls-0">
                                 Unicorn Meat 🍖 <br class="d-none sm:d-block">
                             </h1>
-                            <p class="fs-4 xl:fs-3">A magical coin made by Ethereum in March 2016.<br>Now wrapped and
-                                revived.</p>
-                            <div>
-                                <a class="btn btn-md lg:btn-xl xl:btn-2xl btn-secondary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0"
+                            <p class="fs-4 xl:fs-3">Built by the Ethereum Foundation in March 2016.<br>Before ERC-20. Before Uniswap. Before DAOs had a name.</p>
+                            <div class="hstack gap-2 justify-center flex-wrap">
+                                <a class="btn btn-md lg:btn-xl xl:btn-2xl btn-primary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0"
+                                    href="#trading">
+                                    <span>Buy on Uniswap 🦄</span>
+                                </a>
+                                <a class="btn btn-md lg:btn-xl xl:btn-2xl btn-secondary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm rotate-2 hover:rotate-0"
                                     href="#about">
-                                    <span>🦄 Learn More!</span>
-                                    <span class="fs-4 mb-narrow">🍖</span>
+                                    <span>The Story 🍖</span>
                                 </a>
                             </div>
                             <div class="mt-2 mb-16">
@@ -2100,37 +2134,38 @@
             <div class="section-outer panel py-3 sm:py-2">
                 <div class="container">
                     <div class="section-inner panel">
+                        <p class="text-center text-uppercase fs-7 fw-bold text-muted mb-2" style="letter-spacing: 2px;">Available On</p>
                         <div class="section-content panel">
                             <div class="row gy-4">
                                 <div class="col-xl-2 col-md-3 col-6 association-logo">
-                                    <img src="/assets/images/clients/ethereum.png" 
-                                         class="img-fluid" 
-                                         alt="Ethereum">
+                                    <img src="/assets/images/clients/ethereum.png"
+                                         class="img-fluid"
+                                         alt="Ethereum" loading="lazy">
                                 </div><!-- End Association Item -->
                                 <div class="col-xl-2 col-md-3 col-6 association-logo">
-                                    <img src="/assets/images/clients/ethereum-foundation.png" 
-                                         class="img-fluid" 
-                                         alt="Ethereum Foundation">
+                                    <img src="/assets/images/clients/ethereum-foundation.png"
+                                         class="img-fluid"
+                                         alt="Ethereum Foundation" loading="lazy">
                                 </div><!-- End Association Item -->
                                 <div class="col-xl-2 col-md-3 col-6 association-logo">
-                                    <img src="/assets/images/clients/coinbase-base.png" 
-                                         class="img-fluid" 
-                                         alt="Base">
+                                    <img src="/assets/images/clients/coinbase-base.png"
+                                         class="img-fluid"
+                                         alt="Base" loading="lazy">
                                 </div><!-- End Association Item -->
                                 <div class="col-xl-2 col-md-3 col-6 association-logo">
-                                    <img src="/assets/images/clients/uni.png" 
-                                         class="img-fluid" 
-                                         alt="Uniswap">
+                                    <img src="/assets/images/clients/uni.png"
+                                         class="img-fluid"
+                                         alt="Uniswap" loading="lazy">
                                 </div><!-- End Association Item -->
                                 <div class="col-xl-2 col-md-3 col-6 association-logo">
-                                    <img src="/assets/images/clients/gecko.png" 
-                                         class="img-fluid" 
-                                         alt="CoinGecko">
+                                    <img src="/assets/images/clients/gecko.png"
+                                         class="img-fluid"
+                                         alt="CoinGecko" loading="lazy">
                                 </div><!-- End Association Item -->
                                 <div class="col-xl-2 col-md-3 col-6 association-logo">
-                                    <img src="/assets/images/clients/bic-type.svg" 
-                                         class="img-fluid" 
-                                         alt="Bureau of Internet Culture">
+                                    <img src="/assets/images/clients/bic-type.svg"
+                                         class="img-fluid"
+                                         alt="Bureau of Internet Culture" loading="lazy">
                                 </div><!-- End Association Item -->
                 </div>
                 </div>
@@ -2154,9 +2189,13 @@
                                             Meat Story 🍖</h2>
                                         <div class="desc">
                                             <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">
-                                                Unicorn Meat is a historic Ethereum meme token, created by Ethereum's
-                                                Alex Van de Sande in March 2016 as part of a demonstration of token
-                                                mutations, DAOs, bribable voting, and on-chain fun. A month after the
+                                                Unicorn Meat is a historic Ethereum token, created in March 2016 by
+                                                Alex Van de Sande — Ethereum Foundation developer, lead of the
+                                                <a href="https://github.com/ethereum/mist" target="_blank" rel="noopener noreferrer">Mist Browser</a>
+                                                (Ethereum's first graphical wallet), and pioneer of the
+                                                <a href="https://ens.domains" target="_blank" rel="noopener noreferrer">Ethereum Name Service</a>
+                                                concept. It was one of the earliest demonstrations of token
+                                                mutations, DAOs, bribable voting, and on-chain exchange. A month after the
                                                 Ethereum Foundation created <a
                                                     href='https://etherscan.io/token/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
                                                     target="_blank" rel="noopener noreferrer">Unicorns 🦄</a> as an
@@ -2193,7 +2232,7 @@
                                                     target="_blank" rel="noopener noreferrer">renounced contract</a>,
                                                 and is wrapped to be tradable and owned by anyone!
                                             </p>
-                                            <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">Unicorn Meat is a collectible meme token – no financial value, just mythical fun 🦄🍖.</p>
+                                            <p class="fs-6 sm:fs-5 xl:fs-4 mb-2">Unicorn Meat is a piece of Ethereum history — one of the earliest tokens on the network, predating the ERC-20 standard, CryptoKitties, and the modern DAO ecosystem 🦄🍖.</p>
                                             
                                             <!-- PDF Pitch Deck Button -->
                                             <div id="pitch-deck" class="text-center mb-4 mt-4">
@@ -2212,27 +2251,27 @@
                                                     <div class="col">
                                                         <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rotate-1">
                                                             <h6 class="h6 mb-2 text-uppercase fw-bold">🦄 Unicorns Token</h6>
-                                                            <img src="/assets/images/home-two/unicorns_etherscan.jpg" alt="Etherscan Unicorns Token" 
-                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm" 
-                                                                 style="max-width: 100%; height: auto;">
+                                                            <img src="/assets/images/home-two/unicorns_etherscan.jpg" alt="Etherscan Unicorns Token"
+                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm"
+                                                                 style="max-width: 100%; height: auto;" loading="lazy">
                                                             <p class="fs-7 mt-2 mb-0"><a href="https://etherscan.io/token/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: inherit;">Legendary Ethereum Unicorns</a></p>
                                                         </div>
                                                     </div>
                                                     <div class="col">
                                                         <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white -rotate-1">
                                                             <h6 class="h6 mb-2 text-uppercase fw-bold">💰 Foundation Tip Jar</h6>
-                                                            <img src="/assets/images/home-two/tipjar_etherscan.jpg" alt="Ethereum Foundation Tip Jar Contract" 
-                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm" 
-                                                                 style="max-width: 100%; height: auto;">
+                                                            <img src="/assets/images/home-two/tipjar_etherscan.jpg" alt="Ethereum Foundation Tip Jar Contract"
+                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm"
+                                                                 style="max-width: 100%; height: auto;" loading="lazy">
                                                             <p class="fs-7 mt-2 mb-0"><a href="https://etherscan.io/address/0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: inherit;">Ethereum Foundation donation contract</a></p>
                                                         </div>
                                                     </div>
                                                     <div class="col">
                                                         <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rotate-1">
                                                             <h6 class="h6 mb-2 text-uppercase fw-bold">🍖 Unicorn Meat Token</h6>
-                                                            <img src="/assets/images/home-two/unicornmeat_etherscan.jpg" alt="Etherscan Unicorn Meat Token" 
-                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm" 
-                                                                 style="max-width: 100%; height: auto;">
+                                                            <img src="/assets/images/home-two/unicornmeat_etherscan.jpg" alt="Etherscan Unicorn Meat Token"
+                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm"
+                                                                 style="max-width: 100%; height: auto;" loading="lazy">
                                                             <p class="fs-7 mt-2 mb-0"><a href="https://etherscan.io/token/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: inherit;">Legendary Ethereum Unicorn Meat</a></p>
                                                         </div>
                                                     </div>
@@ -2365,16 +2404,16 @@
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #ffe6f0;">
                 <img class="position-absolute start-0 w-200px xl:w-auto"
                     src="/assets/images/common/cloud-01.svg" alt="cloud"
-                    style="top: 15%">
+                    style="top: 15%" loading="lazy">
                 <img class="position-absolute end-0 w-150px xl:w-auto"
                     src="/assets/images/common/cloud-02.svg" alt="cloud"
-                    style="bottom: 10%">
-                
+                    style="bottom: 10%" loading="lazy">
+
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-lg-10">
                             <div class="section-inner panel p-4 sm:px-8 sm:py-6 lg:p-5 xl:p-7 border border-2 border-black contrast-shadow-lg text-black -rotate-1 bg-white">
-                                
+
                                 <div class="section-header panel text-center mb-4 sm:mb-6 xl:mb-9"
                                     data-anime="onview: -200; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
                                     <h2 class="h4 sm:h3 xl:h2 m-0 rotate-2 text-uppercase ls-0">Buy Unicorn Meat 🦄🍖</h2>
@@ -2469,18 +2508,18 @@
         <!-- Section end -->
 
         <div class="d-none xl:d-block">
-            <img src="/assets/images/common/italic-line-02.svg" alt="victor">
+            <img src="/assets/images/common/italic-line-02.svg" alt="" loading="lazy">
         </div>
 
         <!-- Section start -->
         <div id="features" class="features section panel">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff">
                 <img class="position-absolute start-0 w-250px xl:w-auto"
-                    src="/assets/images/common/cloud-01.svg" alt="victor"
-                    style="top: 11%">
+                    src="/assets/images/common/cloud-01.svg" alt=""
+                    style="top: 11%" loading="lazy">
                 <img class="position-absolute end-0 w-200px xl:w-auto"
-                    src="/assets/images/common/cloud-02.svg" alt="victor"
-                    style="bottom: 6%">
+                    src="/assets/images/common/cloud-02.svg" alt=""
+                    style="bottom: 6%" loading="lazy">
                 <div class="container sm:max-w-lg xl:max-w-xl">
                     <div class="section-inner panel">
                         <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
@@ -2542,10 +2581,10 @@
         <!-- Section end -->
 
         <div class="d-none xl:d-block">
-            <img src="/assets/images/common/italic-line-02.svg" alt="victor">
+            <img src="/assets/images/common/italic-line-02.svg" alt="" loading="lazy">
         </div>
 
-       
+
 
         <!-- Section start -->
         <div id="wrap" class="web3-actions section panel">
@@ -2640,6 +2679,7 @@
                                         Grind Unicorns 🦄</h3>
                                 </div>
                                 <p class="fs-6 xl:fs-5 mb-3 w-100 text-center">Grind your Unicorns 🦄 to get Unicorn Meat 🍖 using the original 2016 Unicorn Meat Grinder Association contract.
+                                    Visit the <a href="/grinder-association" class="fw-bold text-primary" style="text-decoration: underline;">Grinder Association DAO page</a> to vote on proposals and view the governance history.
                                 </p>
                                 <div class="fs-7 text-center mb-3" style="font-size: 0.8rem;">
                                     <p class="mb-2 mt-3"><strong>How it works:</strong></p>
@@ -2861,8 +2901,8 @@
 
         <div class="d-none xl:d-block">
             <img class="text-secondary-100"
-                src="/assets/images/common/italic-line-01.svg" alt="victor"
-                data-uc-svg style="margin-bottom: -1px">
+                src="/assets/images/common/italic-line-01.svg" alt=""
+                data-uc-svg style="margin-bottom: -1px" loading="lazy">
         </div>
 
         <!-- Section start -->
@@ -2870,10 +2910,10 @@
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #ffe6f0;">
                 <img class="position-absolute start-0 w-200px xl:w-auto"
                     src="/assets/images/common/cloud-03.svg" alt="cloud"
-                    style="top: 20%">
+                    style="top: 20%" loading="lazy">
                 <img class="position-absolute end-0 w-150px xl:w-auto"
                     src="/assets/images/common/cloud-04.svg" alt="cloud"
-                    style="bottom: 15%">
+                    style="bottom: 15%" loading="lazy">
                 
                 <div class="container">
                     <div class="row justify-content-center">
@@ -3044,22 +3084,22 @@
 
         <div class="d-none xl:d-block">
             <img class="text-secondary-100"
-                src="/assets/images/common/italic-line-01.svg" alt="victor"
-                data-uc-svg style="margin-bottom: -1px">
+                src="/assets/images/common/italic-line-01.svg" alt=""
+                data-uc-svg style="margin-bottom: -1px" loading="lazy">
         </div>
 
         <!-- Section start -->
         <div id="roadmap" class="roadmap section panel overflow-hidden">
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-primary">
                 <img class="position-absolute end-0"
-                    src="/assets/images/common/cloud-03.svg" alt="victor"
-                    style="top: 10%">
+                    src="/assets/images/common/cloud-03.svg" alt=""
+                    style="top: 10%" loading="lazy">
                 <img class="position-absolute start-0 w-300px xl:w-auto"
-                    src="/assets/images/common/cloud-04.svg" alt="victor"
-                    style="top: 39%">
+                    src="/assets/images/common/cloud-04.svg" alt=""
+                    style="top: 39%" loading="lazy">
                 <img class="position-absolute end-0"
-                    src="/assets/images/common/cloud-05.svg" alt="victor"
-                    style="bottom: 8%">
+                    src="/assets/images/common/cloud-05.svg" alt=""
+                    style="bottom: 8%" loading="lazy">
                 <div class="container sm:max-w-lg xl:max-w-xl">
                     <div class="section-inner panel">
                         <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
@@ -3068,8 +3108,8 @@
                         </div>
                         <div class="section-content panel">
                             <img class="position-absolute start-50 top-50 translate-middle d-none lg:d-block"
-                                src="/assets/images/common/line.svg" alt="victor"
-                                style="height: 90%">
+                                src="/assets/images/common/line.svg" alt=""
+                                style="height: 90%" loading="lazy">
                             <div class="row child-cols-12 items-center g-4 sm:g-6 lg:gx-10 lg:gy-8 xl:gy-9">
                                 <div class="sm:col-8 lg:col-6">
                                     <div class="roadmap-item panel"
@@ -3090,10 +3130,10 @@
                                         <h4 class="h5 xl:h4 m-0 text-secondary -rotate-2">July 30, 2015</h4>
                                         <img class="position-absolute top-0 d-none xl:d-block"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="left: -15.5%">
+                                            alt="" style="left: -15.5%" loading="lazy">
                                         <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="left: -19.5%">
+                                            alt="" style="left: -19.5%" loading="lazy">
                                     </div>
                                 </div>
                                 <div class="sm:col-4 lg:col-6 d-none sm:d-block">
@@ -3101,10 +3141,10 @@
                                         <h4 class="h5 xl:h4 m-0 text-secondary rotate-2 float-end">Feb 11, 2016</h4>
                                         <img class="position-absolute top-0 d-none xl:d-block"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="right: -15.5%">
+                                            alt="" style="right: -15.5%" loading="lazy">
                                         <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="right: -19.5%">
+                                            alt="" style="right: -19.5%" loading="lazy">
                                     </div>
                                 </div>
                                 <div class="sm:col-8 lg:col-6">
@@ -3144,10 +3184,10 @@
                                         <h4 class="h5 xl:h4 m-0 text-secondary -rotate-2">Mar 24, 2016</h4>
                                         <img class="position-absolute top-0 d-none xl:d-block"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="left: -15.5%">
+                                            alt="" style="left: -15.5%" loading="lazy">
                                         <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="left: -19.5%">
+                                            alt="" style="left: -19.5%" loading="lazy">
                                     </div>
                                 </div>
                                 <div class="sm:col-4 lg:col-6 d-none sm:d-block">
@@ -3155,10 +3195,10 @@
                                         <h4 class="h5 xl:h4 m-0 text-secondary rotate-2 float-end">July 7, 2025</h4>
                                         <img class="position-absolute top-0 d-none xl:d-block"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="right: -15.5%">
+                                            alt="" style="right: -15.5%" loading="lazy">
                                         <img class="position-absolute top-0 w-40px d-none lg:d-block xl:d-none"
                                             src="/assets/images/common/coin.svg"
-                                            alt="victor" style="right: -19.5%">
+                                            alt="" style="right: -19.5%" loading="lazy">
                                     </div>
                                 </div>
                                 <div class="sm:col-8 lg:col-6">
@@ -3194,7 +3234,7 @@
 
         <div class="d-none xl:d-block">
             <img class="text-primary" src="/assets/images/common/italic-line-03.svg"
-                alt="victor" data-uc-svg style="margin-top: -5px">
+                alt="" data-uc-svg style="margin-top: -5px" loading="lazy">
         </div>
 
         <!-- Section start -->
@@ -3415,7 +3455,7 @@
             <div
                 class="footer-cta panel py-6 sm:py-8 lg:py-9 xl:py-10 min-h-850px sm:min-h-950px lg:min-h-1000px xl:min-h-1320px">
                 <img class="position-absolute start-0 bottom-0 w-100"
-                    src="/assets/images/home-two/footer.svg" alt="Image">
+                    src="/assets/images/home-two/footer.svg" alt="" loading="lazy">
                 <div class="container sm:max-w-md">
                     <div class="footer-inner panel vstack gap-4 sm:gap-6 xl:gap-9"
                         data-anime="onview: -100; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
@@ -3544,7 +3584,7 @@
     <script defer src="/assets/js/uikit-components-bs.js"></script>
 
     <!-- include ethers.js for blockchain interactions -->
-    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
+    <script defer src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
     <script>
         // Suppress expected wallet extension and third-party widget errors globally
         (function() {
@@ -3622,11 +3662,11 @@
     </script>
     
                 <!-- include Web3.js for subdomain claimer -->
-        <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
         <!-- ethers.js already loaded above from unpkg.com, no need for duplicate -->
     
     <!-- include WalletKit library -->
-    <script src="/assets/js/walletkit.umd.js"></script>
+    <script defer src="/assets/js/walletkit.umd.js"></script>
     
     <!-- include WalletKit integration -->
     <script defer src="/assets/js/walletkit-integration.js"></script>
@@ -4260,6 +4300,7 @@
     
 
     </div>
+    <script defer src="/_vercel/insights/script.js"></script>
 </body>
 
 </html>

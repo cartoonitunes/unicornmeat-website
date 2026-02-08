@@ -401,6 +401,70 @@
         }
     }
     </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the Unicorn Meat Grinder?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The Unicorn Meat Grinder is a governance contract that also takes your Unicorns, sends them to unicorn heaven (the contract), and sends you back Unicorn Meat tokens. Grinding a Unicorn can yield about 5000 pieces of meat, but depending on your luck you might get more. Each token is divisible to 3 decimal places, so each single unicorn will be exchanged for more than a million smaller units."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How much Unicorn Meat do I get per Unicorn?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Each Unicorn grind can yield about 5000 pieces of meat, but there's a small chance you'll get much more than that. The amount is calculated using a semi-random function, so your results may vary. Since each meat token is divisible to 3 decimal places, each unicorn exchanges for more than a million smaller units."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I grind my Unicorns?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Important: Do not send unicorn tokens directly to the grinder! You need to approve first, then grind. The dapp on the Grinder Association page will handle the approval for you. Go to the Grind section, or use the Grinder Association contract on Etherscan and call the grindUnicorns function with the number of unicorns you want to grind. Wait a few seconds and you'll receive your Unicorn Meat tokens."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does quadratic voting work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Your vote weight is calculated as your Unicorn token balance multiplied by the square root of the ETH you send (plus gas costs). This means a vote that sends 100 finney will be 10x more weighted than a vote that sends only 1 finney. The Association 'might take bribes' when counting votes — this is quadratic voting, which helps prevent simple 51% attacks by making it expensive to buy large amounts of voting power."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I vote on proposals?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "To vote on a proposal, you need to own Unicorn tokens. Your vote weight is based on your token balance and any ETH you send with your vote (quadratic voting). Votes against a proposal are weighted 4x more than votes in support, meaning a vocal minority of 20% can veto any proposal. You can vote using the Grinder Association contract on Etherscan or through the website interface."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What technical features did this pioneer?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The Unicorn Meat Grinder demonstrated several important Ethereum functionalities: token upgrades (locking an old token and sending a new token back), decentralized token swaps (a contract receiving tokens and executing functions), and quadratic voting."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is there a Unicorn Killers Hall of Fame?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Almost! The Grinder Association page shows a Unicorn Killers Hall of Fame, which lists all the addresses that have ground Unicorns, along with their kill counts and first kill dates. The original announcement mentioned a partially constructed Hall of Fame, and the on-chain version is in progress with more features than originally envisioned."
+                }
+            }
+        ]
+    }
+    </script>
 </head>
 
 <body>
@@ -558,9 +622,9 @@
                                                     <div class="panel p-2 border border-2 border-black contrast-shadow-sm bg-white rotate-1">
                                                         <h6 class="h6 mb-2 text-uppercase fw-bold fs-7">🐦 Original Announcement</h6>
                                                         <a href="https://x.com/ethereum/status/715821110722433024" target="_blank" rel="noopener noreferrer">
-                                                            <img src="/assets/images/ethereum_grinder_announcement.png" alt="Ethereum Grinder Announcement" 
-                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm" 
-                                                                 style="max-width: 100%; height: auto;">
+                                                            <img src="/assets/images/ethereum_grinder_announcement.png" alt="Ethereum Grinder Announcement"
+                                                                 class="img-fluid border border-2 border-black contrast-shadow-sm"
+                                                                 style="max-width: 100%; height: auto;" loading="lazy">
                                                         </a>
                                                         <p class="fs-7 mt-2 mb-0"><a href="https://x.com/ethereum/status/715821110722433024" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: inherit;">Ethereum Twitter Announcement</a></p>
                                                     </div>
@@ -589,6 +653,7 @@
                                 <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
                                     data-anime="onview: -200; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
                                     <h2 class="h4 sm:h3 xl:h2 m-0 rotate-2 text-uppercase ls-0">The Association</h2>
+                                    <p class="fs-6 mt-2"><a href="/" class="fw-bold text-primary" style="text-decoration: underline;">Back to Unicorn Meat homepage</a></p>
                                 </div>
 
                                 <!-- Error State -->
@@ -661,10 +726,10 @@
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #dbf2ff; position: relative;">
                 <img class="position-absolute start-0 w-200px xl:w-auto"
                     src="/assets/images/common/cloud-01.svg" alt="cloud"
-                    style="top: 15%">
+                    style="top: 15%" loading="lazy">
                 <img class="position-absolute end-0 w-150px xl:w-auto"
                     src="/assets/images/common/cloud-02.svg" alt="cloud"
-                    style="bottom: 10%">
+                    style="bottom: 10%" loading="lazy">
                 <div class="container sm:max-w-lg xl:max-w-2xl">
                     <div class="section-inner panel">
                         <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
@@ -716,10 +781,10 @@
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #e6d9ff; position: relative;">
                 <img class="position-absolute start-0 w-200px xl:w-auto"
                     src="/assets/images/common/cloud-03.svg" alt="cloud"
-                    style="top: 15%">
+                    style="top: 15%" loading="lazy">
                 <img class="position-absolute end-0 w-150px xl:w-auto"
                     src="/assets/images/common/cloud-04.svg" alt="cloud"
-                    style="bottom: 10%">
+                    style="bottom: 10%" loading="lazy">
                 <div class="container sm:max-w-lg xl:max-w-4xl">
                     <div class="section-inner panel">
                         <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
@@ -771,10 +836,10 @@
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #ffe6f9; position: relative;">
                 <img class="position-absolute start-0 w-250px xl:w-auto"
                     src="/assets/images/common/cloud-01.svg" alt="cloud"
-                    style="top: 11%">
+                    style="top: 11%" loading="lazy">
                 <img class="position-absolute end-0 w-200px xl:w-auto"
                     src="/assets/images/common/cloud-02.svg" alt="cloud"
-                    style="bottom: 6%">
+                    style="bottom: 6%" loading="lazy">
                 <div class="container sm:max-w-lg xl:max-w-4xl">
                     <div class="section-inner panel">
                         <div class="section-header panel sm:max-w-500px xl:max-w-800px mx-auto mb-4 sm:mb-6 xl:mb-9 text-center"
@@ -820,10 +885,10 @@
             <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10" style="background-color: #e6ffe6; position: relative;">
                 <img class="position-absolute start-0 w-250px xl:w-auto"
                     src="/assets/images/common/cloud-03.svg" alt="cloud"
-                    style="top: 11%">
+                    style="top: 11%" loading="lazy">
                 <img class="position-absolute end-0 w-200px xl:w-auto"
                     src="/assets/images/common/cloud-04.svg" alt="cloud"
-                    style="bottom: 6%">
+                    style="bottom: 6%" loading="lazy">
                 <div class="container sm:max-w-md xl:max-w-lg">
                     <div class="section-inner panel"
                         data-anime="onview: -300; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
@@ -910,11 +975,11 @@
     </div>
 
     <!-- include ethers.js for blockchain interactions -->
-    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-    
+    <script defer src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+
     <!-- include WalletKit library -->
-    <script src="/assets/js/walletkit.umd.js"></script>
+    <script defer src="/assets/js/walletkit.umd.js"></script>
     
     <!-- include WalletKit integration -->
     <script defer src="/assets/js/walletkit-integration.js"></script>
@@ -1068,7 +1133,7 @@
             <div
                 class="footer-cta panel py-6 sm:py-8 lg:py-9 xl:py-10 min-h-850px sm:min-h-950px lg:min-h-1000px xl:min-h-1320px">
                 <img class="position-absolute start-0 bottom-0 w-100"
-                    src="/assets/images/home-two/footer.svg" alt="Image">
+                    src="/assets/images/home-two/footer.svg" alt="" loading="lazy">
                 <div class="container sm:max-w-md">
                     <div class="footer-inner panel vstack gap-4 sm:gap-6 xl:gap-9"
                         data-anime="onview: -100; translateY: [48, 0]; opacity: [0, 1]; delay: 200;">
@@ -1169,6 +1234,7 @@
     </footer>
 
     <!-- Footer end -->
+    <script defer src="/_vercel/insights/script.js"></script>
 </body>
 
 </html>
