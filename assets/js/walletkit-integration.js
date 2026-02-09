@@ -139,7 +139,7 @@ class UnicornMeatWalletKit {
                     <div style="width: 32px; height: 32px; background: #f6851b; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">🦊</div>
                     <div>
                         <div style="font-weight: 600;">MetaMask</div>
-                        <div style="font-size: 12px; color: #888;">Popular</div>
+                        <div style="font-size: 12px; color: #888;">${typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask ? 'Detected' : 'Popular'}</div>
                     </div>
                 </button>
                 
@@ -179,7 +179,7 @@ class UnicornMeatWalletKit {
                     <div style="width: 32px; height: 32px; background: #0052ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">C</div>
                     <div>
                         <div style="font-weight: 600;">Coinbase</div>
-                        <div style="font-size: 12px; color: #888;">Exchange</div>
+                        <div style="font-size: 12px; color: #888;">${typeof window.ethereum !== 'undefined' && window.ethereum.isCoinbaseWallet ? 'Detected' : 'Extension'}</div>
                     </div>
                 </button>
                 
@@ -273,27 +273,17 @@ class UnicornMeatWalletKit {
     }
     
     handleWalletSelection(wallet) {
-        if (this.walletKit) {
-            // Use WalletKit if available
-            this.walletKit.connect({ wallet });
+        if (typeof window.ethereum !== 'undefined') {
+            // All browser extension wallets use the same window.ethereum API
+            this.connectWithMetaMask();
         } else {
-            // Fallback to direct MetaMask
-            switch (wallet) {
-                case 'metamask':
-                    this.connectWithMetaMask();
-                    break;
-                case 'walletconnect':
-                    this.showError('WalletConnect integration coming soon! For now, please use MetaMask.');
-                    break;
-                case 'coinbase':
-                    this.showError('Coinbase Wallet integration coming soon! For now, please use MetaMask.');
-                    break;
-                case 'rainbow':
-                    this.showError('Rainbow Wallet integration coming soon! For now, please use MetaMask.');
-                    break;
-                default:
-                    this.showError('Unknown wallet selected');
-            }
+            const installUrls = {
+                metamask: 'https://metamask.io/download/',
+                coinbase: 'https://www.coinbase.com/wallet/downloads',
+                rainbow: 'https://rainbow.me/download'
+            };
+            const url = installUrls[wallet] || 'https://ethereum.org/en/wallets/';
+            this.showError(`No wallet detected. <a href="${url}" target="_blank" style="color: #3396ff; text-decoration: underline;">Install ${wallet.charAt(0).toUpperCase() + wallet.slice(1)}</a> or use any Web3 browser extension.`);
         }
     }
     
@@ -356,8 +346,11 @@ class UnicornMeatWalletKit {
         // Check if already connected
         if (this.isConnected && this.account) {
             this.showConnectionInfoModal();
+        } else if (this.walletkitModal) {
+            // Show wallet selection modal
+            this.walletkitModal.style.display = 'block';
         } else {
-            // Go directly to MetaMask connection
+            // Fallback: connect directly
             this.connectWithMetaMask();
         }
     }
@@ -483,11 +476,11 @@ class UnicornMeatWalletKit {
                     modal.hide();
                 }
             } else {
-                this.showError('No wallet detected. Please install a Web3 wallet like MetaMask, WalletConnect, or another compatible wallet.');
+                this.showError('No wallet detected. Please install a Web3 wallet like MetaMask, Coinbase Wallet, or Rainbow.');
             }
         } catch (error) {
-            console.error('Error connecting with MetaMask:', error);
-            this.showError('Failed to connect with MetaMask: ' + error.message);
+            console.error('Error connecting wallet:', error);
+            this.showError('Failed to connect wallet: ' + error.message);
         }
     }
     
