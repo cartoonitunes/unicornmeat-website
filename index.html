@@ -253,6 +253,43 @@
             }
         }
 
+        .emoji-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .emoji-rain .emoji {
+            position: absolute;
+            top: -60px;
+            animation: emojiFall linear infinite;
+            opacity: 0;
+            user-select: none;
+            line-height: 1;
+        }
+
+        @keyframes emojiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(calc(100vh + 80px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
         .associations .row {
             display: flex;
             flex-wrap: nowrap;
@@ -2040,6 +2077,7 @@
         <!-- Hero start -->
         <div id="hero_header" class="hero-header section panel overflow-hidden">
             <div class="section-outer min-h-screen py-9 lg:py-10 hero-bg">
+                <div class="emoji-rain" aria-hidden="true"></div>
                 <div class="container" style="position: relative; z-index: 1;">
                     <div class="section-inner panel">
                         <div class="panel vstack items-center gap-2 lg:gap-3 xl:gap-4 max-w-md mx-auto text-center px-2 lg:px-0 mt-6 lg:mt-8 xl:mt-9"
@@ -2123,6 +2161,23 @@
         </div>
 
         <!-- Hero end -->
+        <script>
+        (function() {
+            var c = document.querySelector('.emoji-rain');
+            if (!c) return;
+            var emojis = ['\uD83E\uDD84', '\uD83C\uDF56'];
+            for (var i = 0; i < 30; i++) {
+                var s = document.createElement('span');
+                s.className = 'emoji';
+                s.textContent = emojis[i % 2];
+                s.style.left = (Math.random() * 100) + '%';
+                s.style.fontSize = (20 + Math.random() * 24) + 'px';
+                s.style.animationDuration = (7 + Math.random() * 10) + 's';
+                s.style.animationDelay = (Math.random() * 12) + 's';
+                c.appendChild(s);
+            }
+        })();
+        </script>
 
         <!-- Associations Section Start -->
         <div id="associations" class="associations section panel overflow-hidden">
