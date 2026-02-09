@@ -15,6 +15,8 @@ class UnicornMeatWalletKit {
             wrappedUnicornMeat: '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'
         };
         
+        this.expectedChainId = '0x1'; // Ethereum mainnet
+
         this.init();
     }
     
@@ -453,16 +455,23 @@ class UnicornMeatWalletKit {
     async connectWithMetaMask() {
         try {
             if (typeof window.ethereum !== 'undefined') {
+                // Check network before connecting
+                const networkOk = await this.checkNetwork();
+                if (!networkOk) return;
+
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 this.account = { address: accounts[0] };
                 this.isConnected = true;
-                
+
                 // Try to set up ethers if available
                 if (typeof window.ethers !== 'undefined') {
                     this.provider = new window.ethers.providers.Web3Provider(window.ethereum);
                     this.signer = this.provider.getSigner();
                 }
-                
+
+                // Persist session
+                try { localStorage.setItem('um_wallet', accounts[0]); } catch(e) {}
+
                 await this.updateConnectButton();
                 const truncatedAddress = `${this.account.address.slice(0, 6)}...${this.account.address.slice(-4)}`;
                 this.showSuccess(`Connected to ${truncatedAddress}!`);
@@ -488,6 +497,9 @@ class UnicornMeatWalletKit {
         this.isConnected = false;
         this.provider = null;
         this.signer = null;
+
+        // Clear persisted session
+        try { localStorage.removeItem('um_wallet'); } catch(e) {}
         
         // Update the connect button
         this.updateConnectButton();
@@ -516,36 +528,79 @@ class UnicornMeatWalletKit {
     }
     
     checkExistingConnections() {
-        // Check if MetaMask is already connected
-        if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
-            this.account = { address: window.ethereum.selectedAddress };
+        if (typeof window.ethereum === 'undefined') return;
+
+        // Check MetaMask active connection, or fall back to persisted session
+        const activeAddress = window.ethereum.selectedAddress;
+        let savedAddress = null;
+        try { savedAddress = localStorage.getItem('um_wallet'); } catch(e) {}
+
+        const address = activeAddress || savedAddress;
+        if (address) {
+            this.account = { address: address };
             this.isConnected = true;
-            
+
             // Set up ethers if available
             if (typeof window.ethers !== 'undefined') {
                 this.provider = new window.ethers.providers.Web3Provider(window.ethereum);
                 this.signer = this.provider.getSigner();
             }
-            
+
             // Update the connect button to show balance
             this.updateConnectButton();
-            
+
             // Load contract data
             this.loadContractData();
-
-            // Listen for account changes
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length === 0) {
-                    this.handleDisconnection();
-                } else {
-                    this.account = { address: accounts[0] };
-                    this.updateConnectButton();
-                    this.loadContractData();
-                }
-            });
         }
+
+        // Listen for account changes
+        window.ethereum.on('accountsChanged', (accounts) => {
+            if (accounts.length === 0) {
+                this.handleDisconnection();
+            } else {
+                this.account = { address: accounts[0] };
+                try { localStorage.setItem('um_wallet', accounts[0]); } catch(e) {}
+                this.updateConnectButton();
+                this.loadContractData();
+            }
+        });
+
+        // Listen for chain changes
+        window.ethereum.on('chainChanged', () => {
+            this.checkNetwork();
+            if (this.isConnected) {
+                // Re-init provider on chain switch
+                if (typeof window.ethers !== 'undefined') {
+                    this.provider = new window.ethers.providers.Web3Provider(window.ethereum);
+                    this.signer = this.provider.getSigner();
+                }
+                this.updateConnectButton();
+                this.loadContractData();
+            }
+        });
     }
     
+    async checkNetwork() {
+        if (typeof window.ethereum === 'undefined') return true;
+        try {
+            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+            if (chainId !== this.expectedChainId) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: this.expectedChainId }]
+                    });
+                } catch (switchError) {
+                    this.showError('Please switch to Ethereum Mainnet to use this site.');
+                    return false;
+                }
+            }
+            return true;
+        } catch (error) {
+            return true; // Don't block on detection errors
+        }
+    }
+
     async loadContractData() {
         if (!this.isConnected || !this.account) return;
         
@@ -719,19 +774,36 @@ class UnicornMeatWalletKit {
         }
     }
     
+    setButtonLoading(buttonId, loading, originalText) {
+        const btn = document.getElementById(buttonId);
+        if (!btn) return;
+        if (loading) {
+            btn.disabled = true;
+            btn.dataset.originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Processing...';
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText || originalText || btn.innerHTML;
+        }
+    }
+
     async wrapTokens() {
         if (!this.isConnected || !this.account) {
             this.showWrapError('Please connect your wallet first');
             return;
         }
-        
+
         const amount = document.getElementById('wrap-unwrap-amount').value;
         if (!amount || amount <= 0) {
             this.showWrapError('Please enter a valid amount');
             return;
         }
-        
+
+        this.setButtonLoading('wrap-button', true);
         try {
+            const networkOk = await this.checkNetwork();
+            if (!networkOk) return;
+
             this.showLoading('Checking balance...');
             
             // Get provider and signer
@@ -784,7 +856,7 @@ class UnicornMeatWalletKit {
             this.showWrapSuccess(`Successfully wrapped ${amount} Unicorn Meat tokens! Transaction: ${wrapTx.hash}`);
             await this.loadContractData();
             await this.updateConnectButton();
-            
+
         } catch (error) {
             console.error('Error wrapping tokens:', error);
             if (error.code === 4001) {
@@ -794,6 +866,8 @@ class UnicornMeatWalletKit {
             } else {
                 this.showWrapError('Failed to wrap tokens: ' + error.message);
             }
+        } finally {
+            this.setButtonLoading('wrap-button', false, 'Wrap');
         }
     }
     
@@ -802,14 +876,18 @@ class UnicornMeatWalletKit {
             this.showWrapError('Please connect your wallet first');
             return;
         }
-        
+
         const amount = document.getElementById('wrap-unwrap-amount').value;
         if (!amount || amount <= 0) {
             this.showWrapError('Please enter a valid amount');
             return;
         }
-        
+
+        this.setButtonLoading('unwrap-button', true);
         try {
+            const networkOk = await this.checkNetwork();
+            if (!networkOk) return;
+
             this.showLoading('Unwrapping tokens...');
             
             // Get provider and signer
@@ -842,7 +920,7 @@ class UnicornMeatWalletKit {
             this.showWrapSuccess(`Successfully unwrapped ${amount} Unicorn Meat tokens!`);
             await this.loadContractData();
             await this.updateConnectButton();
-            
+
         } catch (error) {
             console.error('Error unwrapping tokens:', error);
             if (error.code === 4001) {
@@ -852,6 +930,8 @@ class UnicornMeatWalletKit {
             } else {
                 this.showWrapError('Failed to unwrap tokens: ' + error.message);
             }
+        } finally {
+            this.setButtonLoading('unwrap-button', false, 'Unwrap');
         }
     }
     
