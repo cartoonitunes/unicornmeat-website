@@ -12,8 +12,7 @@ class UnicornMeatWalletKit {
         // Contract addresses
         this.contractAddresses = {
             unicornMeat: '0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A',
-            wrappedUnicornMeat: '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668',
-            mistCoinClaim: '0x...' // Will be updated when contract is deployed
+            wrappedUnicornMeat: '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'
         };
         
         this.init();
@@ -39,11 +38,7 @@ class UnicornMeatWalletKit {
             
             // Check for existing wallet connections
             this.checkExistingConnections();
-            
-            // Claim stats/status loading disabled - no active claims
-            // await this.loadClaimStats();
-            // await this.loadClaimStatus();
-            
+
         } catch (error) {
             // Silently handle initialization errors
         }
@@ -307,8 +302,6 @@ class UnicornMeatWalletKit {
         await this.updateConnectButton();
         this.showSuccess('Wallet connected successfully!');
         this.loadContractData();
-        // Claim data loading disabled - no active claims
-        // this.loadClaimData();
     }
     
     async handleDisconnection() {
@@ -355,33 +348,6 @@ class UnicornMeatWalletKit {
             });
         }
         
-        // Claim button
-        const claimButton = document.getElementById('claim-button');
-        if (claimButton) {
-            claimButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (!this.isConnected) {
-                    this.showError('Please connect your wallet first');
-                    this.openWalletModal();
-                    return;
-                }
-                this.claimTokens();
-            });
-        }
-        
-        // Check claim button
-        const checkClaimButton = document.getElementById('check-claim-button');
-        if (checkClaimButton) {
-            checkClaimButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (!this.isConnected) {
-                    this.showError('Please connect your wallet first');
-                    this.openWalletModal();
-                    return;
-                }
-                this.checkClaimEligibility();
-            });
-        }
     }
     
     openWalletModal() {
@@ -501,9 +467,7 @@ class UnicornMeatWalletKit {
                 const truncatedAddress = `${this.account.address.slice(0, 6)}...${this.account.address.slice(-4)}`;
                 this.showSuccess(`Connected to ${truncatedAddress}!`);
                 this.loadContractData();
-                // Claim data loading disabled - no active claims
-        // this.loadClaimData();
-                
+
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('magicFeaturesModal'));
                 if (modal) {
@@ -568,9 +532,7 @@ class UnicornMeatWalletKit {
             
             // Load contract data
             this.loadContractData();
-            // Claim data loading disabled - no active claims
-            // this.loadClaimData();
-            
+
             // Listen for account changes
             window.ethereum.on('accountsChanged', (accounts) => {
                 if (accounts.length === 0) {
@@ -579,8 +541,6 @@ class UnicornMeatWalletKit {
                     this.account = { address: accounts[0] };
                     this.updateConnectButton();
                     this.loadContractData();
-                    // Claim data loading disabled - no active claims
-                    // this.loadClaimData();
                 }
             });
         }
@@ -600,417 +560,6 @@ class UnicornMeatWalletKit {
         }
     }
     
-    async loadClaimData() {
-        if (!this.isConnected || !this.account) return;
-        
-        try {
-            await this.loadClaimStats();
-        } catch (error) {
-            console.error('Error loading claim data:', error);
-        }
-    }
-    
-    async loadClaimStats() {
-        try {
-            const response = await fetch('/api/claim-stats');
-            const data = await response.json();
-            
-            if (data.success) {
-                this.updateClaimStats(data.stats);
-            }
-        } catch (error) {
-            console.error('Error loading claim stats:', error);
-        }
-    }
-    
-    async loadClaimStatus() {
-        try {
-            const response = await fetch('/api/claim-status');
-            const data = await response.json();
-            
-            if (data.success) {
-                this.updateClaimStatusDisplay(data.claimEnabled);
-            }
-        } catch (error) {
-            console.error('Error loading claim status:', error);
-        }
-    }
-    
-    updateClaimStatusDisplay(claimEnabled) {
-        const statsContainer = document.getElementById('claim-stats');
-        if (statsContainer) {
-            const statusBox = `
-                <div class="mb-4">
-                    <div class="p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-3 text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                            <div style="width: 12px; height: 12px; background-color: ${claimEnabled ? '#28a745' : '#dc3545'}; border-radius: 50%; margin-right: 8px;"></div>
-                            <span class="fw-bold ${claimEnabled ? 'text-success' : 'text-danger'}">
-                                Claims are currently ${claimEnabled ? 'OPEN' : 'CLOSED'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Insert the status box at the beginning of the stats container
-            statsContainer.insertAdjacentHTML('afterbegin', statusBox);
-        }
-    }
-    
-    async checkClaimEligibility() {
-        if (!this.isConnected || !this.account) {
-            this.showError('Please connect your wallet first');
-            return;
-        }
-        
-        try {
-            const response = await fetch(`/api/check-claim/${this.account.address}`);
-            const data = await response.json();
-            
-            if (data.success) {
-                // Store claim data for the transaction
-                if (data.claimableAmount > 0 && !data.hasClaimed) {
-                    this.currentClaimData = {
-                        claimableAmount: data.claimableAmount,
-                        merkleProof: data.merkleProof
-                    };
-                } else {
-                    this.currentClaimData = null;
-                }
-                
-                await this.updateClaimStatus(data);
-            } else {
-                this.showError(data.error || 'Failed to check claim eligibility');
-            }
-            
-        } catch (error) {
-            console.error('Error checking claim eligibility:', error);
-            this.showError('Failed to check claim eligibility: ' + error.message);
-        }
-    }
-    
-    async claimTokens() {
-        if (!this.isConnected || !this.account) {
-            this.showError('Please connect your wallet first');
-            return;
-        }
-        
-        // Check if we have claim data
-        if (!this.currentClaimData) {
-            this.showError('Please check your claim eligibility first');
-            return;
-        }
-        
-        try {
-            this.showLoading('Preparing claim transaction...');
-            
-            // Check if ethers is available
-            if (typeof window.ethers === 'undefined') {
-                this.showError('Ethers.js is required for claiming. Please refresh the page and try again.');
-                console.error('Ethers.js not available. Please check the console for loading errors.');
-                return;
-            }
-            
-            // Create provider and signer
-            const provider = new window.ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            
-            // Claim contract address
-            const claimContractAddress = '0xEC2c2AdEB8Ee3A338485ae684D1B1CB6DA0A498c';
-            
-            // Claim contract ABI
-            const claimAbi = [
-                {
-                    "inputs": [
-                        {"name": "recipient", "type": "address"},
-                        {"name": "amount", "type": "uint256"},
-                        {"name": "merkleProof", "type": "bytes32[]"}
-                    ],
-                    "name": "claim",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "inputs": [{"name": "account", "type": "address"}],
-                    "name": "hasClaimed",
-                    "outputs": [{"name": "", "type": "bool"}],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [
-                        {"name": "account", "type": "address"},
-                        {"name": "amount", "type": "uint256"},
-                        {"name": "proof", "type": "bytes32[]"}
-                    ],
-                    "name": "getClaimableAmount",
-                    "outputs": [{"name": "", "type": "uint256"}],
-                    "stateMutability": "view",
-                    "type": "function"
-                }
-            ];
-            
-            // Create contract instance
-            const claimContract = new window.ethers.Contract(claimContractAddress, claimAbi, signer);
-            
-            // Check if user has already claimed
-            const hasClaimed = await claimContract.hasClaimed(this.account.address);
-            if (hasClaimed) {
-                this.showError('You have already claimed your tokens');
-                return;
-            }
-            
-            // Verify claim data is valid
-            if (!this.currentClaimData.merkleProof || this.currentClaimData.merkleProof.length === 0) {
-                this.showError('Invalid claim data. Please check your eligibility again.');
-                return;
-            }
-            
-            console.log('Claim verification:', {
-                address: this.account.address,
-                hasClaimed: hasClaimed,
-                claimableAmount: this.currentClaimData.claimableAmount,
-                proofLength: this.currentClaimData.merkleProof.length
-            });
-            
-            // The amount from Merkle data is in the smallest unit (3 decimals)
-            // Use as-is - no conversion needed
-            let amount = this.currentClaimData.claimableAmount;
-            
-            // Verify the amount with the contract
-            try {
-                const expectedAmount = await claimContract.getClaimableAmount(
-                    this.account.address,
-                    this.currentClaimData.claimableAmount,
-                    this.currentClaimData.merkleProof
-                );
-                
-                // If there's a mismatch, use the contract's amount
-                if (amount !== expectedAmount.toNumber()) {
-                    amount = expectedAmount.toNumber();
-                }
-            } catch (verifyError) {
-                // Silently handle verification errors
-            }
-            
-            this.showLoading('Waiting for wallet approval...');
-            
-            // Try to estimate gas first, then use a buffer for OKX compatibility
-            let gasEstimate;
-            try {
-                gasEstimate = await claimContract.estimateGas.claim(this.account.address, amount, this.currentClaimData.merkleProof);
-            } catch (estimateError) {
-                gasEstimate = window.ethers.BigNumber.from(300000);
-            }
-            
-            // Use a reasonable gas limit
-            const gasLimit = gasEstimate.mul(120).div(100); // 20% buffer
-            
-            // Use legacy gasPrice method for better wallet compatibility
-            const gasPrice = await provider.getGasPrice();
-            
-            const tx = await claimContract.claim(this.account.address, amount, this.currentClaimData.merkleProof, {
-                gasLimit: gasLimit,
-                gasPrice: gasPrice
-            });
-            
-            this.showLoading('Transaction submitted! Waiting for confirmation...');
-            
-            // Wait for transaction confirmation
-            const receipt = await tx.wait();
-            
-            
-            if (receipt.status === 1) {
-                this.showSuccess(`Claim successful! Transaction: ${receipt.transactionHash}`);
-                this.currentClaimData = null; // Clear claim data
-                await this.loadClaimData();
-                await this.updateConnectButton(); // Refresh the wallet balance display
-            } else {
-                // Transaction failed - try to get the revert reason
-                try {
-                    await claimContract.callStatic.claim(amount, this.currentClaimData.merkleProof);
-                } catch (simError) {
-                    if (simError.reason) {
-                        this.showError(`Claim failed: ${simError.reason}`);
-                    } else {
-                        this.showError('Claim failed. Please check your eligibility or try again later.');
-                    }
-                }
-            }
-            
-        } catch (error) {
-            console.error('Error claiming tokens:', error);
-            
-            if (error.code === 4001) {
-                this.showError('Transaction was rejected by user');
-            } else if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
-                // Parse the error to provide better feedback
-                if (error.reason && error.reason.includes('execution reverted')) {
-                    // Check if it's already claimed
-                    try {
-                        const hasClaimed = await claimContract.hasClaimed(this.account.address);
-                        if (hasClaimed) {
-                            this.showError('You have already claimed your tokens');
-                        } else {
-                            this.showError('Claim failed. Please check your eligibility or try again later.');
-                        }
-                    } catch (checkError) {
-                        this.showError('Claim failed. The transaction was reverted by the contract.');
-                    }
-                } else {
-                    this.showError('Transaction failed. Please try again with a higher gas limit.');
-                }
-            } else if (error.message && error.message.includes('Third Party contract execution error')) {
-                // OKX wallet specific error
-                this.showError('OKX wallet is having trouble with this contract interaction. This is a known limitation of OKX wallet with complex smart contracts. Please use MetaMask, WalletConnect, or another wallet for claiming tokens.');
-            } else if (error.message && error.message.includes('execution reverted')) {
-                // Contract revert error
-                this.showError('Transaction reverted by contract. Please check your eligibility or try again later.');
-            } else if (error.message && error.message.includes('insufficient funds')) {
-                // Insufficient funds error
-                this.showError('Insufficient ETH for gas fees. Please add more ETH to your wallet and try again.');
-            } else {
-                this.showError('Failed to claim tokens: ' + error.message);
-            }
-        }
-    }
-    
-    updateClaimStats(stats) {
-        const statsContainer = document.getElementById('claim-stats');
-        if (statsContainer) {
-            // Calculate percentage for progress bar
-            const percentage = stats.totalAllocated > 0 ? (stats.totalClaimed / stats.totalAllocated) * 100 : 0;
-            
-            statsContainer.innerHTML = `
-                <div class="row child-cols-3 g-3 mb-3">
-                    <div class="col">
-                        <div class="text-center p-3 border border-2 border-black contrast-shadow-sm bg-white">
-                            <h4 class="h6 mb-1">Total Allocated</h4>
-                            <p class="fs-5 mb-0">${this.formatStatsNumber(stats.totalAllocated)}</p>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="text-center p-3 border border-2 border-black contrast-shadow-sm bg-white">
-                            <h4 class="h6 mb-1">Total Claimed</h4>
-                            <p class="fs-5 mb-0">${this.formatStatsNumber(stats.totalClaimed)}</p>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="text-center p-3 border border-2 border-black contrast-shadow-sm bg-white">
-                            <h4 class="h6 mb-1">Remaining</h4>
-                            <p class="fs-5 mb-0">${this.formatStatsNumber(stats.remainingAllocated)}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="p-4 border border-2 border-black contrast-shadow-lg bg-white rounded-3 mt-4">
-                    <div class="mb-3">
-                        <h5 class="h5 mb-0 fw-bold text-dark">Claim Progress</h5>
-                    </div>
-                    <div class="progress rounded-pill position-relative" style="height: 32px; background: linear-gradient(90deg, #f8f9fa, #e9ecef); border: 2px solid #dee2e6;">
-                        <div class="progress-bar rounded-pill" 
-                             role="progressbar" 
-                             style="width: ${percentage}%; background: linear-gradient(90deg, #28a745, #20c997); box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);" 
-                             aria-valuenow="${percentage}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                        </div>
-                    </div>
-                    <div class="mt-2 text-center">
-                        <small class="text-muted fw-medium">${this.formatStatsNumber(stats.totalClaimed)} of ${this.formatStatsNumber(stats.totalAllocated)} tokens claimed (${percentage.toFixed(1)}%)</small>
-                    </div>
-                </div>
-            `;
-        }
-    }
-    
-    async updateClaimStatus(data) {
-        const claimStatus = document.getElementById('claim-status');
-        if (claimStatus) {
-            if (data.hasClaimed) {
-                // Get the claimed amount from the contract
-                let claimedAmount = data.claimedAmount;
-                if (!claimedAmount && this.isConnected && this.account) {
-                    try {
-                        // Create contract instance to get claimed amount
-                        const claimContractAddress = '0xEC2c2AdEB8Ee3A338485ae684D1B1CB6DA0A498c';
-                        const claimAbi = [
-                            {
-                                "inputs": [{"name": "account", "type": "address"}],
-                                "name": "claimedAmounts",
-                                "outputs": [{"name": "", "type": "uint256"}],
-                                "stateMutability": "view",
-                                "type": "function"
-                            }
-                        ];
-                        
-                        if (typeof window.ethers !== 'undefined') {
-                            const provider = new window.ethers.providers.Web3Provider(window.ethereum);
-                            const claimContract = new window.ethers.Contract(claimContractAddress, claimAbi, provider);
-                            claimedAmount = await claimContract.claimedAmounts(this.account.address);
-                        }
-                    } catch (error) {
-                        console.error('Error getting claimed amount:', error);
-                    }
-                }
-                
-                claimStatus.innerHTML = `
-                    <div class="alert alert-warning border border-2 border-black contrast-shadow-lg bg-warning-50 rounded-3 text-center p-4">
-                        <div class="d-flex align-items-center justify-content-center mb-3">
-                            <div style="width: 24px; height: 24px; background-color: #ffc107; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                                <span style="font-size: 14px;">⚠️</span>
-                            </div>
-                            <h5 class="mb-0 fw-bold text-warning">Already Claimed</h5>
-                        </div>
-                        <p class="mb-0 fs-6">You have already claimed <strong>${claimedAmount ? this.formatLargeNumber(claimedAmount) : 'your'}</strong> Unicorn Meat tokens.</p>
-                    </div>
-                `;
-            } else if (data.claimableAmount > 0) {
-                claimStatus.innerHTML = `
-                    <div class="alert alert-success border border-2 border-black contrast-shadow-lg bg-success-50 rounded-3 text-center p-4">
-                        <div class="d-flex align-items-center justify-content-center mb-3">
-                            <div style="width: 24px; height: 24px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                                <span style="font-size: 14px;">✅</span>
-                            </div>
-                            <h5 class="mb-0 fw-bold text-success">Eligible for Claim!</h5>
-                        </div>
-                        <p class="mb-3 fs-6">You can claim <strong>${this.formatStatsNumber(data.claimableAmount)}</strong> Unicorn Meat tokens.</p>
-                        <button id="claim-button" class="btn btn-success btn-lg border border-2 border-black contrast-shadow-sm fw-bold px-4 py-2 mb-0">
-                            <span class="btn-responsive-text-lg">🍖 Claim Tokens</span>
-                        </button>
-                    </div>
-                `;
-                
-                // Set up event listener for the dynamically created claim button
-                const claimButton = document.getElementById('claim-button');
-                if (claimButton) {
-                    claimButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        if (!this.isConnected) {
-                            this.showError('Please connect your wallet first');
-                            this.openWalletModal();
-                            return;
-                        }
-                        this.claimTokens();
-                    });
-                }
-            } else {
-                claimStatus.innerHTML = `
-                    <div class="alert alert-info border border-2 border-black contrast-shadow-lg bg-info-50 rounded-3 text-center">
-                        <p class="mb-0 fs-6">This address is not eligible for MistCoin claims.</p>
-                    </div>
-                `;
-            }
-        }
-    }
-    
-    formatNumber(num) {
-        // Convert from smallest unit to token unit (3 decimals)
-        const tokenAmount = num / 1000; // 3 decimals = 1,000
-        return new Intl.NumberFormat().format(tokenAmount);
-    }
-    
     formatLargeNumber(num) {
         // Handle invalid inputs
         if (!num || isNaN(num) || num === undefined || num === null) {
@@ -1018,20 +567,6 @@ class UnicornMeatWalletKit {
         }
         
         // Convert from smallest unit to token unit (3 decimals)
-        const tokenAmount = num / 1000; // 3 decimals = 1,000
-        
-        if (tokenAmount >= 1000000) {
-            return (tokenAmount / 1000000).toFixed(1) + 'M';
-        } else if (tokenAmount >= 1000) {
-            return (tokenAmount / 1000).toFixed(1) + 'K';
-        } else {
-            return tokenAmount.toFixed(0);
-        }
-    }
-    
-    formatStatsNumber(num) {
-        // For claim statistics - numbers are in smallest unit (3 decimals)
-        // Convert to token units first
         const tokenAmount = num / 1000; // 3 decimals = 1,000
         
         if (tokenAmount >= 1000000) {
