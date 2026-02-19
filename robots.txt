@@ -2,3 +2,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://unicornmeateth.com/sitemap.xml
+
+# LLM-readable token information
+LLMs-Txt: https://unicornmeateth.com/llms.txt
