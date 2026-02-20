@@ -2234,6 +2234,38 @@
         })();
         </script>
 
+        <!-- Live Price Ticker -->
+        <div style="padding: 12px 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <div class="container">
+            <div id="price-ticker-um" style="display: flex; justify-content: center; align-items: center; gap: 32px; flex-wrap: wrap; font-family: monospace; font-size: 0.95rem; color: #e0e0e0;">
+              <span>🍖 <strong>w🍖</strong> <span id="ticker-price-um" style="color: #4fc3f7;">—</span></span>
+              <span>📊 24h Vol: <span id="ticker-volume-um" style="color: #81c784;">—</span></span>
+              <span>💧 Liq: <span id="ticker-liquidity-um" style="color: #b39ddb;">—</span></span>
+              <span style="color: #9e9e9e; font-size: 0.8rem;">via DEXScreener</span>
+            </div>
+          </div>
+        </div>
+        <script>
+        (function() {
+          async function updateTickerUM() {
+            try {
+              const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/0xDFA286329DcA21C3dC0F6b0Ba9C61e44209c97AA');
+              const data = await res.json();
+              if (!data.pairs || !data.pairs.length) {
+                document.getElementById('ticker-price-um').textContent = 'No DEX pairs yet';
+                return;
+              }
+              const p = data.pairs[0];
+              document.getElementById('ticker-price-um').textContent = '$' + parseFloat(p.priceUsd).toFixed(4);
+              document.getElementById('ticker-volume-um').textContent = '$' + Number(p.volume.h24).toLocaleString();
+              document.getElementById('ticker-liquidity-um').textContent = '$' + Number(p.liquidity.usd).toLocaleString();
+            } catch(e) { console.log('Ticker error:', e); }
+          }
+          updateTickerUM();
+          setInterval(updateTickerUM, 60000);
+        })();
+        </script>
+
         <!-- Associations Section Start -->
         <div id="associations" class="associations section panel overflow-hidden">
             <div class="section-outer panel py-3 sm:py-2">
