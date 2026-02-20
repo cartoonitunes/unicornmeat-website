@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Unicorn Market — Mock Preview</title>
   <meta name="description" content="UnicornMarket mock preview — onchain orderbook UX for 🦄 and w🍖." />
+
+  <script src="/assets/js/app-head-bs.js"></script>
+  <link rel="stylesheet" href="/assets/js/uni-core/css/uni-core.min.css">
+  <link rel="stylesheet" href="/assets/css/unicons.min.css">
+  <link rel="stylesheet" href="/assets/css/swiper-bundle.min.css">
+  <link rel="stylesheet" href="/assets/css/prettify.min.css">
+  <link rel="stylesheet" href="/assets/css/magic-cursor.min.css">
+  <link rel="stylesheet" href="/assets/css/theme/theme-two.min.purge.css">
+  <script src="/assets/js/uni-core/js/uni-core-bundle.min.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme/hero-bg.css">
+  <link rel="stylesheet" href="/assets/css/custom.css">
   <style>
     :root {
       --bg: #fff7fb;
@@ -156,18 +167,6 @@
     }
 
 
-    .topnav, .site-footer {
-      border: 2px solid #000;
-      border-radius: 14px;
-      background: #fff;
-      box-shadow: 4px 4px 0 #000;
-      padding: 10px 12px;
-    }
-    .topnav { margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-    .topnav a, .site-footer a { color:#111; font-weight:700; text-decoration:none; margin-right:12px; }
-    .topnav a:hover, .site-footer a:hover { text-decoration:underline; }
-    .footer-grid { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12px; }
-
     details.method {
       border: 2px solid #000;
       border-radius: 10px;
@@ -199,20 +198,69 @@
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <nav class="topnav" aria-label="Unicorn Meat main navigation">
-      <div>
-        <a href="/"><img src="/assets/images/home-two/unicornmeat-logo.webp" alt="Unicorn Meat" style="height:30px;vertical-align:middle;margin-right:8px;"> </a>
-        <a href="/#about">About</a>
-        <a href="/#trading">Buy 🍖</a>
-        <a href="/how-to-buy">How to Buy</a>
-        <a href="/#wrap">Wrap 🦄🍖</a>
-        <a href="/#join-herd">🦄 Herd</a>
-        <a href="/grinder-association">🦄🍖 Grinder</a>
-      </div>
-      <div><a href="/">Unicorn Meat</a></div>
-    </nav>
+  <a href="#main-content" class="skip-to-content" style="position:absolute;top:-40px;left:0;background:#000;color:#fff;padding:8px 16px;z-index:10000;">Skip to content</a>
+  <div class="uc-wrapper">
+    <header class="uc-header header-two uc-navbar-sticky-wrap z-999 uc-dark"
+      data-uc-sticky="start: 100vh; animation: uc-animation-slide-top; sel-target: .uc-navbar-container; cls-active: uc-navbar-sticky; cls-inactive: uc-navbar-transparent; end: !*;">
+      <nav class="uc-navbar-container bg-transparent mt-3 xl:mt-4 uc-navbar-float ft-tertiary z-1">
+        <div class="uc-navbar-main" style="--uc-nav-height: 100px">
+          <div class="container">
+            <div class="uc-navbar min-h-64px lg:min-h-80px xl:min-h-100px ps-2 pe-1 lg:px-4 border border-2 border-black contrast-shadow-md rounded-2 lg:rounded-3"
+              data-uc-navbar=" animation: uc-animation-slide-top-small; duration: 150;"
+              style="background-color: rgba(152, 206, 251, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+              <div class="uc-navbar-left">
+                <div class="uc-logo">
+                  <a class="panel text-none w-150px xl:w-auto" href="/">
+                    <img src="/assets/images/home-two/unicornmeat-logo.webp" alt="Unicorn Meat Logo" style="height:40px;width:auto;filter:drop-shadow(-4px 0px 8px rgba(0,0,0,0.3));">
+                  </a>
+                </div>
+              </div>
+              <div class="uc-navbar-center">
+                <ul class="uc-navbar-nav fs-5 xl:fs-4 gap-3 lg:gap-4 d-none lg:d-flex fw-semibold">
+                  <li><a href="/#about">About</a></li>
+                  <li><a href="/#trading">Buy 🍖</a></li>
+                  <li><a href="/how-to-buy">How to Buy</a></li>
+                  <li><a href="/#wrap">Wrap 🦄🍖</a></li>
+                  <li><a href="/#join-herd">🦄 Herd</a></li>
+                  <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
+                </ul>
+              </div>
+              <div class="uc-navbar-right">
+                <a class="btn btn-sm xl:btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0 d-none lg:d-inline-flex connect-wallet-btn" href="#">
+                  <span class="btn-responsive-text">Connect Wallet</span>
+                </a>
+                <a class="btn btn-md btn-secondary w-48px h-48px p-0 border border-2 border-black contrast-shadow-sm d-inline-flex lg:d-none" href="#uc-menu-panel" data-uc-toggle>
+                  <img class="icon icon-3" src="/assets/images/icons/menu.svg" alt="menu" data-uc-svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
 
+    <div id="uc-menu-panel" data-uc-offcanvas="overlay: true;">
+      <div class="uc-offcanvas-bar m-1 rounded-2 border border-2 border-black contrast-shadow-md bg-secondary-200 text-dark">
+        <header class="uc-offcanvas-header hstack justify-between items-center pb-2">
+          <div class="uc-logo"><a href="/" class="h5 text-none text-gray-900"><img class="w-40px" src="/assets/images/home-two/unicornmeat-logo.webp" alt="Unicorn Meat"></a></div>
+          <button class="uc-offcanvas-close m-1 mt-2 p-0 btn border-0" type="button" data-uc-toggle>
+            <img class="icon icon-3" src="/assets/images/icons/close.svg" alt="close" data-uc-svg>
+          </button>
+        </header>
+        <div class="panel">
+          <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
+            <li><a href="/#about">About</a></li>
+            <li><a href="/#trading">Buy 🍖</a></li>
+            <li><a href="/how-to-buy">How to Buy</a></li>
+            <li><a href="/#wrap">Wrap 🦄🍖</a></li>
+            <li><a href="/#join-herd">🦄 Herd</a></li>
+            <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="wrapper" class="wrap"><main id="main-content">
     <section class="hero">
       <h1>🦄 Unicorn Market</h1>
       <p>Onchain orderbook UX concept for <strong>🦄 ⇄ w🍖</strong></p>
@@ -272,21 +320,26 @@
       </article>
     </section>
 
-  </main>
+  </main></div>
 
-  <footer class="site-footer" style="margin-top:12px;">
-    <div class="footer-grid">
-      <div>
-        <a href="/#about">About</a>
-        <a href="/#trading">Buy 🍖</a>
-        <a href="/how-to-buy">How to Buy</a>
-        <a href="/#wrap">Wrap 🦄🍖</a>
-        <a href="/#join-herd">🦄 Herd</a>
-        <a href="/grinder-association">🦄🍖 Grinder</a>
+    <footer id="uc-footer" class="uc-footer panel overflow-hidden" style="background-color: #dbf2ff; margin-top: 16px;">
+      <div class="footer-content panel bg-primary-400 text-white" style="margin-top: -1px">
+        <div class="container">
+          <div class="footer-inner panel vstack lg:hstack gap-4 justify-between fs-5 xl:fs-4 text-center py-4 lg:py-6">
+            <p>Unicorn Meat © 2025, All rights reserved.</p>
+            <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
+              <li><a href="/#about">About</a></li>
+              <li><a href="/#trading">Buy 🍖</a></li>
+              <li><a href="/how-to-buy">How to Buy</a></li>
+              <li><a href="/#wrap">Wrap 🦄🍖</a></li>
+              <li><a href="/#join-herd">🦄 Herd</a></li>
+              <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="small">Unicorn Market mock · UI preview before onchain launch</div>
-    </div>
-  </footer>
+    </footer>
+  </div>
 
   <script>
     const state = {
