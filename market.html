@@ -1,524 +1,372 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Unicorn Market — Mock Preview</title>
-  <meta name="description" content="UnicornMarket mock preview — onchain orderbook UX for 🦄 and w🍖." />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicorn Market — Onchain Orderbook for 🦄 ⇄ w🍖</title>
+    <link rel="icon" type="image/png" href="/assets/favicon.ico" />
+    <link rel="canonical" href="https://unicornmeateth.com/market" />
+    <link rel="alternate" type="text/plain" href="https://unicornmeateth.com/llms.txt" title="LLM Information" />
+    <meta name="description" content="Unicorn Market — a fully onchain orderbook for trading Unicorns (🦄) and Wrapped Unicorn Meat (w🍖). Place bids, asks, and fill orders transparently on Ethereum.">
+    <meta name="theme-color" content="#FFBA00">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Unicorn Market 🦄🍖">
+    <meta property="og:description" content="Onchain orderbook for trading Unicorns and Wrapped Unicorn Meat on Ethereum.">
+    <meta property="og:url" content="https://unicornmeateth.com/market">
+    <meta property="og:site_name" content="Unicorn Meat 🍖">
+    <meta property="og:image" content="https://gaccdiscordimages.s3.us-east-1.amazonaws.com/unicornmeat-ogsocial.png">
+    <meta property="og:image:width" content="1180">
+    <meta property="og:image:height" content="600">
+    <meta property="og:image:type" content="image/png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Unicorn Market 🦄🍖">
+    <meta name="twitter:description" content="Onchain orderbook for trading Unicorns and Wrapped Unicorn Meat on Ethereum.">
+    <meta name="twitter:image" content="https://gaccdiscordimages.s3.us-east-1.amazonaws.com/unicornmeat-ogsocial.png">
+    <script src="/assets/js/app-head-bs.js"></script>
+    <link rel="stylesheet" href="/assets/js/uni-core/css/uni-core.min.css">
+    <link rel="stylesheet" href="/assets/css/unicons.min.css">
+    <link rel="stylesheet" href="/assets/css/swiper-bundle.min.css">
+    <link rel="stylesheet" href="/assets/css/prettify.min.css">
+    <link rel="stylesheet" href="/assets/css/magic-cursor.min.css">
+    <link rel="stylesheet" href="/assets/css/theme/theme-two.min.purge.css">
+    <script src="/assets/js/uni-core/js/uni-core-bundle.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/theme/hero-bg.css">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .skip-to-content { position:absolute;top:-40px;left:0;background:#000;color:#fff;padding:8px 16px;z-index:10000;transition:top .2s; }
+        .skip-to-content:focus { top:0; }
+        @media (max-width:576px) { .btn-responsive-text { font-size:.8rem!important; } }
 
-  <script src="/assets/js/app-head-bs.js"></script>
-  <link rel="stylesheet" href="/assets/js/uni-core/css/uni-core.min.css">
-  <link rel="stylesheet" href="/assets/css/unicons.min.css">
-  <link rel="stylesheet" href="/assets/css/swiper-bundle.min.css">
-  <link rel="stylesheet" href="/assets/css/prettify.min.css">
-  <link rel="stylesheet" href="/assets/css/magic-cursor.min.css">
-  <link rel="stylesheet" href="/assets/css/theme/theme-two.min.purge.css">
-  <script src="/assets/js/uni-core/js/uni-core-bundle.min.js"></script>
-  <link rel="stylesheet" href="/assets/css/theme/hero-bg.css">
-  <link rel="stylesheet" href="/assets/css/custom.css">
-  <style>
-    :root {
-      --bg: #fff7fb;
-      --card: #ffffff;
-      --ink: #111111;
-      --muted: #555;
-      --pink: #ffc0cb;
-      --pink2: #ffb3d1;
-      --line: #000;
-      --ask: #cc3a57;
-      --bid: #118a68;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--ink);
-      background: radial-gradient(circle at 20% 0%, #ffd9e6 0%, var(--bg) 45%);
-    }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 18px; }
-    .hero {
-      border: 2px solid var(--line);
-      border-radius: 16px;
-      padding: 16px;
-      background: linear-gradient(135deg, var(--pink2), var(--pink));
-      box-shadow: 6px 6px 0 #000;
-      margin-bottom: 14px;
-    }
-    .hero h1 { margin: 0 0 6px; font-size: 24px; }
-    .hero p { margin: 0; font-weight: 600; }
-    .badge {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 5px 10px;
-      border: 2px solid #000;
-      border-radius: 999px;
-      background: #fff;
-      font-size: 12px;
-      font-weight: 700;
-    }
+        /* Market-specific styles */
+        .ask-color { color: #cc3a57; font-weight: 700; }
+        .bid-color { color: #118a68; font-weight: 700; }
 
-    .grid { display: grid; gap: 12px; }
-    @media (min-width: 980px) { .grid { grid-template-columns: 1fr 1.2fr 1fr; } }
+        .market-grid { display:grid; gap:12px; }
+        @media (min-width:980px) { .market-grid { grid-template-columns:1fr 1.2fr 1fr; } }
 
-    .card {
-      background: var(--card);
-      border: 2px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 4px 4px 0 #000;
-      padding: 12px;
-    }
-    h3 {
-      margin: 0 0 10px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .small { font-size: 12px; color: var(--muted); }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px dashed #ddd;
-      font-size: 13px;
-    }
-    .row:last-child { border-bottom: 0; }
-    .ask { color: var(--ask); font-weight: 700; }
-    .bid { color: var(--bid); font-weight: 700; }
+        .market-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #ddd; font-size:13px; }
+        .market-row:last-child { border-bottom:0; }
 
-    select, input, button {
-      width: 100%;
-      border: 2px solid #000;
-      border-radius: 10px;
-      padding: 10px;
-      margin: 6px 0;
-      font-size: 14px;
-      background: #fff;
-      color: #111;
-    }
-    button {
-      cursor: pointer;
-      font-weight: 800;
-      background: linear-gradient(135deg, #ffb3d1, #ffc0cb);
-    }
-    .btn-secondary { background: #f4f4f4; }
+        .stats-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:10px 0 8px; }
+        .stat-card { text-align:center; }
+        .stat-card .k { display:block; font-size:11px; color:#555; text-transform:uppercase; letter-spacing:.05em; }
+        .stat-card .v { display:block; margin-top:3px; font-weight:800; font-size:13px; }
 
-    .ledger { max-height: 220px; overflow: auto; }
-    .my-orders { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
-    .my-order-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed #eee; font-size:12px; }
-    .my-order-row:last-child { border-bottom:0; }
-    .cancel-btn { width:auto; margin:0; padding:6px 8px; font-size:11px; border-radius:8px; background:#f4f4f4; font-weight:700; }
+        .depth-wrap { padding:8px; margin-bottom:8px; }
+        .depth-row { position:relative; display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; padding:5px 6px; font-size:12px; overflow:hidden; border-radius:6px; }
+        .depth-row .bar { position:absolute; top:0; bottom:0; opacity:.18; z-index:0; border-radius:6px; transition:width .35s ease; }
+        .depth-row.ask .bar { right:0; background:#cc3a57; }
+        .depth-row.bid .bar { left:0; background:#118a68; }
+        .depth-row span { position:relative; z-index:1; }
+        .depth-mid { text-align:center; font-size:12px; font-weight:700; padding:6px; border-top:1px dashed #ccc; border-bottom:1px dashed #ccc; margin:6px 0; }
 
-    .depth-wrap {
-      border: 2px solid #000;
-      border-radius: 10px;
-      padding: 8px;
-      background: #fff;
-      margin-bottom: 8px;
-    }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin: 10px 0 8px;
-    }
-    .stat {
-      border: 2px solid #000;
-      border-radius: 10px;
-      background: #fff;
-      padding: 8px;
-      text-align: center;
-    }
-    .stat .k { display:block; font-size:11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-    .stat .v { display:block; margin-top:3px; font-weight:800; font-size:13px; }
+        .ledger-scroll { max-height:220px; overflow:auto; }
+        .my-orders { margin-top:10px; border-top:1px dashed #ddd; padding-top:10px; }
+        .my-order-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed #eee; font-size:12px; }
+        .my-order-row:last-child { border-bottom:0; }
 
-    .depth-row {
-      position: relative;
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 8px;
-      align-items: center;
-      padding: 5px 6px;
-      font-size: 12px;
-      overflow: hidden;
-      border-radius: 6px;
-    }
-    .depth-row .bar {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      opacity: .18;
-      z-index: 0;
-      border-radius: 6px;
-      transition: width .35s ease;
-    }
-    .depth-row.ask .bar { right: 0; background: var(--ask); }
-    .depth-row.bid .bar { left: 0; background: var(--bid); }
-    .depth-row span { position: relative; z-index: 1; }
-    .depth-mid {
-      text-align: center;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px;
-      border-top: 1px dashed #ccc;
-      border-bottom: 1px dashed #ccc;
-      margin: 6px 0;
-    }
+        .take-btn { width:auto; margin:0; padding:4px 10px; font-size:11px; border-radius:8px; background:#d4edda; color:#155724; border:1px solid #155724; font-weight:700; cursor:pointer; }
+        .take-btn:hover { background:#c3e6cb; }
+        .cancel-btn { width:auto; margin:0; padding:4px 10px; font-size:11px; border-radius:8px; background:#f4f4f4; color:#333; border:1px solid #999; font-weight:700; cursor:pointer; }
+        .cancel-btn:hover { background:#e9e9e9; }
 
+        details.method { margin:8px 0; overflow:hidden; }
+        details.method summary { cursor:pointer; font-weight:700; font-size:12px; padding:8px 10px; background:linear-gradient(135deg,#ffe0ec,#ffd0df); border-bottom:1px dashed #bbb; }
+        pre.code { margin:0; padding:10px; background:#101318; color:#e8edf3; overflow:auto; max-width:100%; white-space:pre; font-size:11px; line-height:1.45; }
+        .kw{color:#ff7ab6;font-weight:700;} .fn{color:#7dcfff;} .var{color:#c3e88d;} .num{color:#f7c873;} .addr{color:#82aaff;}
 
-    details.method {
-      border: 2px solid #000;
-      border-radius: 10px;
-      margin: 8px 0;
-      background:#fff;
-      overflow:hidden;
+        .how-it-works-grid { display:grid; gap:12px; }
+        @media (min-width:768px) { .how-it-works-grid { grid-template-columns:repeat(4,1fr); } }
+        .step-num { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; font-weight:800; font-size:14px; }
+    </style>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": "https://unicornmeateth.com/market",
+        "url": "https://unicornmeateth.com/market",
+        "name": "Unicorn Market",
+        "description": "Fully onchain orderbook for trading Unicorns and Wrapped Unicorn Meat on Ethereum",
+        "isPartOf": { "@id": "https://unicornmeateth.com/#website" }
     }
-    details.method summary {
-      cursor:pointer;
-      font-weight:700;
-      font-size:12px;
-      padding:8px 10px;
-      background:linear-gradient(135deg,#ffe0ec,#ffd0df);
-      border-bottom:1px dashed #bbb;
-    }
-    details.method, .card { max-width:100%; overflow:hidden; }
-    pre.code {
-      margin:0;
-      padding:10px;
-      background:#101318;
-      color:#e8edf3;
-      overflow:auto;
-      max-width:100%;
-      white-space:pre;
-      font-size:11px;
-      line-height:1.45;
-    }
-    .kw{color:#ff7ab6;font-weight:700;} .fn{color:#7dcfff;} .var{color:#c3e88d;} .num{color:#f7c873;} .addr{color:#82aaff;}
-  </style>
+    </script>
+    <link rel="llms-txt" href="https://inlay.dev/api/llms/sa_f9d4848447a04edae01a9b0eb9749c4c3c0720cfe05f5d49" />
+    <link rel="mcp-manifest" type="application/json" href="https://inlay.dev/api/mcp/sa_f9d4848447a04edae01a9b0eb9749c4c3c0720cfe05f5d49/manifest" />
+    <script src="https://inlay.dev/api/script/s.js" data-key="sa_f9d4848447a04edae01a9b0eb9749c4c3c0720cfe05f5d49" async></script>
 </head>
-<body>
-  <a href="#main-content" class="skip-to-content" style="position:absolute;top:-40px;left:0;background:#000;color:#fff;padding:8px 16px;z-index:10000;">Skip to content</a>
-  <div class="uc-wrapper">
-    <header class="uc-header header-two uc-navbar-sticky-wrap z-999 uc-dark"
-      data-uc-sticky="start: 100vh; animation: uc-animation-slide-top; sel-target: .uc-navbar-container; cls-active: uc-navbar-sticky; cls-inactive: uc-navbar-transparent; end: !*;">
-      <nav class="uc-navbar-container bg-transparent mt-3 xl:mt-4 uc-navbar-float ft-tertiary z-1">
-        <div class="uc-navbar-main" style="--uc-nav-height: 100px">
-          <div class="container">
-            <div class="uc-navbar min-h-64px lg:min-h-80px xl:min-h-100px ps-2 pe-1 lg:px-4 border border-2 border-black contrast-shadow-md rounded-2 lg:rounded-3"
-              data-uc-navbar=" animation: uc-animation-slide-top-small; duration: 150;"
-              style="background-color: rgba(152, 206, 251, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
-              <div class="uc-navbar-left">
-                <div class="uc-logo">
-                  <a class="panel text-none w-150px xl:w-auto" href="/">
-                    <img src="/assets/images/home-two/unicornmeat-logo.webp" alt="Unicorn Meat Logo" style="height:40px;width:auto;filter:drop-shadow(-4px 0px 8px rgba(0,0,0,0.3));">
-                  </a>
-                </div>
-              </div>
-              <div class="uc-navbar-center">
-                <ul class="uc-navbar-nav fs-5 xl:fs-4 gap-3 lg:gap-4 d-none lg:d-flex fw-semibold">
-                  <li><a href="/#about">About</a></li>
-                  <li><a href="/#trading">Buy 🍖</a></li>
-                  <li><a href="/how-to-buy">How to Buy</a></li>
-                  <li><a href="/#wrap">Wrap 🦄🍖</a></li>
-                  <li><a href="/#join-herd">🦄 Herd</a></li>
-                  <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
-                </ul>
-              </div>
-              <div class="uc-navbar-right">
-                <a class="btn btn-sm xl:btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0 d-none lg:d-inline-flex connect-wallet-btn" href="#">
-                  <span class="btn-responsive-text">Connect Wallet</span>
-                </a>
-                <a class="btn btn-md btn-secondary w-48px h-48px p-0 border border-2 border-black contrast-shadow-sm d-inline-flex lg:d-none" href="#uc-menu-panel" data-uc-toggle>
-                  <img class="icon icon-3" src="/assets/images/icons/menu.svg" alt="menu" data-uc-svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </header>
 
-    <div id="uc-menu-panel" data-uc-offcanvas="overlay: true;">
-      <div class="uc-offcanvas-bar m-1 rounded-2 border border-2 border-black contrast-shadow-md bg-secondary-200 text-dark">
-        <header class="uc-offcanvas-header hstack justify-between items-center pb-2">
-          <div class="uc-logo"><a href="/" class="h5 text-none text-gray-900"><img class="w-40px" src="/assets/images/home-two/unicornmeat-logo.webp" alt="Unicorn Meat"></a></div>
-          <button class="uc-offcanvas-close m-1 mt-2 p-0 btn border-0" type="button" data-uc-toggle>
-            <img class="icon icon-3" src="/assets/images/icons/close.svg" alt="close" data-uc-svg>
-          </button>
+<body>
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+    <div class="uc-wrapper">
+        <!-- Header start -->
+        <header class="uc-header header-two uc-navbar-sticky-wrap z-999 uc-dark"
+            data-uc-sticky="start: 100vh; animation: uc-animation-slide-top; sel-target: .uc-navbar-container; cls-active: uc-navbar-sticky; cls-inactive: uc-navbar-transparent; end: !*;">
+            <nav class="uc-navbar-container bg-transparent mt-3 xl:mt-4 uc-navbar-float ft-tertiary z-1"
+                data-anime="translateY: [-40, 0]; opacity: [0, 1]; duration: 750; delay: 0;">
+                <div class="uc-navbar-main" style="--uc-nav-height: 100px">
+                    <div class="container">
+                        <div class="uc-navbar min-h-64px lg:min-h-80px xl:min-h-100px ps-2 pe-1 lg:px-4 border border-2 border-black contrast-shadow-md rounded-2 lg:rounded-3"
+                            data-uc-navbar=" animation: uc-animation-slide-top-small; duration: 150;"
+                            style="background-color: rgba(152, 206, 251, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+                            <div class="uc-navbar-left">
+                                <div class="uc-logo">
+                                    <a class="panel text-none w-150px xl:w-auto" href="/">
+                                        <img src="/assets/images/home-two/unicornmeat-logo.webp"
+                                            alt="Unicorn Meat Logo"
+                                            style="height: 40px; width: auto; filter: drop-shadow(-4px 0px 8px rgba(0,0,0,0.3));">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="uc-navbar-center">
+                                <ul class="uc-navbar-nav fs-5 xl:fs-4 gap-3 lg:gap-4 d-none lg:d-flex fw-semibold"
+                                    data-uc-scrollspy-nav="closet: > *; offset: 48; scroll: true;">
+                                    <li><a href="#about">About</a></li>
+                                    <li><a href="#orderbook">Orderbook</a></li>
+                                    <li><a href="#how-it-works">How It Works</a></li>
+                                    <li><a href="#transparency">Transparency</a></li>
+                                </ul>
+                            </div>
+                            <div class="uc-navbar-right">
+                                <a class="btn btn-sm xl:btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0 d-none lg:d-inline-flex connect-wallet-btn"
+                                    href="#">
+                                    <span class="btn-responsive-text">Connect Wallet</span>
+                                </a>
+                                <a class="btn btn-md btn-secondary w-48px h-48px p-0 border border-2 border-black contrast-shadow-sm d-inline-flex lg:d-none"
+                                    href="#uc-menu-panel" data-uc-toggle>
+                                    <img class="icon icon-3"
+                                        src="/assets/images/icons/menu.svg" alt="menu"
+                                        data-uc-svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
         </header>
-        <div class="panel">
-          <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
-            <li><a href="/#about">About</a></li>
-            <li><a href="/#trading">Buy 🍖</a></li>
-            <li><a href="/how-to-buy">How to Buy</a></li>
-            <li><a href="/#wrap">Wrap 🦄🍖</a></li>
-            <li><a href="/#join-herd">🦄 Herd</a></li>
-            <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
-          </ul>
+        <!-- Header end -->
+
+        <!-- Mobile Menu Panel -->
+        <div id="uc-menu-panel" data-uc-offcanvas="overlay: true;">
+            <div class="uc-offcanvas-bar m-1 rounded-2 border border-2 border-black contrast-shadow-md bg-secondary-200 text-dark dark:bg-gray-900 dark:text-white">
+                <header class="uc-offcanvas-header hstack justify-between items-center pb-2">
+                    <div class="uc-logo">
+                        <a href="/" class="h5 text-none text-gray-900 dark:text-white">
+                            <img class="w-40px" src="/assets/images/home-two/unicornmeat-logo.webp"
+                                alt="Unicorn Meat" style="filter: drop-shadow(-4px 0px 8px rgba(0,0,0,0.3));">
+                        </a>
+                    </div>
+                    <button class="uc-offcanvas-close rtl:end-auto rtl:start-0 m-1 mt-2 p-0 btn border-0 dark:text-white dark:text-opacity-50 hover:text-primary hover:rotate-90 duration-150 transition-all"
+                        type="button" data-uc-toggle>
+                        <img class="icon icon-3" src="/assets/images/icons/close.svg" alt="close" data-uc-svg>
+                    </button>
+                </header>
+                <div class="panel">
+                    <ul class="nav-y gap-narrow fw-medium fs-6" data-uc-nav>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#orderbook">Orderbook</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#transparency">Transparency</a></li>
+                    </ul>
+                    <div class="mt-4">
+                        <a class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm connect-wallet-btn w-100" href="#">
+                            <span class="btn-responsive-text">Connect Wallet</span>
+                        </a>
+                    </div>
+                    <ul class="nav-x gap-1 mt-4">
+                        <li><a class="w-32px hover:-rotate-3" href="https://x.com/UnicornMeatETH" target="_blank" rel="noopener noreferrer"
+                            style="font-size:24px;display:flex;align-items:center;justify-content:center;color:#000;text-decoration:none;"><i class="fab fa-x-twitter"></i></a></li>
+                        <li><a class="w-32px hover:-rotate-3" href="https://t.me/UnicornMeatETH" target="_blank" rel="noopener noreferrer"
+                            style="font-size:24px;display:flex;align-items:center;justify-content:center;color:#0088cc;text-decoration:none;"><i class="fab fa-telegram"></i></a></li>
+                        <li><a class="w-32px hover:-rotate-3" href="mailto:team@unicornmeateth.com" target="_blank" rel="noopener noreferrer"
+                            style="font-size:24px;display:flex;align-items:center;justify-content:center;color:#6E1E71;text-decoration:none;"><i class="fas fa-envelope"></i></a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- Back to Top -->
+        <div class="backtotop-wrap position-fixed bottom-0 end-0 z-99 m-2 vstack">
+            <a class="btn btn-sm p-0 bg-yellow text-black border border-2 border-black contrast-shadow-sm w-48px h-48px rounded-circle"
+                href="to_top" data-uc-backtotop>
+                <img class="icon icon-3" src="/assets/images/icons/chevron-up.svg" alt="to-top" data-uc-svg>
+            </a>
+        </div>
+
+        <main id="main-content">
+
+        <!-- Hero / About Section -->
+        <div id="about" class="section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-secondary-100">
+                <div class="container sm:max-w-lg xl:max-w-2xl">
+                    <div class="section-inner panel">
+                        <div class="section-content panel">
+                            <div class="row justify-center"
+                                data-anime="onview: -400; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 200});">
+                                <div class="col-12 col-lg-8 col-xl-6">
+                                    <div class="vstack items-center gap-3 sm:gap-4 text-center">
+                                        <h1 class="h4 sm:h3 xl:h2 mb-0 ls-0 text-uppercase -rotate-1">🦄 Unicorn Market</h1>
+                                        <p class="fs-6 sm:fs-5 xl:fs-4 mb-0">
+                                            A fully onchain orderbook for <strong>🦄 ⇄ w🍖</strong>. Place bids, asks, and fill orders — all transparent, all on Ethereum. No backend, no matching engine, no middlemen.
+                                        </p>
+                                        <p class="fs-7 text-muted mb-0">
+                                            Continuing the lineage from the early 2016 Unicorn grinder experiments. Trade legacy Ethereum tokens the way they deserve — openly and onchain.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orderbook Section -->
+        <div id="orderbook" class="section panel overflow-hidden">
+            <div class="section-outer panel py-4 sm:py-6 lg:py-8">
+                <div class="container">
+                    <div class="market-grid">
+
+                        <!-- Trade Ticket -->
+                        <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2">
+                            <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-2">Trade Ticket</h3>
+                            <select id="side" class="form-select border border-2 border-black rounded-2 mb-2 fs-6 fw-semibold" style="padding:10px;">
+                                <option value="ask">Create Ask (Sell 🦄 for w🍖)</option>
+                                <option value="bid">Create Bid (Sell w🍖 for 🦄)</option>
+                            </select>
+                            <input id="amount" value="2" aria-label="amount" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
+                            <input id="price" value="5000" aria-label="price" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
+                            <button id="create-order" class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm w-100 fw-bold">Create Mock Order</button>
+                            <div class="market-row mt-2"><span class="fs-7 text-muted">Preview</span><strong id="preview" class="fs-7">2 🦄 @ 5,000 w🍖/🦄</strong></div>
+                        </div>
+
+                        <!-- Depth Chart + Orderbook -->
+                        <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2">
+                            <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-2">Depth Chart + Orderbook</h3>
+                            <div class="stats-grid" id="stats"></div>
+                            <div class="depth-wrap border border-2 border-black rounded-2 bg-white" id="depth"></div>
+
+                            <div class="market-row"><strong class="fs-7">Asks (sell 🦄)</strong><strong class="fs-7">w🍖 / 🦄</strong></div>
+                            <div id="asks"></div>
+
+                            <div class="market-row" style="margin-top:6px"><strong class="fs-7">Bids (sell w🍖)</strong><strong class="fs-7">w🍖 / 🦄</strong></div>
+                            <div id="bids"></div>
+                        </div>
+
+                        <!-- Ledger + My Orders + Transparency -->
+                        <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2">
+                            <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-2">Ledger + My Orders</h3>
+                            <div class="ledger-scroll" id="ledger"></div>
+                            <div class="my-orders">
+                                <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-1">My Open Orders</h3>
+                                <div id="my-orders"></div>
+                            </div>
+
+                            <div id="transparency">
+                            <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mt-3 mb-2">Contract Transparency</h3>
+                            <p class="fs-7 text-muted mb-2">Approvals: maker approves token before <strong>placeOrder</strong>; taker approves counter-token before <strong>fillOrder</strong>.</p>
+                            <details class="method border border-2 border-black rounded-2">
+                                <summary>placeOrder(sellToken, buyToken, sellAmount, buyAmount)</summary>
+                                <pre class="code"><span class="fn">IERC20</span>(<span class="var">sellToken</span>).<span class="fn">approve</span>(<span class="var">market</span>, <span class="var">sellAmount</span>);
+<span class="var">market</span>.<span class="fn">placeOrder</span>(<span class="var">sellToken</span>, <span class="var">buyToken</span>, <span class="var">sellAmount</span>, <span class="var">buyAmount</span>);</pre>
+                            </details>
+                            <details class="method border border-2 border-black rounded-2">
+                                <summary>fillOrder(orderId, sellAmountToTake)</summary>
+                                <pre class="code"><span class="fn">IERC20</span>(<span class="var">order.buyToken</span>).<span class="fn">approve</span>(<span class="var">market</span>, <span class="var">buyAmountToPay</span>);
+<span class="var">market</span>.<span class="fn">fillOrder</span>(<span class="var">orderId</span>, <span class="var">sellAmountToTake</span>);</pre>
+                            </details>
+                            <details class="method border border-2 border-black rounded-2">
+                                <summary>cancelOrder(orderId)</summary>
+                                <pre class="code"><span class="var">market</span>.<span class="fn">cancelOrder</span>(<span class="var">orderId</span>);</pre>
+                            </details>
+                            <details class="method border border-2 border-black rounded-2">
+                                <summary>getOrder(orderId) → Order</summary>
+                                <pre class="code"><span class="var">market</span>.<span class="fn">getOrder</span>(<span class="var">orderId</span>);
+<span class="kw">returns</span> (maker, sellToken, buyToken, sellAmountRemaining, buyAmountRemaining, status)</pre>
+                            </details>
+                            <details class="method border border-2 border-black rounded-2">
+                                <summary>getOpenOrderIds() → uint256[]</summary>
+                                <pre class="code"><span class="var">market</span>.<span class="fn">getOpenOrderIds</span>();
+<span class="kw">returns</span> [<span class="num">0</span>, <span class="num">2</span>, <span class="num">5</span>, ...]</pre>
+                            </details>
+                            <details class="method border border-2 border-black rounded-2">
+                                <summary>getOrderBook(sellToken, buyToken) → uint256[]</summary>
+                                <pre class="code"><span class="var">market</span>.<span class="fn">getOrderBook</span>(<span class="addr">UNICORN</span>, <span class="addr">W_MEAT</span>);
+<span class="kw">returns</span> [<span class="num">1</span>, <span class="num">3</span>, <span class="num">7</span>, ...]</pre>
+                            </details>
+                            <p class="fs-7 text-muted mt-2">Verified contract code (when live): <a href="#" id="etherscan-link">View on Etherscan</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div id="how-it-works" class="section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9 xl:py-10 bg-secondary-100">
+                <div class="container sm:max-w-lg xl:max-w-2xl">
+                    <div class="section-inner panel">
+                        <div class="text-center mb-4"
+                            data-anime="onview: -400; translateY: [24, 0]; opacity: [0, 1]; delay: 200;">
+                            <h2 class="h5 sm:h3 xl:h2 mb-0 ls-0 text-uppercase -rotate-1">How It Works</h2>
+                            <p class="fs-6 sm:fs-5 text-muted mt-2">Four steps. Fully onchain. No middlemen.</p>
+                        </div>
+                        <div class="how-it-works-grid"
+                            data-anime="onview: -300; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(100, {start: 300});">
+                            <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2 text-center">
+                                <div class="step-num border border-2 border-black bg-secondary-200 mx-auto mb-2">1</div>
+                                <h4 class="fs-6 fw-bold mb-1">Connect Wallet</h4>
+                                <p class="fs-7 text-muted mb-0">Connect your Ethereum wallet (MetaMask, WalletConnect, etc).</p>
+                            </div>
+                            <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2 text-center">
+                                <div class="step-num border border-2 border-black bg-secondary-200 mx-auto mb-2">2</div>
+                                <h4 class="fs-6 fw-bold mb-1">Approve Token</h4>
+                                <p class="fs-7 text-muted mb-0">Approve the market contract to transfer the token you want to sell (🦄 or w🍖).</p>
+                            </div>
+                            <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2 text-center">
+                                <div class="step-num border border-2 border-black bg-secondary-200 mx-auto mb-2">3</div>
+                                <h4 class="fs-6 fw-bold mb-1">Place or Take</h4>
+                                <p class="fs-7 text-muted mb-0">Place a new order or take an existing one. Partial fills are supported.</p>
+                            </div>
+                            <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2 text-center">
+                                <div class="step-num border border-2 border-black bg-secondary-200 mx-auto mb-2">4</div>
+                                <h4 class="fs-6 fw-bold mb-1">Settled Onchain</h4>
+                                <p class="fs-7 text-muted mb-0">Tokens transfer directly between maker and taker. No escrow beyond the order itself.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </main>
+
+        <footer id="uc-footer" class="uc-footer panel overflow-hidden" style="background-color: #dbf2ff">
+            <div class="footer-content panel bg-primary-400 text-white" style="margin-top: -1px">
+                <div class="container">
+                    <div class="footer-inner panel vstack lg:hstack gap-4 justify-between fs-5 xl:fs-4 text-center py-4 lg:py-6">
+                        <p>Unicorn Meat &copy; 2026, All rights reserved.</p>
+                        <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
+                            <li><a href="/#about">About</a></li>
+                            <li><a href="/#trading">Buy 🍖</a></li>
+                            <li><a href="/how-to-buy">How to Buy</a></li>
+                            <li><a href="/#wrap">Wrap 🦄🍖</a></li>
+                            <li><a href="/#join-herd">🦄 Herd</a></li>
+                            <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <div id="wrapper" class="wrap"><main id="main-content">
-    <section class="hero">
-      <h1>🦄 Unicorn Market</h1>
-      <p>Onchain orderbook UX concept for <strong>🦄 ⇄ w🍖</strong></p>
-      <p class="small" style="margin-top:8px;color:#222;">Historical context: this market continues the lineage from early 2016 Unicorn grinder experiments, bringing transparent bids, asks, and fills to legacy Ethereum token contracts.</p>
-    </section>
+    
 
-    <section class="grid">
-      <article class="card">
-        <h3>Trade Ticket</h3>
-        <select id="side">
-          <option value="ask">Create Ask (Sell 🦄 for w🍖)</option>
-          <option value="bid">Create Bid (Sell w🍖 for 🦄)</option>
-        </select>
-        <input id="amount" value="2" aria-label="amount" />
-        <input id="price" value="5000" aria-label="price" />
-        <button id="create-order">Create Mock Order</button>
-        <div class="row"><span class="small">Preview</span><strong id="preview">2 🦄 @ 5,000 w🍖/🦄</strong></div>
-      </article>
-
-      <article class="card">
-        <h3>Interactive Depth Chart + Orderbook</h3>
-        <div class="stats" id="stats"></div>
-        <div class="depth-wrap" id="depth"></div>
-
-        <div class="row"><strong>Asks (sell 🦄)</strong><strong>w🍖 / 🦄</strong></div>
-        <div id="asks"></div>
-
-        <div class="row" style="margin-top:6px"><strong>Bids (sell w🍖)</strong><strong>w🍖 / 🦄</strong></div>
-        <div id="bids"></div>
-      </article>
-
-      <article class="card">
-        <h3>Ledger + My Orders</h3>
-        <div class="ledger" id="ledger"></div>
-        <div class="my-orders">
-          <h3 style="margin-bottom:6px">My Open Orders</h3>
-          <div id="my-orders"></div>
-        </div>
-
-        <h3 style="margin-top:12px">Contract Transparency</h3>
-        <p class="small" style="margin-bottom:8px;">Approvals: maker approves token before <strong>createOrder</strong>; taker approves counter-token before <strong>fillOrder</strong>. In production we surface allowance checks inline.</p>
-        <details class="method">
-          <summary>placeOrder(sellToken, buyToken, sellAmount, buyAmount)</summary>
-          <pre class="code"><span class="fn">IERC20</span>(<span class="var">sellToken</span>).<span class="fn">approve</span>(<span class="var">market</span>, <span class="var">sellAmount</span>);
-<span class="var">market</span>.<span class="fn">placeOrder</span>(<span class="var">sellToken</span>, <span class="var">buyToken</span>, <span class="var">sellAmount</span>, <span class="var">buyAmount</span>);</pre>
-        </details>
-        <details class="method">
-          <summary>fillOrder(orderId, sellAmountToTake)</summary>
-          <pre class="code"><span class="fn">IERC20</span>(<span class="var">order.buyToken</span>).<span class="fn">approve</span>(<span class="var">market</span>, <span class="var">buyAmountToPay</span>);
-<span class="var">market</span>.<span class="fn">fillOrder</span>(<span class="var">orderId</span>, <span class="var">sellAmountToTake</span>);</pre>
-        </details>
-        <details class="method">
-          <summary>cancelOrder(orderId)</summary>
-          <pre class="code"><span class="var">market</span>.<span class="fn">cancelOrder</span>(<span class="var">orderId</span>);</pre>
-        </details>
-        <p class="small" style="margin-top:8px;">Verified contract code (when live): <a href="#" id="etherscan-link">Etherscan link</a></p>
-      </article>
-    </section>
-
-  </main></div>
-
-    <footer id="uc-footer" class="uc-footer panel overflow-hidden" style="background-color: #dbf2ff; margin-top: 16px;">
-      <div class="footer-content panel bg-primary-400 text-white" style="margin-top: -1px">
-        <div class="container">
-          <div class="footer-inner panel vstack lg:hstack gap-4 justify-between fs-5 xl:fs-4 text-center py-4 lg:py-6">
-            <p>Unicorn Meat © 2025, All rights reserved.</p>
-            <ul class="nav-x gap-0 row child-cols-auto justify-center gx-4 gy-2 lg:g-4">
-              <li><a href="/#about">About</a></li>
-              <li><a href="/#trading">Buy 🍖</a></li>
-              <li><a href="/how-to-buy">How to Buy</a></li>
-              <li><a href="/#wrap">Wrap 🦄🍖</a></li>
-              <li><a href="/#join-herd">🦄 Herd</a></li>
-              <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </footer>
-  </div>
-
-  <script>
-    const state = {
-      asks: [
-        { id: 101, amount: 2, price: 5200, mine: false },
-        { id: 102, amount: 4, price: 5100, mine: false },
-        { id: 103, amount: 1, price: 5000, mine: false }
-      ],
-      bids: [
-        { id: 201, amount: 7500, price: 4900, mine: false },
-        { id: 202, amount: 12000, price: 4850, mine: false }
-      ],
-      ledger: [
-        'OrderFilled #184 · 1 🦄 ↔ 5,000 w🍖',
-        'OrderCreated #185 · 3 🦄 ask @ 5,100',
-        'OrderCancelled #181 · remaining 2 🦄 refunded'
-      ],
-      mine: []
-    };
-    let nextOrderId = 300;
-    let nextBookId = 1000;
-
-    const asksEl = document.getElementById('asks');
-    const bidsEl = document.getElementById('bids');
-    const ledgerEl = document.getElementById('ledger');
-    const depthEl = document.getElementById('depth');
-    const statsEl = document.getElementById('stats');
-    const myOrdersEl = document.getElementById('my-orders');
-
-    const fmt = (n) => Number(n).toLocaleString();
-
-    function render() {
-      const maxAsk = Math.max(...state.asks.map(x => x.amount), 1);
-      const maxBid = Math.max(...state.bids.map(x => x.amount), 1);
-
-      asksEl.innerHTML = state.asks
-        .sort((a,b)=>b.price-a.price)
-        .map(a => `<div class="row"><span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span><button class="cancel-btn" data-take-side="ask" data-take-id="${a.id}">Take</button></div>`).join('');
-
-      bidsEl.innerHTML = state.bids
-        .sort((a,b)=>b.price-a.price)
-        .map(b => `<div class="row"><span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span><button class="cancel-btn" data-take-side="bid" data-take-id="${b.id}">Take</button></div>`).join('');
-
-      const bestAsk = state.asks.slice().sort((a,b)=>a.price-b.price)[0]?.price || 0;
-      const bestBid = state.bids.slice().sort((a,b)=>b.price-a.price)[0]?.price || 0;
-      const mid = bestAsk && bestBid ? Math.round((bestAsk+bestBid)/2) : 0;
-      const spread = bestAsk && bestBid ? bestAsk - bestBid : 0;
-      const spreadPct = mid ? ((spread / mid) * 100).toFixed(2) : '0.00';
-      const vol24h = state.ledger.filter(x => x.startsWith('OrderFilled')).length * 5000;
-
-      statsEl.innerHTML = `
-        <div class="stat"><span class="k">Best Bid</span><span class="v bid">${fmt(bestBid)} w🍖</span></div>
-        <div class="stat"><span class="k">Best Ask</span><span class="v ask">${fmt(bestAsk)} w🍖</span></div>
-        <div class="stat"><span class="k">Spread</span><span class="v">${fmt(spread)} (${spreadPct}%)</span></div>
-        <div class="stat"><span class="k">24h Vol</span><span class="v">${fmt(vol24h)} w🍖</span></div>
-      `;
-
-      depthEl.innerHTML = `
-        ${state.asks.slice().sort((a,b)=>a.price-b.price).map(a => `
-          <div class="depth-row ask">
-            <div class="bar" style="width:${(a.amount/maxAsk)*100}%"></div>
-            <span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span><span>ask</span>
-          </div>`).join('')}
-        <div class="depth-mid">Mid: ${fmt(mid)} w🍖/🦄</div>
-        ${state.bids.slice().sort((a,b)=>b.price-a.price).map(b => `
-          <div class="depth-row bid">
-            <div class="bar" style="width:${(b.amount/maxBid)*100}%"></div>
-            <span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span><span>bid</span>
-          </div>`).join('')}
-      `;
-
-      ledgerEl.innerHTML = [...state.mine.filter(o=>o.active).map(o=>`(mine) OrderCreated #${o.id} · ${o.label}`), ...state.ledger]
-        .slice(-12).reverse()
-        .map(line => `<div class="row"><span>${line}</span></div>`).join('');
-
-      document.querySelectorAll('[data-take-id]').forEach(btn => {
-        btn.addEventListener('click', () => takeOrder(btn.dataset.takeSide, Number(btn.dataset.takeId)));
-      });
-
-      const openMine = state.mine.filter(o => o.active);
-      myOrdersEl.innerHTML = openMine.length
-        ? openMine.map(o => `
-          <div class="my-order-row">
-            <span>#${o.id} · ${o.label}</span>
-            <button class="cancel-btn" data-cancel-id="${o.id}">Cancel</button>
-          </div>
-        `).join('')
-        : '<p class="small" style="margin:0">No open orders yet.</p>';
-
-      myOrdersEl.querySelectorAll('[data-cancel-id]').forEach(btn => {
-        btn.addEventListener('click', () => cancelOrderById(Number(btn.dataset.cancelId)));
-      });
-    }
-
-    const sideEl = document.getElementById('side');
-    const amountEl = document.getElementById('amount');
-    const priceEl = document.getElementById('price');
-    const previewEl = document.getElementById('preview');
-
-    function updatePreview() {
-      const side = sideEl.value;
-      const amount = Number(amountEl.value || 0);
-      const price = Number(priceEl.value || 0);
-      previewEl.textContent = side === 'ask'
-        ? `${fmt(amount)} 🦄 @ ${fmt(price)} w🍖/🦄`
-        : `${fmt(amount)} w🍖 @ ${fmt(price)} w🍖/🦄`;
-    }
-
-    [sideEl, amountEl, priceEl].forEach(el => el.addEventListener('input', updatePreview));
-
-    function cancelOrderById(orderId) {
-      const order = state.mine.find(o => o.id === orderId && o.active);
-      if (!order) return;
-      order.active = false;
-
-      const arr = order.side === 'ask' ? state.asks : state.bids;
-      const idx = arr.findIndex(x => x.id === order.bookId);
-      if (idx >= 0) arr.splice(idx, 1);
-
-      state.ledger.push(`OrderCancelled #${order.id} · ${order.label} (mock)`);
-      render();
-    }
-
-    function takeOrder(side, bookId) {
-      const arr = side === 'ask' ? state.asks : state.bids;
-      const o = arr.find(x => x.id === bookId);
-      if (!o) return;
-
-      const maxFill = Number(o.amount);
-      const input = prompt(`Take order #${bookId}\nEnter fill amount (max ${maxFill})`, String(maxFill));
-      if (input === null) return;
-      const fill = Number(input);
-      if (!fill || fill <= 0 || fill > maxFill) return alert('Invalid fill amount');
-
-      o.amount = Number((o.amount - fill).toFixed(6));
-      const paid = Math.round(fill * o.price);
-      const line = side === 'ask'
-        ? `OrderFilled #${bookId} · took ${fmt(fill)} 🦄 for ${fmt(paid)} w🍖`
-        : `OrderFilled #${bookId} · took ${fmt(fill)} w🍖 for ~${(fill / o.price).toFixed(4)} 🦄`;
-      state.ledger.push(line);
-
-      if (o.amount <= 0) {
-        const idx = arr.findIndex(x => x.id === bookId);
-        if (idx >= 0) arr.splice(idx, 1);
-        const mine = state.mine.find(m => m.bookId === bookId && m.active);
-        if (mine) mine.active = false;
-      } else {
-        const mine = state.mine.find(m => m.bookId === bookId && m.active);
-        if (mine) {
-          mine.amount = o.amount;
-          mine.label = mine.side === 'ask'
-            ? `${fmt(o.amount)} 🦄 ask @ ${fmt(o.price)}`
-            : `${fmt(o.amount)} w🍖 bid @ ${fmt(o.price)}`;
-        }
-      }
-      render();
-    }
-
-    document.getElementById('create-order').addEventListener('click', () => {
-      const side = sideEl.value;
-      const amount = Number(amountEl.value || 0);
-      const price = Number(priceEl.value || 0);
-      if (!amount || !price) return;
-
-      const bookId = nextBookId++;
-      if (side === 'ask') state.asks.push({ id: bookId, amount, price, mine: true });
-      else state.bids.push({ id: bookId, amount, price, mine: true });
-
-      const id = nextOrderId++;
-      const label = side === 'ask'
-        ? `${fmt(amount)} 🦄 ask @ ${fmt(price)}`
-        : `${fmt(amount)} w🍖 bid @ ${fmt(price)}`;
-
-      state.mine.push({ id, bookId, side, amount, price, label, active: true });
-      render();
-    });
-
-    updatePreview();
-    render();
-  </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
