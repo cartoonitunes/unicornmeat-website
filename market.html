@@ -367,6 +367,198 @@
 
     
 
+    <script>
+    const state = {
+      asks: [
+        { id: 101, amount: 2, price: 5200, mine: false },
+        { id: 102, amount: 4, price: 5100, mine: false },
+        { id: 103, amount: 1, price: 5000, mine: false }
+      ],
+      bids: [
+        { id: 201, amount: 7500, price: 4900, mine: false },
+        { id: 202, amount: 12000, price: 4850, mine: false }
+      ],
+      ledger: [
+        'OrderFilled #184 · 1 🦄 ↔ 5,000 w🍖',
+        'OrderCreated #185 · 3 🦄 ask @ 5,100',
+        'OrderCancelled #181 · remaining 2 🦄 refunded'
+      ],
+      mine: []
+    };
+    let nextOrderId = 300;
+    let nextBookId = 1000;
+
+    const asksEl = document.getElementById('asks');
+    const bidsEl = document.getElementById('bids');
+    const ledgerEl = document.getElementById('ledger');
+    const depthEl = document.getElementById('depth');
+    const statsEl = document.getElementById('stats');
+    const myOrdersEl = document.getElementById('my-orders');
+
+    const fmt = (n) => Number(n).toLocaleString();
+
+    function render() {
+      const maxAsk = Math.max(...state.asks.map(x => x.amount), 1);
+      const maxBid = Math.max(...state.bids.map(x => x.amount), 1);
+
+      asksEl.innerHTML = state.asks.length === 0 ? '<p class="fs-7 text-muted text-center py-2 mb-0">No asks yet — place the first one!</p>' : state.asks
+        .sort((a,b)=>b.price-a.price)
+        .map(a => `<div class="market-row"><span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span><button class="take-btn" data-take-side="ask" data-take-id="${a.id}">Take</button></div>`).join('');
+
+      bidsEl.innerHTML = state.bids.length === 0 ? '<p class="fs-7 text-muted text-center py-2 mb-0">No bids yet — place the first one!</p>' : state.bids
+        .sort((a,b)=>b.price-a.price)
+        .map(b => `<div class="market-row"><span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span><button class="take-btn" data-take-side="bid" data-take-id="${b.id}">Take</button></div>`).join('');
+
+      const bestAsk = state.asks.slice().sort((a,b)=>a.price-b.price)[0]?.price || 0;
+      const bestBid = state.bids.slice().sort((a,b)=>b.price-a.price)[0]?.price || 0;
+      const mid = bestAsk && bestBid ? Math.round((bestAsk+bestBid)/2) : 0;
+      const spread = bestAsk && bestBid ? bestAsk - bestBid : 0;
+      const spreadPct = mid ? ((spread / mid) * 100).toFixed(2) : '0.00';
+      const vol24h = state.ledger.filter(x => x.startsWith('OrderFilled')).length * 5000;
+
+      statsEl.innerHTML = `
+        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Best Bid</span><span class="v bid">${fmt(bestBid)} w🍖</span></div>
+        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Best Ask</span><span class="v ask">${fmt(bestAsk)} w🍖</span></div>
+        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Spread</span><span class="v">${fmt(spread)} (${spreadPct}%)</span></div>
+        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">24h Vol</span><span class="v">${fmt(vol24h)} w🍖</span></div>
+      `;
+
+      depthEl.innerHTML = `
+        ${state.asks.slice().sort((a,b)=>a.price-b.price).map(a => `
+          <div class="depth-row ask">
+            <div class="bar" style="width:${(a.amount/maxAsk)*100}%"></div>
+            <span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span><span>ask</span>
+          </div>`).join('')}
+        <div class="depth-mid">Mid: ${fmt(mid)} w🍖/🦄</div>
+        ${state.bids.slice().sort((a,b)=>b.price-a.price).map(b => `
+          <div class="depth-row bid">
+            <div class="bar" style="width:${(b.amount/maxBid)*100}%"></div>
+            <span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span><span>bid</span>
+          </div>`).join('')}
+      `;
+
+      ledgerEl.innerHTML = [...state.mine.filter(o=>o.active).map(o=>`(mine) OrderCreated #${o.id} · ${o.label}`), ...state.ledger]
+        .slice(-12).reverse()
+        .map(line => `<div class="market-row"><span>${line}</span></div>`).join('');
+
+      document.querySelectorAll('[data-take-id]').forEach(btn => {
+        btn.addEventListener('click', () => takeOrder(btn.dataset.takeSide, Number(btn.dataset.takeId)));
+      });
+
+      const openMine = state.mine.filter(o => o.active);
+      myOrdersEl.innerHTML = openMine.length
+        ? openMine.map(o => `
+          <div class="my-order-row">
+            <span>#${o.id} · ${o.label}</span>
+            <button class="cancel-btn" data-cancel-id="${o.id}">Cancel</button>
+          </div>
+        `).join('')
+        : '<p class="small" style="margin:0">No open orders yet.</p>';
+
+      myOrdersEl.querySelectorAll('[data-cancel-id]').forEach(btn => {
+        btn.addEventListener('click', () => cancelOrderById(Number(btn.dataset.cancelId)));
+      });
+    }
+
+    const sideEl = document.getElementById('side');
+    const amountEl = document.getElementById('amount');
+    const priceEl = document.getElementById('price');
+    const previewEl = document.getElementById('preview');
+
+    function updatePreview() {
+      const side = sideEl.value;
+      const amount = Number(amountEl.value || 0);
+      const price = Number(priceEl.value || 0);
+      previewEl.textContent = side === 'ask'
+        ? `${fmt(amount)} 🦄 @ ${fmt(price)} w🍖/🦄`
+        : `${fmt(amount)} w🍖 @ ${fmt(price)} w🍖/🦄`;
+    }
+
+    [sideEl, amountEl, priceEl].forEach(el => el.addEventListener('input', updatePreview));
+
+    function cancelOrderById(orderId) {
+      const order = state.mine.find(o => o.id === orderId && o.active);
+      if (!order) return;
+      order.active = false;
+
+      const arr = order.side === 'ask' ? state.asks : state.bids;
+      const idx = arr.findIndex(x => x.id === order.bookId);
+      if (idx >= 0) arr.splice(idx, 1);
+
+      state.ledger.push(`OrderCancelled #${order.id} · ${order.label} (mock)`);
+      render();
+    }
+
+    let activeFillId = null;
+
+    function takeOrder(side, bookId) {
+      if (activeFillId === bookId) { activeFillId = null; render(); return; }
+      activeFillId = bookId;
+      render();
+      setTimeout(() => {
+        const inp = document.getElementById('fill-amount-' + bookId);
+        if (inp) inp.focus();
+      }, 50);
+      return;
+    }
+
+    function confirmFill(side, bookId) {
+      const arr = side === 'ask' ? state.asks : state.bids;
+      const o = arr.find(x => x.id === bookId);
+      if (!o) return;
+      const inp = document.getElementById('fill-amount-' + bookId);
+      const fill = Number(inp ? inp.value : 0);
+      const maxFill = Number(o.amount);
+      if (!fill || fill <= 0 || fill > maxFill) { if(inp) inp.style.borderColor='#cc3a57'; return; }
+      activeFillId = null;
+
+      o.amount = Number((o.amount - fill).toFixed(6));
+      const paid = Math.round(fill * o.price);
+      const line = side === 'ask'
+        ? `OrderFilled #${bookId} · took ${fmt(fill)} 🦄 for ${fmt(paid)} w🍖`
+        : `OrderFilled #${bookId} · took ${fmt(fill)} w🍖 for ~${(fill / o.price).toFixed(4)} 🦄`;
+      state.ledger.push(line);
+
+      if (o.amount <= 0) {
+        const idx = arr.findIndex(x => x.id === bookId);
+        if (idx >= 0) arr.splice(idx, 1);
+        const mine = state.mine.find(m => m.bookId === bookId && m.active);
+        if (mine) mine.active = false;
+      } else {
+        const mine = state.mine.find(m => m.bookId === bookId && m.active);
+        if (mine) {
+          mine.amount = o.amount;
+          mine.label = mine.side === 'ask'
+            ? `${fmt(o.amount)} 🦄 ask @ ${fmt(o.price)}`
+            : `${fmt(o.amount)} w🍖 bid @ ${fmt(o.price)}`;
+        }
+      }
+      render();
+    }
+
+    document.getElementById('create-order').addEventListener('click', () => {
+      const side = sideEl.value;
+      const amount = Number(amountEl.value || 0);
+      const price = Number(priceEl.value || 0);
+      if (!amount || !price) return;
+
+      const bookId = nextBookId++;
+      if (side === 'ask') state.asks.push({ id: bookId, amount, price, mine: true });
+      else state.bids.push({ id: bookId, amount, price, mine: true });
+
+      const id = nextOrderId++;
+      const label = side === 'ask'
+        ? `${fmt(amount)} 🦄 ask @ ${fmt(price)}`
+        : `${fmt(amount)} w🍖 bid @ ${fmt(price)}`;
+
+      state.mine.push({ id, bookId, side, amount, price, label, active: true });
+      render();
+    });
+
+    updatePreview();
+    render();
+  </script>
+
     <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
