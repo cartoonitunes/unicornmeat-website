@@ -14,8 +14,8 @@
       --pink: #ffc0cb;
       --pink2: #ffb3d1;
       --line: #000;
-      --ask: #d44;
-      --bid: #0f8a5f;
+      --ask: #cc3a57;
+      --bid: #118a68;
     }
     * { box-sizing: border-box; }
     body {
@@ -95,6 +95,45 @@
 
     .ledger { max-height: 280px; overflow: auto; }
 
+    .depth-wrap {
+      border: 2px solid #000;
+      border-radius: 10px;
+      padding: 8px;
+      background: #fff;
+      margin-bottom: 8px;
+    }
+    .depth-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 5px 6px;
+      font-size: 12px;
+      overflow: hidden;
+      border-radius: 6px;
+    }
+    .depth-row .bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      opacity: .18;
+      z-index: 0;
+      border-radius: 6px;
+    }
+    .depth-row.ask .bar { right: 0; background: var(--ask); }
+    .depth-row.bid .bar { left: 0; background: var(--bid); }
+    .depth-row span { position: relative; z-index: 1; }
+    .depth-mid {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px;
+      border-top: 1px dashed #ccc;
+      border-bottom: 1px dashed #ccc;
+      margin: 6px 0;
+    }
+
     .tabs {
       display: flex;
       gap: 8px;
@@ -128,37 +167,31 @@
     <section class="grid">
       <article class="card">
         <h3>Trade Ticket</h3>
-        <select>
-          <option>Create Ask (Sell 🦄 for w🍖)</option>
-          <option>Create Bid (Sell w🍖 for 🦄)</option>
+        <select id="side">
+          <option value="ask">Create Ask (Sell 🦄 for w🍖)</option>
+          <option value="bid">Create Bid (Sell w🍖 for 🦄)</option>
         </select>
-        <input value="2" aria-label="amount" />
-        <input value="10000" aria-label="price" />
-        <button>Create Onchain Order</button>
-        <div class="row"><span class="small">Preview Price</span><strong>1 🦄 = 5,000 w🍖</strong></div>
+        <input id="amount" value="2" aria-label="amount" />
+        <input id="price" value="5000" aria-label="price" />
+        <button id="create-order">Create Mock Order</button>
+        <div class="row"><span class="small">Preview</span><strong id="preview">2 🦄 @ 5,000 w🍖/🦄</strong></div>
       </article>
 
       <article class="card">
-        <h3>Orderbook</h3>
+        <h3>Interactive Depth Chart + Orderbook</h3>
+        <div class="depth-wrap" id="depth"></div>
+
         <div class="row"><strong>Asks (sell 🦄)</strong><strong>w🍖 / 🦄</strong></div>
-        <div class="row"><span>2 🦄</span><span class="ask">5,200</span></div>
-        <div class="row"><span>4 🦄</span><span class="ask">5,100</span></div>
-        <div class="row"><span>1 🦄</span><span class="ask">5,000</span></div>
+        <div id="asks"></div>
 
         <div class="row" style="margin-top:6px"><strong>Bids (sell w🍖)</strong><strong>w🍖 / 🦄</strong></div>
-        <div class="row"><span>7,500 w🍖</span><span class="bid">4,900</span></div>
-        <div class="row"><span>12,000 w🍖</span><span class="bid">4,850</span></div>
+        <div id="bids"></div>
       </article>
 
       <article class="card">
         <h3>Ledger + My Orders</h3>
-        <div class="ledger">
-          <div class="row"><span>OrderFilled #184</span><span>1 🦄 ↔ 5,000 w🍖</span></div>
-          <div class="row"><span>OrderCreated #185</span><span>3 🦄 ask @ 5,100</span></div>
-          <div class="row"><span>OrderCancelled #181</span><span>remaining 2 🦄 refunded</span></div>
-          <div class="row"><span>My Open #186</span><span>2 🦄 ask @ 5,300</span></div>
-        </div>
-        <button class="btn-secondary" style="margin-top:10px">Cancel Selected Order</button>
+        <div class="ledger" id="ledger"></div>
+        <button class="btn-secondary" style="margin-top:10px" id="cancel-last">Cancel Last My Order</button>
 
         <h3 style="margin-top:12px">Contract Transparency</h3>
         <p class="small">Decoded order fields (mock): maker, sellToken, buyToken, sellAmountRemaining, buyAmountRemaining, status.</p>
@@ -172,5 +205,109 @@
       <div class="tab">My Orders</div>
     </nav>
   </main>
+
+  <script>
+    const state = {
+      asks: [
+        { amount: 2, price: 5200 },
+        { amount: 4, price: 5100 },
+        { amount: 1, price: 5000 }
+      ],
+      bids: [
+        { amount: 7500, price: 4900 },
+        { amount: 12000, price: 4850 }
+      ],
+      ledger: [
+        'OrderFilled #184 · 1 🦄 ↔ 5,000 w🍖',
+        'OrderCreated #185 · 3 🦄 ask @ 5,100',
+        'OrderCancelled #181 · remaining 2 🦄 refunded'
+      ],
+      mine: []
+    };
+
+    const asksEl = document.getElementById('asks');
+    const bidsEl = document.getElementById('bids');
+    const ledgerEl = document.getElementById('ledger');
+    const depthEl = document.getElementById('depth');
+
+    const fmt = (n) => Number(n).toLocaleString();
+
+    function render() {
+      const maxAsk = Math.max(...state.asks.map(x => x.amount), 1);
+      const maxBid = Math.max(...state.bids.map(x => x.amount), 1);
+
+      asksEl.innerHTML = state.asks
+        .sort((a,b)=>b.price-a.price)
+        .map(a => `<div class="row"><span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span></div>`).join('');
+
+      bidsEl.innerHTML = state.bids
+        .sort((a,b)=>b.price-a.price)
+        .map(b => `<div class="row"><span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span></div>`).join('');
+
+      const bestAsk = state.asks.slice().sort((a,b)=>a.price-b.price)[0]?.price || 0;
+      const bestBid = state.bids.slice().sort((a,b)=>b.price-a.price)[0]?.price || 0;
+      const mid = bestAsk && bestBid ? Math.round((bestAsk+bestBid)/2) : 0;
+
+      depthEl.innerHTML = `
+        ${state.asks.slice().sort((a,b)=>a.price-b.price).map(a => `
+          <div class="depth-row ask">
+            <div class="bar" style="width:${(a.amount/maxAsk)*100}%"></div>
+            <span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span><span>ask</span>
+          </div>`).join('')}
+        <div class="depth-mid">Mid: ${fmt(mid)} w🍖/🦄</div>
+        ${state.bids.slice().sort((a,b)=>b.price-a.price).map(b => `
+          <div class="depth-row bid">
+            <div class="bar" style="width:${(b.amount/maxBid)*100}%"></div>
+            <span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span><span>bid</span>
+          </div>`).join('')}
+      `;
+
+      ledgerEl.innerHTML = [...state.mine.map(x=>`(mine) ${x}`), ...state.ledger]
+        .slice(-12).reverse()
+        .map(line => `<div class="row"><span>${line}</span></div>`).join('');
+    }
+
+    const sideEl = document.getElementById('side');
+    const amountEl = document.getElementById('amount');
+    const priceEl = document.getElementById('price');
+    const previewEl = document.getElementById('preview');
+
+    function updatePreview() {
+      const side = sideEl.value;
+      const amount = Number(amountEl.value || 0);
+      const price = Number(priceEl.value || 0);
+      previewEl.textContent = side === 'ask'
+        ? `${fmt(amount)} 🦄 @ ${fmt(price)} w🍖/🦄`
+        : `${fmt(amount)} w🍖 @ ${fmt(price)} w🍖/🦄`;
+    }
+
+    [sideEl, amountEl, priceEl].forEach(el => el.addEventListener('input', updatePreview));
+
+    document.getElementById('create-order').addEventListener('click', () => {
+      const side = sideEl.value;
+      const amount = Number(amountEl.value || 0);
+      const price = Number(priceEl.value || 0);
+      if (!amount || !price) return;
+
+      if (side === 'ask') state.asks.push({ amount, price });
+      else state.bids.push({ amount, price });
+
+      const log = side === 'ask'
+        ? `OrderCreated #${Math.floor(Math.random()*900+100)} · ${fmt(amount)} 🦄 ask @ ${fmt(price)}`
+        : `OrderCreated #${Math.floor(Math.random()*900+100)} · ${fmt(amount)} w🍖 bid @ ${fmt(price)}`;
+
+      state.mine.push(log);
+      render();
+    });
+
+    document.getElementById('cancel-last').addEventListener('click', () => {
+      const last = state.mine.pop();
+      if (last) state.ledger.push(last.replace('OrderCreated', 'OrderCancelled') + ' (mock)');
+      render();
+    });
+
+    updatePreview();
+    render();
+  </script>
 </body>
 </html>
