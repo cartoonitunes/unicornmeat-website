@@ -102,6 +102,22 @@
       background: #fff;
       margin-bottom: 8px;
     }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0 8px;
+    }
+    .stat {
+      border: 2px solid #000;
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px;
+      text-align: center;
+    }
+    .stat .k { display:block; font-size:11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat .v { display:block; margin-top:3px; font-weight:800; font-size:13px; }
+
     .depth-row {
       position: relative;
       display: grid;
@@ -120,6 +136,7 @@
       opacity: .18;
       z-index: 0;
       border-radius: 6px;
+      transition: width .35s ease;
     }
     .depth-row.ask .bar { right: 0; background: var(--ask); }
     .depth-row.bid .bar { left: 0; background: var(--bid); }
@@ -179,6 +196,7 @@
 
       <article class="card">
         <h3>Interactive Depth Chart + Orderbook</h3>
+        <div class="stats" id="stats"></div>
         <div class="depth-wrap" id="depth"></div>
 
         <div class="row"><strong>Asks (sell 🦄)</strong><strong>w🍖 / 🦄</strong></div>
@@ -229,6 +247,7 @@
     const bidsEl = document.getElementById('bids');
     const ledgerEl = document.getElementById('ledger');
     const depthEl = document.getElementById('depth');
+    const statsEl = document.getElementById('stats');
 
     const fmt = (n) => Number(n).toLocaleString();
 
@@ -247,6 +266,16 @@
       const bestAsk = state.asks.slice().sort((a,b)=>a.price-b.price)[0]?.price || 0;
       const bestBid = state.bids.slice().sort((a,b)=>b.price-a.price)[0]?.price || 0;
       const mid = bestAsk && bestBid ? Math.round((bestAsk+bestBid)/2) : 0;
+      const spread = bestAsk && bestBid ? bestAsk - bestBid : 0;
+      const spreadPct = mid ? ((spread / mid) * 100).toFixed(2) : '0.00';
+      const vol24h = state.ledger.filter(x => x.startsWith('OrderFilled')).length * 5000;
+
+      statsEl.innerHTML = `
+        <div class="stat"><span class="k">Best Bid</span><span class="v bid">${fmt(bestBid)} w🍖</span></div>
+        <div class="stat"><span class="k">Best Ask</span><span class="v ask">${fmt(bestAsk)} w🍖</span></div>
+        <div class="stat"><span class="k">Spread</span><span class="v">${fmt(spread)} (${spreadPct}%)</span></div>
+        <div class="stat"><span class="k">24h Vol</span><span class="v">${fmt(vol24h)} w🍖</span></div>
+      `;
 
       depthEl.innerHTML = `
         ${state.asks.slice().sort((a,b)=>a.price-b.price).map(a => `
