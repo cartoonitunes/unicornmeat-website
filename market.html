@@ -37,6 +37,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.1/ethers.umd.min.js" crossorigin="anonymous"></script>
     <style>
         .skip-to-content { position:absolute;top:-40px;left:0;background:#000;color:#fff;padding:8px 16px;z-index:10000;transition:top .2s; }
         .skip-to-content:focus { top:0; }
@@ -83,6 +84,21 @@
         .how-it-works-grid { display:grid; gap:12px; }
         @media (min-width:768px) { .how-it-works-grid { grid-template-columns:repeat(4,1fr); } }
         .step-num { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; font-weight:800; font-size:14px; }
+
+        /* Production additions */
+        .network-warning { background:#fff3cd; color:#856404; border:2px solid #856404; padding:10px 16px; text-align:center; font-weight:700; font-size:13px; position:fixed; top:0; left:0; right:0; z-index:10001; }
+        .tx-status { font-size:12px; padding:6px 10px; border-radius:8px; margin-top:6px; }
+        .tx-status.pending { background:#fff3cd; color:#856404; }
+        .tx-status.success { background:#d4edda; color:#155724; }
+        .tx-status.error { background:#f8d7da; color:#721c24; }
+        .balances { display:flex; gap:12px; margin-bottom:8px; font-size:12px; }
+        .balances .bal { background:#f0f4f8; padding:4px 8px; border-radius:6px; font-weight:600; }
+        .fill-inline { display:flex; gap:4px; align-items:center; margin-top:4px; }
+        .fill-inline input { width:70px; padding:3px 6px; font-size:11px; border:1px solid #999; border-radius:6px; }
+        .fill-inline button { padding:3px 8px; font-size:10px; border-radius:6px; cursor:pointer; font-weight:700; border:1px solid; }
+        .fill-confirm { background:#d4edda; color:#155724; border-color:#155724; }
+        .fill-all { background:#cce5ff; color:#004085; border-color:#004085; }
+        .order-stale { opacity:0.5; }
     </style>
     <script type="application/ld+json">
     {
@@ -102,6 +118,7 @@
 
 <body>
     <a href="#main-content" class="skip-to-content">Skip to content</a>
+    <div id="network-warning" class="network-warning" style="display:none;">⚠️ Please switch to Ethereum Mainnet to use Unicorn Market</div>
     <div class="uc-wrapper">
         <!-- Header start -->
         <header class="uc-header header-two uc-navbar-sticky-wrap z-999 uc-dark"
@@ -133,7 +150,7 @@
                             </div>
                             <div class="uc-navbar-right">
                                 <a class="btn btn-sm xl:btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0 d-none lg:d-inline-flex connect-wallet-btn"
-                                    href="#">
+                                    href="#" onclick="connectWallet(); return false;">
                                     <span class="btn-responsive-text">Connect Wallet</span>
                                 </a>
                                 <a class="btn btn-md btn-secondary w-48px h-48px p-0 border border-2 border-black contrast-shadow-sm d-inline-flex lg:d-none"
@@ -173,7 +190,7 @@
                         <li><a href="#transparency">Transparency</a></li>
                     </ul>
                     <div class="mt-4">
-                        <a class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm connect-wallet-btn w-100" href="#">
+                        <a class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm connect-wallet-btn w-100" href="#" onclick="connectWallet(); return false;">
                             <span class="btn-responsive-text">Connect Wallet</span>
                         </a>
                     </div>
@@ -234,14 +251,21 @@
                         <!-- Trade Ticket -->
                         <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2">
                             <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-2">Trade Ticket</h3>
+                            <div class="balances" id="balances">
+                                <span class="bal">🦄 —</span>
+                                <span class="bal">w🍖 —</span>
+                            </div>
                             <select id="side" class="form-select border border-2 border-black rounded-2 mb-2 fs-6 fw-semibold" style="padding:10px;">
                                 <option value="ask">Create Ask (Sell 🦄 for w🍖)</option>
                                 <option value="bid">Create Bid (Sell w🍖 for 🦄)</option>
                             </select>
-                            <input id="amount" value="2" aria-label="amount" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
-                            <input id="price" value="5000" aria-label="price" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
-                            <button id="create-order" class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm w-100 fw-bold">Create Mock Order</button>
-                            <div class="market-row mt-2"><span class="fs-7 text-muted">Preview</span><strong id="preview" class="fs-7">2 🦄 @ 5,000 w🍖/🦄</strong></div>
+                            <label class="fs-7 text-muted" id="amount-label">Amount (🦄)</label>
+                            <input id="amount" placeholder="0" aria-label="amount" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
+                            <label class="fs-7 text-muted">Price (w🍖 per 🦄)</label>
+                            <input id="price" placeholder="0" aria-label="price" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
+                            <button id="create-order" class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm w-100 fw-bold" disabled>Connect Wallet to Trade</button>
+                            <div class="market-row mt-2"><span class="fs-7 text-muted">Preview</span><strong id="preview" class="fs-7">—</strong></div>
+                            <div id="tx-status"></div>
                         </div>
 
                         <!-- Depth Chart + Orderbook -->
@@ -251,19 +275,19 @@
                             <div class="depth-wrap border border-2 border-black rounded-2 bg-white" id="depth"></div>
 
                             <div class="market-row"><strong class="fs-7">Asks (sell 🦄)</strong><strong class="fs-7">w🍖 / 🦄</strong></div>
-                            <div id="asks"></div>
+                            <div id="asks"><p class="fs-7 text-muted text-center py-2 mb-0">Loading...</p></div>
 
                             <div class="market-row" style="margin-top:6px"><strong class="fs-7">Bids (sell w🍖)</strong><strong class="fs-7">w🍖 / 🦄</strong></div>
-                            <div id="bids"></div>
+                            <div id="bids"><p class="fs-7 text-muted text-center py-2 mb-0">Loading...</p></div>
                         </div>
 
                         <!-- Ledger + My Orders + Transparency -->
                         <div class="panel p-3 border border-2 border-black contrast-shadow-sm bg-white rounded-2">
-                            <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-2">Ledger + My Orders</h3>
-                            <div class="ledger-scroll" id="ledger"></div>
+                            <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-2">Ledger</h3>
+                            <div class="ledger-scroll" id="ledger"><p class="fs-7 text-muted text-center py-2 mb-0">Loading events...</p></div>
                             <div class="my-orders">
                                 <h3 class="fs-7 fw-bold text-uppercase ls-1 text-muted mb-1">My Open Orders</h3>
-                                <div id="my-orders"></div>
+                                <div id="my-orders"><p class="fs-7 text-muted mb-0">Connect wallet to see your orders</p></div>
                             </div>
 
                             <div id="transparency">
@@ -280,25 +304,26 @@
 <span class="var">market</span>.<span class="fn">fillOrder</span>(<span class="var">orderId</span>, <span class="var">sellAmountToTake</span>);</pre>
                             </details>
                             <details class="method border border-2 border-black rounded-2">
+                                <summary>fillOrderFull(orderId)</summary>
+                                <pre class="code"><span class="fn">IERC20</span>(<span class="var">order.buyToken</span>).<span class="fn">approve</span>(<span class="var">market</span>, <span class="var">order.buyAmountRemaining</span>);
+<span class="var">market</span>.<span class="fn">fillOrderFull</span>(<span class="var">orderId</span>);</pre>
+                            </details>
+                            <details class="method border border-2 border-black rounded-2">
                                 <summary>cancelOrder(orderId)</summary>
                                 <pre class="code"><span class="var">market</span>.<span class="fn">cancelOrder</span>(<span class="var">orderId</span>);</pre>
                             </details>
                             <details class="method border border-2 border-black rounded-2">
                                 <summary>getOrder(orderId) → Order</summary>
                                 <pre class="code"><span class="var">market</span>.<span class="fn">getOrder</span>(<span class="var">orderId</span>);
-<span class="kw">returns</span> (maker, sellToken, buyToken, sellAmountRemaining, buyAmountRemaining, status)</pre>
-                            </details>
-                            <details class="method border border-2 border-black rounded-2">
-                                <summary>getOpenOrderIds() → uint256[]</summary>
-                                <pre class="code"><span class="var">market</span>.<span class="fn">getOpenOrderIds</span>();
-<span class="kw">returns</span> [<span class="num">0</span>, <span class="num">2</span>, <span class="num">5</span>, ...]</pre>
+<span class="kw">returns</span> (maker, sellToken, buyToken, sellAmountTotal, buyAmountTotal,
+        sellAmountRemaining, buyAmountRemaining, createdAt, status)</pre>
                             </details>
                             <details class="method border border-2 border-black rounded-2">
                                 <summary>getOrderBook(sellToken, buyToken) → uint256[]</summary>
                                 <pre class="code"><span class="var">market</span>.<span class="fn">getOrderBook</span>(<span class="addr">UNICORN</span>, <span class="addr">W_MEAT</span>);
 <span class="kw">returns</span> [<span class="num">1</span>, <span class="num">3</span>, <span class="num">7</span>, ...]</pre>
                             </details>
-                            <p class="fs-7 text-muted mt-2">Verified contract code (when live): <a href="#" id="etherscan-link">View on Etherscan</a></p>
+                            <p class="fs-7 text-muted mt-2" id="etherscan-wrap">Contract: <a href="#" id="etherscan-link" target="_blank" rel="noopener">View on Etherscan</a></p>
                             </div>
                         </div>
                     </div>
@@ -365,199 +390,654 @@
         </footer>
     </div>
 
-    
-
     <script>
-    const state = {
-      asks: [
-        { id: 101, amount: 2, price: 5200, mine: false },
-        { id: 102, amount: 4, price: 5100, mine: false },
-        { id: 103, amount: 1, price: 5000, mine: false }
-      ],
-      bids: [
-        { id: 201, amount: 7500, price: 4900, mine: false },
-        { id: 202, amount: 12000, price: 4850, mine: false }
-      ],
-      ledger: [
-        'OrderFilled #184 · 1 🦄 ↔ 5,000 w🍖',
-        'OrderCreated #185 · 3 🦄 ask @ 5,100',
-        'OrderCancelled #181 · remaining 2 🦄 refunded'
-      ],
-      mine: []
-    };
-    let nextOrderId = 300;
-    let nextBookId = 1000;
+    // ═══════════════════════════════════════════════════════════════════
+    // UNICORN MARKET — PRODUCTION ONCHAIN ORDERBOOK
+    // ═══════════════════════════════════════════════════════════════════
 
+    // ─── Config ────────────────────────────────────────────────────────
+    const CONTRACT_ADDRESS = '0x0000000000000000000000000000000000000000'; // UPDATE ON DEPLOY
+    const RPC_URL = 'https://eth-mainnet.g.alchemy.com/v2/J3_kv3R_rj4tIrl60I1dQcLvkmIPaTyE';
+    const CHAIN_ID = 1; // Ethereum Mainnet
+
+    const UNICORN  = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7';
+    const W_UNICORN = '0x38a9aF1BD00f9988977095B31eb18d6D3D5dCA00';
+    const MEAT     = '0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A';
+    const W_MEAT   = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668';
+
+    const REFRESH_INTERVAL = 15000;
+    const EVENT_LOOKBACK_BLOCKS = 5000;
+
+    // ─── ABIs ──────────────────────────────────────────────────────────
+    const MARKET_ABI = [
+        'function placeOrder(address sellToken, address buyToken, uint256 sellAmount, uint256 buyAmount) external returns (uint256 orderId)',
+        'function fillOrder(uint256 orderId, uint256 sellAmountToTake) external',
+        'function fillOrderFull(uint256 orderId) external',
+        'function cancelOrder(uint256 orderId) external',
+        'function getOrder(uint256 orderId) external view returns (tuple(address maker, address sellToken, address buyToken, uint256 sellAmountTotal, uint256 buyAmountTotal, uint256 sellAmountRemaining, uint256 buyAmountRemaining, uint64 createdAt, uint8 status))',
+        'function getOrderBook(address sellToken, address buyToken) external view returns (uint256[])',
+        'function orderCount() external view returns (uint256)',
+        'event OrderPlaced(uint256 indexed orderId, address indexed maker, address sellToken, address buyToken, uint256 sellAmountTotal, uint256 buyAmountTotal)',
+        'event OrderFilled(uint256 indexed orderId, address indexed taker, uint256 sellAmountFilled, uint256 buyAmountPaid, uint256 sellAmountRemaining, uint256 buyAmountRemaining)',
+        'event OrderCancelled(uint256 indexed orderId, address indexed maker, uint256 sellAmountRefunded)',
+    ];
+
+    const ERC20_ABI = [
+        'function balanceOf(address) view returns (uint256)',
+        'function allowance(address owner, address spender) view returns (uint256)',
+        'function approve(address spender, uint256 amount) returns (bool)',
+    ];
+
+    // ─── State ─────────────────────────────────────────────────────────
+    let readProvider = null;
+    let signer = null;
+    let userAddress = null;
+    let marketRead = null;
+    let marketWrite = null;
+    let asks = [];    // [{id, maker, sellToken, buyToken, sellTotal, buyTotal, sellRem, buyRem, price}]
+    let bids = [];
+    let ledgerEntries = [];
+    let refreshTimer = null;
+    let activeFillId = null;
+    let txPending = false;
+
+    // ─── DOM refs ──────────────────────────────────────────────────────
     const asksEl = document.getElementById('asks');
     const bidsEl = document.getElementById('bids');
     const ledgerEl = document.getElementById('ledger');
     const depthEl = document.getElementById('depth');
     const statsEl = document.getElementById('stats');
     const myOrdersEl = document.getElementById('my-orders');
-
-    const fmt = (n) => Number(n).toLocaleString();
-
-    function render() {
-      const maxAsk = Math.max(...state.asks.map(x => x.amount), 1);
-      const maxBid = Math.max(...state.bids.map(x => x.amount), 1);
-
-      asksEl.innerHTML = state.asks.length === 0 ? '<p class="fs-7 text-muted text-center py-2 mb-0">No asks yet — place the first one!</p>' : state.asks
-        .sort((a,b)=>b.price-a.price)
-        .map(a => `<div class="market-row"><span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span><button class="take-btn" data-take-side="ask" data-take-id="${a.id}">Take</button></div>`).join('');
-
-      bidsEl.innerHTML = state.bids.length === 0 ? '<p class="fs-7 text-muted text-center py-2 mb-0">No bids yet — place the first one!</p>' : state.bids
-        .sort((a,b)=>b.price-a.price)
-        .map(b => `<div class="market-row"><span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span><button class="take-btn" data-take-side="bid" data-take-id="${b.id}">Take</button></div>`).join('');
-
-      const bestAsk = state.asks.slice().sort((a,b)=>a.price-b.price)[0]?.price || 0;
-      const bestBid = state.bids.slice().sort((a,b)=>b.price-a.price)[0]?.price || 0;
-      const mid = bestAsk && bestBid ? Math.round((bestAsk+bestBid)/2) : 0;
-      const spread = bestAsk && bestBid ? bestAsk - bestBid : 0;
-      const spreadPct = mid ? ((spread / mid) * 100).toFixed(2) : '0.00';
-      const vol24h = state.ledger.filter(x => x.startsWith('OrderFilled')).length * 5000;
-
-      statsEl.innerHTML = `
-        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Best Bid</span><span class="v bid">${fmt(bestBid)} w🍖</span></div>
-        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Best Ask</span><span class="v ask">${fmt(bestAsk)} w🍖</span></div>
-        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Spread</span><span class="v">${fmt(spread)} (${spreadPct}%)</span></div>
-        <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">24h Vol</span><span class="v">${fmt(vol24h)} w🍖</span></div>
-      `;
-
-      depthEl.innerHTML = `
-        ${state.asks.slice().sort((a,b)=>a.price-b.price).map(a => `
-          <div class="depth-row ask">
-            <div class="bar" style="width:${(a.amount/maxAsk)*100}%"></div>
-            <span>${fmt(a.amount)} 🦄</span><span class="ask">${fmt(a.price)}</span><span>ask</span>
-          </div>`).join('')}
-        <div class="depth-mid">Mid: ${fmt(mid)} w🍖/🦄</div>
-        ${state.bids.slice().sort((a,b)=>b.price-a.price).map(b => `
-          <div class="depth-row bid">
-            <div class="bar" style="width:${(b.amount/maxBid)*100}%"></div>
-            <span>${fmt(b.amount)} w🍖</span><span class="bid">${fmt(b.price)}</span><span>bid</span>
-          </div>`).join('')}
-      `;
-
-      ledgerEl.innerHTML = [...state.mine.filter(o=>o.active).map(o=>`(mine) OrderCreated #${o.id} · ${o.label}`), ...state.ledger]
-        .slice(-12).reverse()
-        .map(line => `<div class="market-row"><span>${line}</span></div>`).join('');
-
-      document.querySelectorAll('[data-take-id]').forEach(btn => {
-        btn.addEventListener('click', () => takeOrder(btn.dataset.takeSide, Number(btn.dataset.takeId)));
-      });
-
-      const openMine = state.mine.filter(o => o.active);
-      myOrdersEl.innerHTML = openMine.length
-        ? openMine.map(o => `
-          <div class="my-order-row">
-            <span>#${o.id} · ${o.label}</span>
-            <button class="cancel-btn" data-cancel-id="${o.id}">Cancel</button>
-          </div>
-        `).join('')
-        : '<p class="small" style="margin:0">No open orders yet.</p>';
-
-      myOrdersEl.querySelectorAll('[data-cancel-id]').forEach(btn => {
-        btn.addEventListener('click', () => cancelOrderById(Number(btn.dataset.cancelId)));
-      });
-    }
-
+    const balancesEl = document.getElementById('balances');
+    const previewEl = document.getElementById('preview');
+    const txStatusEl = document.getElementById('tx-status');
+    const createBtn = document.getElementById('create-order');
     const sideEl = document.getElementById('side');
     const amountEl = document.getElementById('amount');
     const priceEl = document.getElementById('price');
-    const previewEl = document.getElementById('preview');
+    const amountLabel = document.getElementById('amount-label');
 
-    function updatePreview() {
-      const side = sideEl.value;
-      const amount = Number(amountEl.value || 0);
-      const price = Number(priceEl.value || 0);
-      previewEl.textContent = side === 'ask'
-        ? `${fmt(amount)} 🦄 @ ${fmt(price)} w🍖/🦄`
-        : `${fmt(amount)} w🍖 @ ${fmt(price)} w🍖/🦄`;
+    // ─── Helpers ───────────────────────────────────────────────────────
+    const fmt = (n) => Number(n).toLocaleString(undefined, { maximumFractionDigits: 3 });
+    const shortAddr = (a) => a ? a.slice(0,6) + '…' + a.slice(-4) : '';
+
+    function isUnicornSide(token) {
+        return token.toLowerCase() === UNICORN.toLowerCase() || token.toLowerCase() === W_UNICORN.toLowerCase();
     }
 
-    [sideEl, amountEl, priceEl].forEach(el => el.addEventListener('input', updatePreview));
-
-    function cancelOrderById(orderId) {
-      const order = state.mine.find(o => o.id === orderId && o.active);
-      if (!order) return;
-      order.active = false;
-
-      const arr = order.side === 'ask' ? state.asks : state.bids;
-      const idx = arr.findIndex(x => x.id === order.bookId);
-      if (idx >= 0) arr.splice(idx, 1);
-
-      state.ledger.push(`OrderCancelled #${order.id} · ${order.label} (mock)`);
-      render();
-    }
-
-    let activeFillId = null;
-
-    function takeOrder(side, bookId) {
-      if (activeFillId === bookId) { activeFillId = null; render(); return; }
-      activeFillId = bookId;
-      render();
-      setTimeout(() => {
-        const inp = document.getElementById('fill-amount-' + bookId);
-        if (inp) inp.focus();
-      }, 50);
-      return;
-    }
-
-    function confirmFill(side, bookId) {
-      const arr = side === 'ask' ? state.asks : state.bids;
-      const o = arr.find(x => x.id === bookId);
-      if (!o) return;
-      const inp = document.getElementById('fill-amount-' + bookId);
-      const fill = Number(inp ? inp.value : 0);
-      const maxFill = Number(o.amount);
-      if (!fill || fill <= 0 || fill > maxFill) { if(inp) inp.style.borderColor='#cc3a57'; return; }
-      activeFillId = null;
-
-      o.amount = Number((o.amount - fill).toFixed(6));
-      const paid = Math.round(fill * o.price);
-      const line = side === 'ask'
-        ? `OrderFilled #${bookId} · took ${fmt(fill)} 🦄 for ${fmt(paid)} w🍖`
-        : `OrderFilled #${bookId} · took ${fmt(fill)} w🍖 for ~${(fill / o.price).toFixed(4)} 🦄`;
-      state.ledger.push(line);
-
-      if (o.amount <= 0) {
-        const idx = arr.findIndex(x => x.id === bookId);
-        if (idx >= 0) arr.splice(idx, 1);
-        const mine = state.mine.find(m => m.bookId === bookId && m.active);
-        if (mine) mine.active = false;
-      } else {
-        const mine = state.mine.find(m => m.bookId === bookId && m.active);
-        if (mine) {
-          mine.amount = o.amount;
-          mine.label = mine.side === 'ask'
-            ? `${fmt(o.amount)} 🦄 ask @ ${fmt(o.price)}`
-            : `${fmt(o.amount)} w🍖 bid @ ${fmt(o.price)}`;
+    // W_MEAT has 3 decimals. UNICORN/W_UNICORN/MEAT have 0 decimals.
+    function displayAmount(token, rawAmount) {
+        const n = Number(rawAmount);
+        if (token.toLowerCase() === W_MEAT.toLowerCase()) {
+            return fmt(n / 1000);
         }
-      }
-      render();
+        return fmt(n);
     }
 
-    document.getElementById('create-order').addEventListener('click', () => {
-      const side = sideEl.value;
-      const amount = Number(amountEl.value || 0);
-      const price = Number(priceEl.value || 0);
-      if (!amount || !price) return;
+    function tokenSymbol(token) {
+        const t = token.toLowerCase();
+        if (t === UNICORN.toLowerCase()) return '🦄';
+        if (t === W_UNICORN.toLowerCase()) return 'w🦄';
+        if (t === MEAT.toLowerCase()) return '🍖';
+        if (t === W_MEAT.toLowerCase()) return 'w🍖';
+        return '???';
+    }
 
-      const bookId = nextBookId++;
-      if (side === 'ask') state.asks.push({ id: bookId, amount, price, mine: true });
-      else state.bids.push({ id: bookId, amount, price, mine: true });
+    // Calculate price as w🍖 per 🦄
+    function calcPrice(order) {
+        const sell = Number(order.sellTotal || order.sellAmountTotal);
+        const buy = Number(order.buyTotal || order.buyAmountTotal);
+        if (sell === 0 || buy === 0) return 0;
+        if (isUnicornSide(order.sellToken)) {
+            // Selling unicorns, buying meat: price = buyAmount(meat) / 1000 / sellAmount(unicorn)
+            return (buy / 1000) / sell;
+        } else {
+            // Selling meat, buying unicorns: price = sellAmount(meat) / 1000 / buyAmount(unicorn)
+            return (sell / 1000) / buy;
+        }
+    }
 
-      const id = nextOrderId++;
-      const label = side === 'ask'
-        ? `${fmt(amount)} 🦄 ask @ ${fmt(price)}`
-        : `${fmt(amount)} w🍖 bid @ ${fmt(price)}`;
+    function showTxStatus(msg, type) {
+        txStatusEl.innerHTML = `<div class="tx-status ${type}">${msg}</div>`;
+        if (type === 'success') setTimeout(() => { txStatusEl.innerHTML = ''; }, 8000);
+    }
 
-      state.mine.push({ id, bookId, side, amount, price, label, active: true });
-      render();
+    function clearTxStatus() { txStatusEl.innerHTML = ''; }
+
+    // ─── Etherscan link ────────────────────────────────────────────────
+    document.getElementById('etherscan-link').href = `https://etherscan.io/address/${CONTRACT_ADDRESS}`;
+
+    // ─── Initialize Provider ───────────────────────────────────────────
+    async function initProvider() {
+        try {
+            readProvider = new ethers.JsonRpcProvider(RPC_URL);
+            marketRead = new ethers.Contract(CONTRACT_ADDRESS, MARKET_ABI, readProvider);
+            await loadOrderbook();
+            await loadLedger();
+            startAutoRefresh();
+        } catch (e) {
+            console.error('Init error:', e);
+            asksEl.innerHTML = '<p class="fs-7 text-muted text-center py-2 mb-0">Unable to load orderbook — contract may not be deployed yet</p>';
+            bidsEl.innerHTML = '<p class="fs-7 text-muted text-center py-2 mb-0">Unable to load orderbook</p>';
+        }
+    }
+
+    // ─── Wallet Connection ─────────────────────────────────────────────
+    async function connectWallet() {
+        if (!window.ethereum) {
+            alert('Please install MetaMask or another Ethereum wallet');
+            return;
+        }
+        try {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const network = await provider.getNetwork();
+            if (Number(network.chainId) !== CHAIN_ID) {
+                document.getElementById('network-warning').style.display = 'block';
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x1' }],
+                    });
+                } catch (e) { /* user rejected */ }
+                return;
+            }
+            document.getElementById('network-warning').style.display = 'none';
+
+            signer = await provider.getSigner();
+            userAddress = await signer.getAddress();
+            marketWrite = new ethers.Contract(CONTRACT_ADDRESS, MARKET_ABI, signer);
+
+            // Update all wallet buttons
+            document.querySelectorAll('.connect-wallet-btn .btn-responsive-text').forEach(el => {
+                el.textContent = shortAddr(userAddress);
+            });
+
+            createBtn.disabled = false;
+            createBtn.textContent = 'Place Order';
+
+            await updateBalances();
+            render();
+        } catch (e) {
+            console.error('Wallet connect error:', e);
+        }
+    }
+
+    // Listen for account/chain changes
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', () => { location.reload(); });
+        window.ethereum.on('chainChanged', () => { location.reload(); });
+    }
+
+    async function updateBalances() {
+        if (!userAddress || !readProvider) return;
+        try {
+            const unicornToken = new ethers.Contract(UNICORN, ERC20_ABI, readProvider);
+            const wMeatToken = new ethers.Contract(W_MEAT, ERC20_ABI, readProvider);
+            const [uBal, mBal] = await Promise.all([
+                unicornToken.balanceOf(userAddress),
+                wMeatToken.balanceOf(userAddress),
+            ]);
+            balancesEl.innerHTML = `
+                <span class="bal">🦄 ${fmt(Number(uBal))}</span>
+                <span class="bal">w🍖 ${fmt(Number(mBal) / 1000)}</span>
+            `;
+        } catch (e) {
+            console.warn('Balance fetch failed:', e);
+        }
+    }
+
+    // ─── Load Orderbook ────────────────────────────────────────────────
+    async function loadOrderbook() {
+        try {
+            // Asks: selling UNICORN for W_MEAT
+            const askIds = await marketRead.getOrderBook(UNICORN, W_MEAT);
+            const askOrders = await Promise.all(askIds.map(async (id) => {
+                const o = await marketRead.getOrder(id);
+                return {
+                    id: Number(id), maker: o.maker, sellToken: o.sellToken, buyToken: o.buyToken,
+                    sellTotal: Number(o.sellAmountTotal), buyTotal: Number(o.buyAmountTotal),
+                    sellRem: Number(o.sellAmountRemaining), buyRem: Number(o.buyAmountRemaining),
+                    sellAmountTotal: Number(o.sellAmountTotal), buyAmountTotal: Number(o.buyAmountTotal),
+                };
+            }));
+
+            // Bids: selling W_MEAT for UNICORN
+            const bidIds = await marketRead.getOrderBook(W_MEAT, UNICORN);
+            const bidOrders = await Promise.all(bidIds.map(async (id) => {
+                const o = await marketRead.getOrder(id);
+                return {
+                    id: Number(id), maker: o.maker, sellToken: o.sellToken, buyToken: o.buyToken,
+                    sellTotal: Number(o.sellAmountTotal), buyTotal: Number(o.buyAmountTotal),
+                    sellRem: Number(o.sellAmountRemaining), buyRem: Number(o.buyAmountRemaining),
+                    sellAmountTotal: Number(o.sellAmountTotal), buyAmountTotal: Number(o.buyAmountTotal),
+                };
+            }));
+
+            asks = askOrders.map(o => ({ ...o, price: calcPrice(o) }));
+            bids = bidOrders.map(o => ({ ...o, price: calcPrice(o) }));
+
+            render();
+        } catch (e) {
+            console.error('Orderbook load error:', e);
+            asksEl.innerHTML = '<p class="fs-7 text-muted text-center py-2 mb-0">Unable to load — contract may not be deployed yet</p>';
+            bidsEl.innerHTML = asksEl.innerHTML;
+        }
+    }
+
+    // ─── Load Ledger (Events) ──────────────────────────────────────────
+    async function loadLedger() {
+        try {
+            const currentBlock = await readProvider.getBlockNumber();
+            const fromBlock = Math.max(0, currentBlock - EVENT_LOOKBACK_BLOCKS);
+            const iface = new ethers.Interface(MARKET_ABI);
+
+            const [placedLogs, filledLogs, cancelledLogs] = await Promise.all([
+                readProvider.getLogs({ address: CONTRACT_ADDRESS, topics: [iface.getEvent('OrderPlaced').topicHash], fromBlock, toBlock: 'latest' }),
+                readProvider.getLogs({ address: CONTRACT_ADDRESS, topics: [iface.getEvent('OrderFilled').topicHash], fromBlock, toBlock: 'latest' }),
+                readProvider.getLogs({ address: CONTRACT_ADDRESS, topics: [iface.getEvent('OrderCancelled').topicHash], fromBlock, toBlock: 'latest' }),
+            ]);
+
+            ledgerEntries = [];
+
+            for (const log of placedLogs) {
+                const parsed = iface.parseLog(log);
+                const sym = tokenSymbol(parsed.args.sellToken);
+                const amt = isUnicornSide(parsed.args.sellToken)
+                    ? `${fmt(Number(parsed.args.sellAmountTotal))} ${sym}`
+                    : `${fmt(Number(parsed.args.sellAmountTotal) / 1000)} ${sym}`;
+                ledgerEntries.push({ block: log.blockNumber, text: `Placed #${Number(parsed.args.orderId)} · ${amt} by ${shortAddr(parsed.args.maker)}` });
+            }
+
+            for (const log of filledLogs) {
+                const parsed = iface.parseLog(log);
+                ledgerEntries.push({ block: log.blockNumber, text: `Filled #${Number(parsed.args.orderId)} · took ${fmt(Number(parsed.args.sellAmountFilled))} for ${fmt(Number(parsed.args.buyAmountPaid))} by ${shortAddr(parsed.args.taker)}` });
+            }
+
+            for (const log of cancelledLogs) {
+                const parsed = iface.parseLog(log);
+                ledgerEntries.push({ block: log.blockNumber, text: `Cancelled #${Number(parsed.args.orderId)} · ${fmt(Number(parsed.args.sellAmountRefunded))} refunded to ${shortAddr(parsed.args.maker)}` });
+            }
+
+            ledgerEntries.sort((a, b) => b.block - a.block);
+            renderLedger();
+        } catch (e) {
+            console.warn('Ledger load error:', e);
+            ledgerEl.innerHTML = '<p class="fs-7 text-muted text-center py-2 mb-0">Unable to load events</p>';
+        }
+    }
+
+    // ─── Auto Refresh ──────────────────────────────────────────────────
+    function startAutoRefresh() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = setInterval(async () => {
+            await loadOrderbook();
+            await loadLedger();
+            if (userAddress) await updateBalances();
+        }, REFRESH_INTERVAL);
+    }
+
+    async function refreshAll() {
+        await loadOrderbook();
+        await loadLedger();
+        if (userAddress) await updateBalances();
+    }
+
+    // ─── Render ────────────────────────────────────────────────────────
+    function render() {
+        renderAsks();
+        renderBids();
+        renderDepth();
+        renderStats();
+        renderMyOrders();
+        renderLedger();
+    }
+
+    function renderAsks() {
+        if (asks.length === 0) {
+            asksEl.innerHTML = '<p class="fs-7 text-muted text-center py-2 mb-0">No asks yet — place the first one!</p>';
+            return;
+        }
+        const sorted = [...asks].sort((a, b) => b.price - a.price);
+        asksEl.innerHTML = sorted.map(a => {
+            const isMine = userAddress && a.maker.toLowerCase() === userAddress.toLowerCase();
+            let actions = '';
+            if (userAddress && !isMine) {
+                if (activeFillId === a.id) {
+                    actions = `
+                        <div class="fill-inline">
+                            <input type="number" id="fill-amount-${a.id}" placeholder="${a.sellRem}" min="1" max="${a.sellRem}" value="${a.sellRem}" />
+                            <button class="fill-confirm" onclick="doFillOrder(${a.id}, 'ask')">Fill</button>
+                            <button class="fill-all" onclick="doFillOrderFull(${a.id})">All</button>
+                        </div>`;
+                } else {
+                    actions = `<button class="take-btn" onclick="toggleFill(${a.id})">Take</button>`;
+                }
+            } else if (isMine) {
+                actions = `<button class="cancel-btn" onclick="doCancelOrder(${a.id})">Cancel</button>`;
+            }
+            return `<div class="market-row">
+                <span>${fmt(a.sellRem)} 🦄</span>
+                <span class="ask-color">${fmt(a.price)}</span>
+                ${actions}
+            </div>`;
+        }).join('');
+    }
+
+    function renderBids() {
+        if (bids.length === 0) {
+            bidsEl.innerHTML = '<p class="fs-7 text-muted text-center py-2 mb-0">No bids yet — place the first one!</p>';
+            return;
+        }
+        const sorted = [...bids].sort((a, b) => b.price - a.price);
+        bidsEl.innerHTML = sorted.map(b => {
+            const isMine = userAddress && b.maker.toLowerCase() === userAddress.toLowerCase();
+            // For bids, sellRem is in W_MEAT raw (3 dec), buyRem is in UNICORN (0 dec)
+            const displaySell = fmt(b.sellRem / 1000);
+            let actions = '';
+            if (userAddress && !isMine) {
+                if (activeFillId === b.id) {
+                    // For bids, taker takes w🍖 by providing 🦄. sellAmountToTake is in w🍖 raw.
+                    actions = `
+                        <div class="fill-inline">
+                            <input type="number" id="fill-amount-${b.id}" placeholder="${b.sellRem}" min="1" max="${b.sellRem}" value="${b.sellRem}" step="1000" />
+                            <button class="fill-confirm" onclick="doFillOrder(${b.id}, 'bid')">Fill</button>
+                            <button class="fill-all" onclick="doFillOrderFull(${b.id})">All</button>
+                        </div>`;
+                } else {
+                    actions = `<button class="take-btn" onclick="toggleFill(${b.id})">Take</button>`;
+                }
+            } else if (isMine) {
+                actions = `<button class="cancel-btn" onclick="doCancelOrder(${b.id})">Cancel</button>`;
+            }
+            return `<div class="market-row">
+                <span>${displaySell} w🍖</span>
+                <span class="bid-color">${fmt(b.price)}</span>
+                ${actions}
+            </div>`;
+        }).join('');
+    }
+
+    function renderDepth() {
+        const allAsks = [...asks].sort((a, b) => a.price - b.price);
+        const allBids = [...bids].sort((a, b) => b.price - a.price);
+        const maxAskAmt = Math.max(...asks.map(a => a.sellRem), 1);
+        const maxBidAmt = Math.max(...bids.map(b => b.sellRem / 1000), 1);
+
+        const bestAsk = allAsks[0]?.price || 0;
+        const bestBid = allBids[0]?.price || 0;
+        const mid = bestAsk && bestBid ? ((bestAsk + bestBid) / 2) : (bestAsk || bestBid || 0);
+
+        depthEl.innerHTML = `
+            ${allAsks.map(a => `
+                <div class="depth-row ask">
+                    <div class="bar" style="width:${(a.sellRem / maxAskAmt) * 100}%"></div>
+                    <span>${fmt(a.sellRem)} 🦄</span><span class="ask-color">${fmt(a.price)}</span><span>ask</span>
+                </div>`).join('')}
+            ${mid ? `<div class="depth-mid">Mid: ${fmt(mid)} w🍖/🦄</div>` : '<div class="depth-mid">No orders</div>'}
+            ${allBids.map(b => `
+                <div class="depth-row bid">
+                    <div class="bar" style="width:${((b.sellRem / 1000) / maxBidAmt) * 100}%"></div>
+                    <span>${fmt(b.sellRem / 1000)} w🍖</span><span class="bid-color">${fmt(b.price)}</span><span>bid</span>
+                </div>`).join('')}
+        `;
+    }
+
+    function renderStats() {
+        const bestAsk = asks.length ? Math.min(...asks.map(a => a.price)) : 0;
+        const bestBid = bids.length ? Math.max(...bids.map(b => b.price)) : 0;
+        const spread = bestAsk && bestBid ? bestAsk - bestBid : 0;
+        const mid = bestAsk && bestBid ? (bestAsk + bestBid) / 2 : 0;
+        const spreadPct = mid ? ((spread / mid) * 100).toFixed(2) : '0.00';
+
+        // Volume from filled events
+        const filledCount = ledgerEntries.filter(e => e.text.startsWith('Filled')).length;
+
+        statsEl.innerHTML = `
+            <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Best Bid</span><span class="v bid-color">${bestBid ? fmt(bestBid) + ' w🍖' : '—'}</span></div>
+            <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Best Ask</span><span class="v ask-color">${bestAsk ? fmt(bestAsk) + ' w🍖' : '—'}</span></div>
+            <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Spread</span><span class="v">${spread ? fmt(spread) + ' (' + spreadPct + '%)' : '—'}</span></div>
+            <div class="stat-card panel p-2 border border-2 border-black contrast-shadow-sm bg-white rounded-2"><span class="k">Fills</span><span class="v">${filledCount}</span></div>
+        `;
+    }
+
+    function renderLedger() {
+        if (ledgerEntries.length === 0) {
+            ledgerEl.innerHTML = '<p class="fs-7 text-muted text-center py-2 mb-0">No events yet</p>';
+            return;
+        }
+        ledgerEl.innerHTML = ledgerEntries.slice(0, 20).map(e =>
+            `<div class="market-row"><span class="fs-7">${e.text}</span></div>`
+        ).join('');
+    }
+
+    function renderMyOrders() {
+        if (!userAddress) {
+            myOrdersEl.innerHTML = '<p class="fs-7 text-muted mb-0">Connect wallet to see your orders</p>';
+            return;
+        }
+        const mine = [...asks, ...bids].filter(o => o.maker.toLowerCase() === userAddress.toLowerCase());
+        if (mine.length === 0) {
+            myOrdersEl.innerHTML = '<p class="fs-7 text-muted mb-0">No open orders</p>';
+            return;
+        }
+        myOrdersEl.innerHTML = mine.map(o => {
+            const isAsk = isUnicornSide(o.sellToken);
+            const label = isAsk
+                ? `${fmt(o.sellRem)} 🦄 ask @ ${fmt(o.price)} w🍖`
+                : `${fmt(o.sellRem / 1000)} w🍖 bid @ ${fmt(o.price)} w🍖`;
+            return `<div class="my-order-row">
+                <span>#${o.id} · ${label}</span>
+                <button class="cancel-btn" onclick="doCancelOrder(${o.id})">Cancel</button>
+            </div>`;
+        }).join('');
+    }
+
+    // ─── Trade Ticket ──────────────────────────────────────────────────
+    function updatePreview() {
+        const side = sideEl.value;
+        const amount = Number(amountEl.value || 0);
+        const price = Number(priceEl.value || 0);
+        if (!amount || !price) { previewEl.textContent = '—'; return; }
+
+        if (side === 'ask') {
+            amountLabel.textContent = 'Amount (🦄)';
+            const total = amount * price;
+            previewEl.textContent = `Sell ${fmt(amount)} 🦄 for ${fmt(total)} w🍖 (@ ${fmt(price)} w🍖/🦄)`;
+        } else {
+            amountLabel.textContent = 'Amount (w🍖)';
+            const unicorns = amount / price;
+            previewEl.textContent = `Sell ${fmt(amount)} w🍖 for ~${fmt(unicorns)} 🦄 (@ ${fmt(price)} w🍖/🦄)`;
+        }
+    }
+
+    sideEl.addEventListener('change', updatePreview);
+    amountEl.addEventListener('input', updatePreview);
+    priceEl.addEventListener('input', updatePreview);
+
+    // ─── Place Order ───────────────────────────────────────────────────
+    createBtn.addEventListener('click', async () => {
+        if (!marketWrite || !userAddress) return;
+        if (txPending) return;
+
+        const side = sideEl.value;
+        const amount = Number(amountEl.value || 0);
+        const price = Number(priceEl.value || 0);
+        if (!amount || !price || amount <= 0 || price <= 0) {
+            showTxStatus('Enter valid amount and price', 'error');
+            return;
+        }
+
+        let sellToken, buyToken, sellAmount, buyAmount;
+
+        if (side === 'ask') {
+            // Sell UNICORN for W_MEAT
+            sellToken = UNICORN;
+            buyToken = W_MEAT;
+            sellAmount = BigInt(Math.floor(amount)); // 0 decimals
+            buyAmount = BigInt(Math.floor(amount * price * 1000)); // 3 decimals
+        } else {
+            // Sell W_MEAT for UNICORN
+            sellToken = W_MEAT;
+            buyToken = UNICORN;
+            sellAmount = BigInt(Math.floor(amount * 1000)); // 3 decimals
+            buyAmount = BigInt(Math.floor(amount / price)); // 0 decimals
+            if (buyAmount === 0n) {
+                showTxStatus('Amount too small for at least 1 🦄', 'error');
+                return;
+            }
+        }
+
+        txPending = true;
+        createBtn.disabled = true;
+        createBtn.textContent = 'Checking allowance...';
+
+        try {
+            // Check + approve
+            const token = new ethers.Contract(sellToken, ERC20_ABI, signer);
+            const allowance = await token.allowance(userAddress, CONTRACT_ADDRESS);
+            if (allowance < sellAmount) {
+                showTxStatus('Approving token...', 'pending');
+                createBtn.textContent = 'Approve in wallet...';
+                const approveTx = await token.approve(CONTRACT_ADDRESS, sellAmount);
+                showTxStatus('Waiting for approval confirmation...', 'pending');
+                await approveTx.wait();
+            }
+
+            // Place order
+            showTxStatus('Placing order...', 'pending');
+            createBtn.textContent = 'Confirm in wallet...';
+            const tx = await marketWrite.placeOrder(sellToken, buyToken, sellAmount, buyAmount);
+            showTxStatus(`TX submitted: ${shortAddr(tx.hash)}`, 'pending');
+            createBtn.textContent = 'Waiting for confirmation...';
+            const receipt = await tx.wait();
+            showTxStatus(`Order placed! TX: ${shortAddr(receipt.hash)}`, 'success');
+
+            amountEl.value = '';
+            priceEl.value = '';
+            previewEl.textContent = '—';
+            await refreshAll();
+        } catch (e) {
+            console.error('Place order error:', e);
+            const reason = e.reason || e.shortMessage || e.message || 'Transaction failed';
+            showTxStatus(reason, 'error');
+        } finally {
+            txPending = false;
+            createBtn.disabled = false;
+            createBtn.textContent = 'Place Order';
+        }
     });
 
+    // ─── Fill Order ────────────────────────────────────────────────────
+    function toggleFill(orderId) {
+        activeFillId = activeFillId === orderId ? null : orderId;
+        render();
+        if (activeFillId !== null) {
+            setTimeout(() => {
+                const inp = document.getElementById('fill-amount-' + orderId);
+                if (inp) inp.focus();
+            }, 50);
+        }
+    }
+
+    async function doFillOrder(orderId, side) {
+        if (!marketWrite || txPending) return;
+        const inp = document.getElementById('fill-amount-' + orderId);
+        const fillAmount = BigInt(inp ? inp.value : 0);
+        if (fillAmount <= 0n) return;
+
+        // Find the order to determine buyToken for approval
+        const order = [...asks, ...bids].find(o => o.id === orderId);
+        if (!order) return;
+
+        txPending = true;
+        try {
+            // Taker pays buyToken. Calculate approximate buyAmountToPay.
+            const buyAmountApprox = (fillAmount * BigInt(order.buyTotal)) / BigInt(order.sellTotal) + 1n;
+            const buyTokenContract = new ethers.Contract(order.buyToken, ERC20_ABI, signer);
+            const allowance = await buyTokenContract.allowance(userAddress, CONTRACT_ADDRESS);
+            if (allowance < buyAmountApprox) {
+                showTxStatus('Approving token...', 'pending');
+                const approveTx = await buyTokenContract.approve(CONTRACT_ADDRESS, buyAmountApprox);
+                await approveTx.wait();
+            }
+
+            showTxStatus('Filling order...', 'pending');
+            const tx = await marketWrite.fillOrder(orderId, fillAmount);
+            showTxStatus(`TX submitted: ${shortAddr(tx.hash)}`, 'pending');
+            await tx.wait();
+            showTxStatus('Order filled!', 'success');
+            activeFillId = null;
+            await refreshAll();
+        } catch (e) {
+            console.error('Fill order error:', e);
+            showTxStatus(e.reason || e.shortMessage || 'Fill failed', 'error');
+        } finally {
+            txPending = false;
+        }
+    }
+
+    async function doFillOrderFull(orderId) {
+        if (!marketWrite || txPending) return;
+        const order = [...asks, ...bids].find(o => o.id === orderId);
+        if (!order) return;
+
+        txPending = true;
+        try {
+            const buyTokenContract = new ethers.Contract(order.buyToken, ERC20_ABI, signer);
+            const allowance = await buyTokenContract.allowance(userAddress, CONTRACT_ADDRESS);
+            if (allowance < BigInt(order.buyRem)) {
+                showTxStatus('Approving token...', 'pending');
+                const approveTx = await buyTokenContract.approve(CONTRACT_ADDRESS, BigInt(order.buyRem));
+                await approveTx.wait();
+            }
+
+            showTxStatus('Filling entire order...', 'pending');
+            const tx = await marketWrite.fillOrderFull(orderId);
+            showTxStatus(`TX submitted: ${shortAddr(tx.hash)}`, 'pending');
+            await tx.wait();
+            showTxStatus('Order fully filled!', 'success');
+            activeFillId = null;
+            await refreshAll();
+        } catch (e) {
+            console.error('Fill full error:', e);
+            showTxStatus(e.reason || e.shortMessage || 'Fill failed', 'error');
+        } finally {
+            txPending = false;
+        }
+    }
+
+    // ─── Cancel Order ──────────────────────────────────────────────────
+    async function doCancelOrder(orderId) {
+        if (!marketWrite || txPending) return;
+        if (!confirm(`Cancel order #${orderId}?`)) return;
+
+        txPending = true;
+        try {
+            showTxStatus('Cancelling order...', 'pending');
+            const tx = await marketWrite.cancelOrder(orderId);
+            showTxStatus(`TX submitted: ${shortAddr(tx.hash)}`, 'pending');
+            await tx.wait();
+            showTxStatus('Order cancelled!', 'success');
+            await refreshAll();
+        } catch (e) {
+            console.error('Cancel error:', e);
+            showTxStatus(e.reason || e.shortMessage || 'Cancel failed', 'error');
+        } finally {
+            txPending = false;
+        }
+    }
+
+    // ─── Boot ──────────────────────────────────────────────────────────
     updatePreview();
-    render();
-  </script>
+    initProvider();
+
+    // Auto-reconnect if wallet was previously connected
+    if (window.ethereum) {
+        window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+            if (accounts.length > 0) connectWallet();
+        });
+    }
+    </script>
 
     <script defer src="/_vercel/insights/script.js"></script>
 </body>
