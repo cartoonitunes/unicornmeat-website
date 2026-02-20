@@ -279,11 +279,11 @@
                             </div>
                             <select id="side" class="form-select border border-2 border-black rounded-2 mb-2 fs-6 fw-semibold" style="padding:10px;">
                                 <option value="ask">Create Ask (Sell 🦄 for w🍖)</option>
-                                <option value="bid">Create Bid (Sell w🍖 for 🦄)</option>
+                                <option value="bid">Create Bid (Offer w🍖 for 🦄)</option>
                             </select>
                             <label class="fs-7 text-muted" id="amount-label">Amount (🦄)</label>
                             <input id="amount" placeholder="0" aria-label="amount" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
-                            <label class="fs-7 text-muted">Price (w🍖 per 🦄)</label>
+                            <label class="fs-7 text-muted" id="price-label">Price (w🍖 per 🦄)</label>
                             <input id="price" placeholder="0" aria-label="price" class="form-control border border-2 border-black rounded-2 mb-2 fs-6" style="padding:10px;" />
                             <button id="create-order" class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm w-100 fw-bold">Connect Wallet</button>
                             <div class="market-row mt-2"><span class="fs-7 text-muted">Preview</span><strong id="preview" class="fs-7">—</strong></div>
@@ -478,6 +478,7 @@
     const amountEl = document.getElementById('amount');
     const priceEl = document.getElementById('price');
     const amountLabel = document.getElementById('amount-label');
+    const priceLabel = document.getElementById('price-label');
 
     // ─── Helpers ───────────────────────────────────────────────────────
     const fmt = (n) => Number(n).toLocaleString(undefined, { maximumFractionDigits: 3 });
@@ -866,12 +867,22 @@
 
         if (side === 'ask') {
             amountLabel.textContent = 'Amount (🦄)';
+            priceLabel.textContent = 'Price (w🍖 per 🦄)';
+            amountEl.placeholder = '0';
+            priceEl.placeholder = '0';
+            priceEl.step = 'any';
             const total = amount * price;
             previewEl.textContent = `Sell ${fmt(amount)} 🦄 for ${fmt(total)} w🍖 (@ ${fmt(price)} w🍖/🦄)`;
         } else {
-            amountLabel.textContent = 'Amount (w🍖)';
-            const unicorns = amount / price;
-            previewEl.textContent = `Sell ${fmt(amount)} w🍖 for ~${fmt(unicorns)} 🦄 (@ ${fmt(price)} w🍖/🦄)`;
+            amountLabel.textContent = 'Total Offered (w🍖)';
+            priceLabel.textContent = 'Unicorns Wanted (whole number)';
+            amountEl.placeholder = 'e.g. 5000';
+            priceEl.placeholder = 'e.g. 2';
+            priceEl.step = '1';
+            const unicornsWanted = Math.floor(price);
+            if (unicornsWanted <= 0) { previewEl.textContent = 'Enter at least 1 unicorn'; return; }
+            const implied = amount / unicornsWanted;
+            previewEl.textContent = `Offer ${fmt(amount)} w🍖 for ${fmt(unicornsWanted)} 🦄 (implied ${fmt(implied)} w🍖/🦄)`;
         }
     }
 
@@ -902,15 +913,16 @@
             sellAmount = BigInt(Math.floor(amount)); // 0 decimals
             buyAmount = BigInt(Math.floor(amount * price * 1000)); // 3 decimals
         } else {
-            // Sell W_MEAT for UNICORN
-            sellToken = W_MEAT;
-            buyToken = UNICORN;
-            sellAmount = BigInt(Math.floor(amount * 1000)); // 3 decimals
-            buyAmount = BigInt(Math.floor(amount / price)); // 0 decimals
-            if (buyAmount === 0n) {
-                showTxStatus('Amount too small for at least 1 🦄', 'error');
+            // Bid UX: amount = total w🍖 offered, price field = unicorns wanted (whole)
+            const unicornsWanted = Math.floor(price);
+            if (!Number.isInteger(unicornsWanted) || unicornsWanted <= 0) {
+                showTxStatus('Unicorns wanted must be a whole number ≥ 1', 'error');
                 return;
             }
+            sellToken = W_MEAT;
+            buyToken = UNICORN;
+            sellAmount = BigInt(Math.floor(amount * 1000)); // total w🍖 offered, 3 decimals
+            buyAmount = BigInt(unicornsWanted); // whole unicorns, 0 decimals
         }
 
         txPending = true;
