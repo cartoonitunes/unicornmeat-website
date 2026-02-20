@@ -177,56 +177,44 @@
     }
     details.method summary {
       cursor:pointer;
-      font-weight:800;
-      padding:10px;
+      font-weight:700;
+      font-size:12px;
+      padding:8px 10px;
       background:linear-gradient(135deg,#ffe0ec,#ffd0df);
       border-bottom:1px dashed #bbb;
     }
+    details.method, .card { max-width:100%; overflow:hidden; }
     pre.code {
       margin:0;
-      padding:12px;
-      background:#111;
-      color:#f7f7f7;
+      padding:10px;
+      background:#101318;
+      color:#e8edf3;
       overflow:auto;
-      font-size:12px;
-      line-height:1.5;
+      max-width:100%;
+      white-space:pre;
+      font-size:11px;
+      line-height:1.45;
     }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      position: sticky;
-      bottom: 0;
-      padding: 8px 0;
-      background: linear-gradient(to top, var(--bg), rgba(255,247,251,.65));
-    }
-    .tab {
-      flex: 1;
-      text-align: center;
-      border: 2px solid #000;
-      border-radius: 10px;
-      padding: 8px;
-      background: #fff;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    @media (min-width: 980px) { .tabs { display: none; } }
+    .kw{color:#ff7ab6;font-weight:700;} .fn{color:#7dcfff;} .var{color:#c3e88d;} .num{color:#f7c873;} .addr{color:#82aaff;}
   </style>
 </head>
 <body>
   <main class="wrap">
     <nav class="topnav" aria-label="Unicorn Meat main navigation">
       <div>
-        <a href="/">🦄 Unicorn Meat</a>
+        <a href="/"><img src="/assets/images/home-two/unicornmeat-logo.webp" alt="Unicorn Meat" style="height:30px;vertical-align:middle;margin-right:8px;"> </a>
+        <a href="/#about">About</a>
+        <a href="/#trading">Buy 🍖</a>
         <a href="/how-to-buy">How to Buy</a>
-        <a href="/grinder-association">Grinder</a>
+        <a href="/#wrap">Wrap 🦄🍖</a>
+        <a href="/#join-herd">🦄 Herd</a>
+        <a href="/grinder-association">🦄🍖 Grinder</a>
       </div>
-      <div><a href="https://etherscan.io/token/0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7">Contract History</a></div>
+      <div><a href="/">Unicorn Meat</a></div>
     </nav>
 
     <section class="hero">
-      <h1>🦄 Unicorn Market (Mock Preview)</h1>
+      <h1>🦄 Unicorn Market</h1>
       <p>Onchain orderbook UX concept for <strong>🦄 ⇄ w🍖</strong></p>
       <p class="small" style="margin-top:8px;color:#222;">Historical context: this market continues the lineage from early 2016 Unicorn grinder experiments, bringing transparent bids, asks, and fills to legacy Ethereum token contracts.</p>
     </section>
@@ -268,39 +256,33 @@
         <p class="small" style="margin-bottom:8px;">Approvals: maker approves token before <strong>createOrder</strong>; taker approves counter-token before <strong>fillOrder</strong>. In production we surface allowance checks inline.</p>
         <details class="method">
           <summary>placeOrder(sellToken, buyToken, sellAmount, buyAmount)</summary>
-          <pre class="code">// maker approval required first
-IERC20(sellToken).approve(market, sellAmount);
-market.placeOrder(sellToken, buyToken, sellAmount, buyAmount);</pre>
+          <pre class="code"><span class="fn">IERC20</span>(<span class="var">sellToken</span>).<span class="fn">approve</span>(<span class="var">market</span>, <span class="var">sellAmount</span>);
+<span class="var">market</span>.<span class="fn">placeOrder</span>(<span class="var">sellToken</span>, <span class="var">buyToken</span>, <span class="var">sellAmount</span>, <span class="var">buyAmount</span>);</pre>
         </details>
         <details class="method">
           <summary>fillOrder(orderId, sellAmountToTake)</summary>
-          <pre class="code">// taker approval required first (for buyToken)
-IERC20(order.buyToken).approve(market, buyAmountToPay);
-market.fillOrder(orderId, sellAmountToTake);</pre>
+          <pre class="code"><span class="fn">IERC20</span>(<span class="var">order.buyToken</span>).<span class="fn">approve</span>(<span class="var">market</span>, <span class="var">buyAmountToPay</span>);
+<span class="var">market</span>.<span class="fn">fillOrder</span>(<span class="var">orderId</span>, <span class="var">sellAmountToTake</span>);</pre>
         </details>
         <details class="method">
           <summary>cancelOrder(orderId)</summary>
-          <pre class="code">// maker can cancel open order and recover remaining escrow
-market.cancelOrder(orderId);</pre>
+          <pre class="code"><span class="var">market</span>.<span class="fn">cancelOrder</span>(<span class="var">orderId</span>);</pre>
         </details>
         <p class="small" style="margin-top:8px;">Verified contract code (when live): <a href="#" id="etherscan-link">Etherscan link</a></p>
       </article>
     </section>
 
-    <nav class="tabs" aria-label="Mobile tabs">
-      <div class="tab">Trade</div>
-      <div class="tab">Orderbook</div>
-      <div class="tab">Ledger</div>
-      <div class="tab">My Orders</div>
-    </nav>
   </main>
 
   <footer class="site-footer" style="margin-top:12px;">
     <div class="footer-grid">
       <div>
-        <a href="/">Home</a>
+        <a href="/#about">About</a>
+        <a href="/#trading">Buy 🍖</a>
         <a href="/how-to-buy">How to Buy</a>
-        <a href="/grinder-association">Grinder</a>
+        <a href="/#wrap">Wrap 🦄🍖</a>
+        <a href="/#join-herd">🦄 Herd</a>
+        <a href="/grinder-association">🦄🍖 Grinder</a>
       </div>
       <div class="small">Unicorn Market mock · UI preview before onchain launch</div>
     </div>
