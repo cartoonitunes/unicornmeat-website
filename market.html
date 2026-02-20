@@ -1,73 +1,176 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UnicornMarket Mock</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UnicornMarket — Mock Preview</title>
+  <meta name="description" content="UnicornMarket mock preview — onchain orderbook UX for 🦄 and w🍖." />
   <style>
-    body{margin:0;font-family:Inter,system-ui;background:#0b0f14;color:#e7edf5}
-    .wrap{max-width:1200px;margin:0 auto;padding:16px}
-    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .pill{background:#1a2230;border:1px solid #2c3950;padding:6px 10px;border-radius:999px;color:#9ab0ce;font-size:12px}
-    .grid{display:grid;gap:12px}
-    @media(min-width:900px){.grid{grid-template-columns:1fr 1.2fr 1fr}}
-    .card{background:#121925;border:1px solid #263247;border-radius:12px;padding:12px}
-    h3{margin:0 0 10px;font-size:14px;color:#9ab0ce;text-transform:uppercase;letter-spacing:.06em}
-    .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2a3d;font-size:13px}
-    .row:last-child{border-bottom:0}
-    input,select,button{width:100%;padding:10px;border-radius:10px;border:1px solid #31415e;background:#0f1520;color:#e7edf5;margin:6px 0}
-    button{background:linear-gradient(90deg,#ff8a3d,#ffb347);color:#1b1308;font-weight:700;cursor:pointer}
-    .tabs{display:flex;gap:8px;position:sticky;bottom:0;background:#0b0f14;padding:10px 0}
-    .tab{flex:1;text-align:center;background:#161f2c;border:1px solid #2c3a53;border-radius:10px;padding:8px;font-size:12px}
-    @media(min-width:900px){.tabs{display:none}}
-    .ledger{max-height:290px;overflow:auto}
-    .green{color:#57d89a}.red{color:#ff7a7a}
+    :root {
+      --bg: #fff7fb;
+      --card: #ffffff;
+      --ink: #111111;
+      --muted: #555;
+      --pink: #ffc0cb;
+      --pink2: #ffb3d1;
+      --line: #000;
+      --ask: #d44;
+      --bid: #0f8a5f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 20% 0%, #ffd9e6 0%, var(--bg) 45%);
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 18px; }
+    .hero {
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--pink2), var(--pink));
+      box-shadow: 6px 6px 0 #000;
+      margin-bottom: 14px;
+    }
+    .hero h1 { margin: 0 0 6px; font-size: 24px; }
+    .hero p { margin: 0; font-weight: 600; }
+    .badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 10px;
+      border: 2px solid #000;
+      border-radius: 999px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .grid { display: grid; gap: 12px; }
+    @media (min-width: 980px) { .grid { grid-template-columns: 1fr 1.2fr 1fr; } }
+
+    .card {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 4px 4px 0 #000;
+      padding: 12px;
+    }
+    h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .small { font-size: 12px; color: var(--muted); }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #ddd;
+      font-size: 13px;
+    }
+    .row:last-child { border-bottom: 0; }
+    .ask { color: var(--ask); font-weight: 700; }
+    .bid { color: var(--bid); font-weight: 700; }
+
+    select, input, button {
+      width: 100%;
+      border: 2px solid #000;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 6px 0;
+      font-size: 14px;
+      background: #fff;
+      color: #111;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffb3d1, #ffc0cb);
+    }
+    .btn-secondary { background: #f4f4f4; }
+
+    .ledger { max-height: 280px; overflow: auto; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      position: sticky;
+      bottom: 0;
+      padding: 8px 0;
+      background: linear-gradient(to top, var(--bg), rgba(255,247,251,.65));
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      border: 2px solid #000;
+      border-radius: 10px;
+      padding: 8px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    @media (min-width: 980px) { .tabs { display: none; } }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="head">
-      <h2>🦄 UnicornMarket (Mock)</h2>
-      <span class="pill">Primary Pair: Unicorn ⇄ wMEAT</span>
-    </div>
-    <div class="grid">
-      <section class="card">
+  <main class="wrap">
+    <section class="hero">
+      <h1>🦄 UnicornMarket (Mock Preview)</h1>
+      <p>Onchain orderbook UX concept for <strong>🦄 ⇄ w🍖</strong></p>
+      <span class="badge">Primary pair: Unwrapped Unicorn and Wrapped Unicorn Meat</span>
+    </section>
+
+    <section class="grid">
+      <article class="card">
         <h3>Trade Ticket</h3>
-        <select><option>Create Ask (Sell Unicorn for wMEAT)</option><option>Create Bid (Sell wMEAT for Unicorn)</option></select>
-        <input value="2" />
-        <input value="10000" />
+        <select>
+          <option>Create Ask (Sell 🦄 for w🍖)</option>
+          <option>Create Bid (Sell w🍖 for 🦄)</option>
+        </select>
+        <input value="2" aria-label="amount" />
+        <input value="10000" aria-label="price" />
         <button>Create Onchain Order</button>
-        <div class="row"><span>Preview Price</span><strong>1 Unicorn = 5,000 wMEAT</strong></div>
-      </section>
+        <div class="row"><span class="small">Preview Price</span><strong>1 🦄 = 5,000 w🍖</strong></div>
+      </article>
 
-      <section class="card">
+      <article class="card">
         <h3>Orderbook</h3>
-        <div class="row"><strong>Asks (Sell Unicorn)</strong><strong>wMEAT/UNI</strong></div>
-        <div class="row"><span>2 UNI</span><span class="red">5,200</span></div>
-        <div class="row"><span>4 UNI</span><span class="red">5,100</span></div>
-        <div class="row"><span>1 UNI</span><span class="red">5,000</span></div>
-        <div class="row"><strong>Bids (Sell wMEAT)</strong><strong>wMEAT/UNI</strong></div>
-        <div class="row"><span>7,500 wMEAT</span><span class="green">4,900</span></div>
-        <div class="row"><span>12,000 wMEAT</span><span class="green">4,850</span></div>
-      </section>
+        <div class="row"><strong>Asks (sell 🦄)</strong><strong>w🍖 / 🦄</strong></div>
+        <div class="row"><span>2 🦄</span><span class="ask">5,200</span></div>
+        <div class="row"><span>4 🦄</span><span class="ask">5,100</span></div>
+        <div class="row"><span>1 🦄</span><span class="ask">5,000</span></div>
 
-      <section class="card">
+        <div class="row" style="margin-top:6px"><strong>Bids (sell w🍖)</strong><strong>w🍖 / 🦄</strong></div>
+        <div class="row"><span>7,500 w🍖</span><span class="bid">4,900</span></div>
+        <div class="row"><span>12,000 w🍖</span><span class="bid">4,850</span></div>
+      </article>
+
+      <article class="card">
         <h3>Ledger + My Orders</h3>
         <div class="ledger">
-          <div class="row"><span>OrderFilled #184</span><span>1 UNI ↔ 5,000 wMEAT</span></div>
-          <div class="row"><span>OrderCreated #185</span><span>3 UNI ask @ 5,100</span></div>
-          <div class="row"><span>OrderCancelled #181</span><span>remaining 2 UNI refunded</span></div>
-          <div class="row"><span>My Open #186</span><span>2 UNI ask @ 5,300</span></div>
+          <div class="row"><span>OrderFilled #184</span><span>1 🦄 ↔ 5,000 w🍖</span></div>
+          <div class="row"><span>OrderCreated #185</span><span>3 🦄 ask @ 5,100</span></div>
+          <div class="row"><span>OrderCancelled #181</span><span>remaining 2 🦄 refunded</span></div>
+          <div class="row"><span>My Open #186</span><span>2 🦄 ask @ 5,300</span></div>
         </div>
-        <button style="margin-top:10px;background:#2a3952;color:#d3e2ff">Cancel Selected Order</button>
-        <h3 style="margin-top:12px">Contract Transparency</h3>
-        <div style="font-size:12px;color:#9ab0ce">Order struct: maker, sellToken, buyToken, sellAmountRemaining, buyAmountRemaining, status.</div>
-      </section>
-    </div>
+        <button class="btn-secondary" style="margin-top:10px">Cancel Selected Order</button>
 
-    <div class="tabs">
-      <div class="tab">Trade</div><div class="tab">Orderbook</div><div class="tab">Ledger</div><div class="tab">My Orders</div>
-    </div>
-  </div>
+        <h3 style="margin-top:12px">Contract Transparency</h3>
+        <p class="small">Decoded order fields (mock): maker, sellToken, buyToken, sellAmountRemaining, buyAmountRemaining, status.</p>
+      </article>
+    </section>
+
+    <nav class="tabs" aria-label="Mobile tabs">
+      <div class="tab">Trade</div>
+      <div class="tab">Orderbook</div>
+      <div class="tab">Ledger</div>
+      <div class="tab">My Orders</div>
+    </nav>
+  </main>
 </body>
 </html>
