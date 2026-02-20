@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UnicornMarket — Mock Preview</title>
+  <title>Unicorn Market — Mock Preview</title>
   <meta name="description" content="UnicornMarket mock preview — onchain orderbook UX for 🦄 and w🍖." />
   <style>
     :root {
@@ -155,6 +155,43 @@
       margin: 6px 0;
     }
 
+
+    .topnav, .site-footer {
+      border: 2px solid #000;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 4px 4px 0 #000;
+      padding: 10px 12px;
+    }
+    .topnav { margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .topnav a, .site-footer a { color:#111; font-weight:700; text-decoration:none; margin-right:12px; }
+    .topnav a:hover, .site-footer a:hover { text-decoration:underline; }
+    .footer-grid { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12px; }
+
+    details.method {
+      border: 2px solid #000;
+      border-radius: 10px;
+      margin: 8px 0;
+      background:#fff;
+      overflow:hidden;
+    }
+    details.method summary {
+      cursor:pointer;
+      font-weight:800;
+      padding:10px;
+      background:linear-gradient(135deg,#ffe0ec,#ffd0df);
+      border-bottom:1px dashed #bbb;
+    }
+    pre.code {
+      margin:0;
+      padding:12px;
+      background:#111;
+      color:#f7f7f7;
+      overflow:auto;
+      font-size:12px;
+      line-height:1.5;
+    }
+
     .tabs {
       display: flex;
       gap: 8px;
@@ -179,10 +216,19 @@
 </head>
 <body>
   <main class="wrap">
+    <nav class="topnav" aria-label="Unicorn Meat main navigation">
+      <div>
+        <a href="/">🦄 Unicorn Meat</a>
+        <a href="/how-to-buy">How to Buy</a>
+        <a href="/grinder-association">Grinder</a>
+      </div>
+      <div><a href="https://etherscan.io/token/0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7">Contract History</a></div>
+    </nav>
+
     <section class="hero">
-      <h1>🦄 UnicornMarket (Mock Preview)</h1>
+      <h1>🦄 Unicorn Market (Mock Preview)</h1>
       <p>Onchain orderbook UX concept for <strong>🦄 ⇄ w🍖</strong></p>
-      <span class="badge">Primary pair: Unwrapped Unicorn and Wrapped Unicorn Meat</span>
+      <p class="small" style="margin-top:8px;color:#222;">Historical context: this market continues the lineage from early 2016 Unicorn grinder experiments, bringing transparent bids, asks, and fills to legacy Ethereum token contracts.</p>
     </section>
 
     <section class="grid">
@@ -219,7 +265,25 @@
         </div>
 
         <h3 style="margin-top:12px">Contract Transparency</h3>
-        <p class="small">Decoded order fields (mock): maker, sellToken, buyToken, sellAmountRemaining, buyAmountRemaining, status.</p>
+        <p class="small" style="margin-bottom:8px;">Approvals: maker approves token before <strong>createOrder</strong>; taker approves counter-token before <strong>fillOrder</strong>. In production we surface allowance checks inline.</p>
+        <details class="method">
+          <summary>placeOrder(sellToken, buyToken, sellAmount, buyAmount)</summary>
+          <pre class="code">// maker approval required first
+IERC20(sellToken).approve(market, sellAmount);
+market.placeOrder(sellToken, buyToken, sellAmount, buyAmount);</pre>
+        </details>
+        <details class="method">
+          <summary>fillOrder(orderId, sellAmountToTake)</summary>
+          <pre class="code">// taker approval required first (for buyToken)
+IERC20(order.buyToken).approve(market, buyAmountToPay);
+market.fillOrder(orderId, sellAmountToTake);</pre>
+        </details>
+        <details class="method">
+          <summary>cancelOrder(orderId)</summary>
+          <pre class="code">// maker can cancel open order and recover remaining escrow
+market.cancelOrder(orderId);</pre>
+        </details>
+        <p class="small" style="margin-top:8px;">Verified contract code (when live): <a href="#" id="etherscan-link">Etherscan link</a></p>
       </article>
     </section>
 
@@ -230,6 +294,17 @@
       <div class="tab">My Orders</div>
     </nav>
   </main>
+
+  <footer class="site-footer" style="margin-top:12px;">
+    <div class="footer-grid">
+      <div>
+        <a href="/">Home</a>
+        <a href="/how-to-buy">How to Buy</a>
+        <a href="/grinder-association">Grinder</a>
+      </div>
+      <div class="small">Unicorn Market mock · UI preview before onchain launch</div>
+    </div>
+  </footer>
 
   <script>
     const state = {
