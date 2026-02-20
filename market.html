@@ -93,7 +93,11 @@
     }
     .btn-secondary { background: #f4f4f4; }
 
-    .ledger { max-height: 280px; overflow: auto; }
+    .ledger { max-height: 220px; overflow: auto; }
+    .my-orders { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
+    .my-order-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed #eee; font-size:12px; }
+    .my-order-row:last-child { border-bottom:0; }
+    .cancel-btn { width:auto; margin:0; padding:6px 8px; font-size:11px; border-radius:8px; background:#f4f4f4; font-weight:700; }
 
     .depth-wrap {
       border: 2px solid #000;
@@ -209,7 +213,10 @@
       <article class="card">
         <h3>Ledger + My Orders</h3>
         <div class="ledger" id="ledger"></div>
-        <button class="btn-secondary" style="margin-top:10px" id="cancel-last">Cancel Last My Order</button>
+        <div class="my-orders">
+          <h3 style="margin-bottom:6px">My Open Orders</h3>
+          <div id="my-orders"></div>
+        </div>
 
         <h3 style="margin-top:12px">Contract Transparency</h3>
         <p class="small">Decoded order fields (mock): maker, sellToken, buyToken, sellAmountRemaining, buyAmountRemaining, status.</p>
@@ -242,12 +249,14 @@
       ],
       mine: []
     };
+    let nextOrderId = 200;
 
     const asksEl = document.getElementById('asks');
     const bidsEl = document.getElementById('bids');
     const ledgerEl = document.getElementById('ledger');
     const depthEl = document.getElementById('depth');
     const statsEl = document.getElementById('stats');
+    const myOrdersEl = document.getElementById('my-orders');
 
     const fmt = (n) => Number(n).toLocaleString();
 
@@ -291,9 +300,23 @@
           </div>`).join('')}
       `;
 
-      ledgerEl.innerHTML = [...state.mine.map(x=>`(mine) ${x}`), ...state.ledger]
+      ledgerEl.innerHTML = [...state.mine.filter(o=>o.active).map(o=>`(mine) OrderCreated #${o.id} · ${o.label}`), ...state.ledger]
         .slice(-12).reverse()
         .map(line => `<div class="row"><span>${line}</span></div>`).join('');
+
+      const openMine = state.mine.filter(o => o.active);
+      myOrdersEl.innerHTML = openMine.length
+        ? openMine.map(o => `
+          <div class="my-order-row">
+            <span>#${o.id} · ${o.label}</span>
+            <button class="cancel-btn" data-cancel-id="${o.id}">Cancel</button>
+          </div>
+        `).join('')
+        : '<p class="small" style="margin:0">No open orders yet.</p>';
+
+      myOrdersEl.querySelectorAll('[data-cancel-id]').forEach(btn => {
+        btn.addEventListener('click', () => cancelOrderById(Number(btn.dataset.cancelId)));
+      });
     }
 
     const sideEl = document.getElementById('side');
@@ -312,6 +335,20 @@
 
     [sideEl, amountEl, priceEl].forEach(el => el.addEventListener('input', updatePreview));
 
+    function cancelOrderById(orderId) {
+      const order = state.mine.find(o => o.id === orderId && o.active);
+      if (!order) return;
+      order.active = false;
+
+      // Remove one matching level from mock book for visual feedback.
+      const arr = order.side === 'ask' ? state.asks : state.bids;
+      const idx = arr.findIndex(x => x.amount === order.amount && x.price === order.price);
+      if (idx >= 0) arr.splice(idx, 1);
+
+      state.ledger.push(`OrderCancelled #${order.id} · ${order.label} (mock)`);
+      render();
+    }
+
     document.getElementById('create-order').addEventListener('click', () => {
       const side = sideEl.value;
       const amount = Number(amountEl.value || 0);
@@ -321,17 +358,12 @@
       if (side === 'ask') state.asks.push({ amount, price });
       else state.bids.push({ amount, price });
 
-      const log = side === 'ask'
-        ? `OrderCreated #${Math.floor(Math.random()*900+100)} · ${fmt(amount)} 🦄 ask @ ${fmt(price)}`
-        : `OrderCreated #${Math.floor(Math.random()*900+100)} · ${fmt(amount)} w🍖 bid @ ${fmt(price)}`;
+      const id = nextOrderId++;
+      const label = side === 'ask'
+        ? `${fmt(amount)} 🦄 ask @ ${fmt(price)}`
+        : `${fmt(amount)} w🍖 bid @ ${fmt(price)}`;
 
-      state.mine.push(log);
-      render();
-    });
-
-    document.getElementById('cancel-last').addEventListener('click', () => {
-      const last = state.mine.pop();
-      if (last) state.ledger.push(last.replace('OrderCreated', 'OrderCancelled') + ' (mock)');
+      state.mine.push({ id, side, amount, price, label, active: true });
       render();
     });
 
