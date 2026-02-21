@@ -44,6 +44,9 @@ The original Unicorn Meat token predates the ERC-20 standard. To make it compati
 - DexScreener: https://dexscreener.com/ethereum/0xd835c3e83d9760a8fa1aaabfb9a5a3e363bec995
 - Twitter/X: https://x.com/UnicornMeatETH
 
+## Token List
+- Token List (Uniswap standard): https://unicornmeateth.com/tokenlist.json
+
 ## Contact
 
 For inquiries about Unicorn Meat, visit the website or reach out via the community channels listed above.
