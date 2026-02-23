@@ -2149,8 +2149,9 @@
                             <p class="fs-4 xl:fs-3">Built by the Ethereum Foundation in March 2016.<br>Before ERC-20 was finalized. Before Uniswap. Before DeFi.</p>
                             <div class="hstack gap-2 justify-center flex-wrap">
                                 <a class="btn btn-md lg:btn-xl xl:btn-2xl btn-primary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm -rotate-2 hover:rotate-0"
-                                    href="#trading">
-                                    <span>Buy on Uniswap 🦄</span>
+                                    href="#trading"
+                                    style="max-width: 100%;">
+                                    <span style="font-size: clamp(0.78rem, 3.5vw, 1.15rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">Buy on Uniswap 🦄</span>
                                 </a>
                                 <a class="btn btn-md lg:btn-xl xl:btn-2xl btn-secondary px-3 mt-1 sm:mt-2 border border-2 border-black contrast-shadow-sm rotate-2 hover:rotate-0"
                                     href="#about">
@@ -2239,11 +2240,12 @@
         <!-- Live Price Ticker -->
         <div style="padding: 12px 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);">
           <div class="container">
-            <div id="price-ticker-um" style="display: flex; justify-content: center; align-items: center; gap: 32px; flex-wrap: wrap; font-family: monospace; font-size: 0.95rem; color: #e0e0e0;">
+            <div id="price-ticker-um" style="display: flex; justify-content: center; align-items: center; gap: 24px; flex-wrap: wrap; font-family: monospace; font-size: 0.95rem; color: #e0e0e0;">
               <span>🍖 <strong>w🍖</strong> <span id="ticker-price-um" style="color: #4fc3f7;">—</span></span>
               <span>📊 24h Vol: <span id="ticker-volume-um" style="color: #81c784;">—</span></span>
-              <span>💧 Liq: <span id="ticker-liquidity-um" style="color: #b39ddb;">—</span></span>
-              <span style="color: #9e9e9e; font-size: 0.8rem;">via DEXScreener</span>
+              <span>📈 Mkt Cap: <span id="ticker-mcap-um" style="color: #b39ddb;">—</span></span>
+              <span>🕐 24h: <span id="ticker-change-um" style="color: #e0e0e0;">—</span></span>
+              <span style="color: #9e9e9e; font-size: 0.8rem;">via CoinGecko</span>
             </div>
           </div>
         </div>
@@ -2251,20 +2253,29 @@
         (function() {
           async function updateTickerUM() {
             try {
-              const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/0xDFA286329DcA21C3dC0F6b0Ba9C61e44209c97AA');
+              const res = await fetch('https://api.coingecko.com/api/v3/coins/unicorn-meat?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false');
+              if (!res.ok) return;
               const data = await res.json();
-              if (!data.pairs || !data.pairs.length) {
-                document.getElementById('ticker-price-um').textContent = 'No DEX pairs yet';
-                return;
+              const md = data.market_data;
+              if (!md) return;
+
+              const price = md.current_price?.usd;
+              const vol   = md.total_volume?.usd;
+              const mcap  = md.market_cap?.usd;
+              const chg   = md.price_change_percentage_24h;
+
+              if (price != null) document.getElementById('ticker-price-um').textContent = '$' + price.toFixed(price < 0.01 ? 6 : 4);
+              if (vol   != null) document.getElementById('ticker-volume-um').textContent = '$' + Number(Math.round(vol)).toLocaleString();
+              if (mcap  != null) document.getElementById('ticker-mcap-um').textContent  = '$' + Number(Math.round(mcap)).toLocaleString();
+              if (chg   != null) {
+                const el = document.getElementById('ticker-change-um');
+                el.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+                el.style.color = chg >= 0 ? '#81c784' : '#ef9a9a';
               }
-              const p = data.pairs[0];
-              document.getElementById('ticker-price-um').textContent = '$' + parseFloat(p.priceUsd).toFixed(4);
-              document.getElementById('ticker-volume-um').textContent = '$' + Number(p.volume.h24).toLocaleString();
-              document.getElementById('ticker-liquidity-um').textContent = '$' + Number(p.liquidity.usd).toLocaleString();
             } catch(e) { console.log('Ticker error:', e); }
           }
           updateTickerUM();
-          setInterval(updateTickerUM, 60000);
+          setInterval(updateTickerUM, 120000); // CoinGecko rate limit — 2 min refresh
         })();
         </script>
 
