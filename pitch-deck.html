@@ -357,6 +357,67 @@
     }
 
     /* ===========================================
+       INLINE LINKS
+    =========================================== */
+    a.inline {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-color: rgba(200,156,255,0.35);
+      text-underline-offset: 3px;
+      transition: color 0.2s, text-decoration-color 0.2s;
+    }
+
+    a.inline:hover {
+      color: var(--accent2);
+      text-decoration-color: var(--accent2);
+    }
+
+    /* ===========================================
+       FACT LIST — numbered, clearly separated points
+    =========================================== */
+    .fact-list {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.5rem, 1.2vw, 1rem);
+    }
+
+    .fact {
+      display: grid;
+      grid-template-columns: clamp(28px, 4vw, 40px) 1fr;
+      gap: 0 clamp(0.6rem, 1.2vw, 1rem);
+      align-items: start;
+      padding-bottom: clamp(0.5rem, 1.2vw, 1rem);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .fact:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .fact-num {
+      font-family: var(--font-head);
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      font-weight: 700;
+      color: var(--accent2);
+      line-height: 1.3;
+      opacity: 0.6;
+      padding-top: 0.05em;
+    }
+
+    .fact-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15em;
+    }
+
+    .fact-body p {
+      font-size: var(--body-size);
+      line-height: 1.6;
+      color: rgba(240,232,255,0.88);
+    }
+
+    /* ===========================================
        LINKS
     =========================================== */
     .link-row {
@@ -535,12 +596,24 @@
     <span class="tag reveal">Origin Story</span>
     <h2 class="reveal">The Unicorns 🦄</h2>
     <div class="divider reveal"></div>
-    <ul class="bullets">
-      <li class="reveal">In <strong>February 2016</strong> — six months after mainnet launch — the Ethereum Foundation launched a fundraising initiative.</li>
-      <li class="reveal">EF leader <strong class="accent">Alex Van de Sande (avsa)</strong> deployed two contracts: the Foundation TipJar and <strong>Unicorns 🦄</strong> — a 0-decimal non-standard ERC-20.</li>
-      <li class="reveal">Donate <strong>2.014 ETH</strong> (~$20 at the time) to the TipJar → receive 1 Unicorn. To date, <strong class="gold">2,717</strong> have ever been created.</li>
-      <li class="reveal">avsa later raised the price to <strong>42,329 ETH</strong> — a "beeple" — after the Everydays: The First 5000 Days sale.</li>
-    </ul>
+    <div class="fact-list">
+      <div class="fact reveal">
+        <span class="fact-num">01</span>
+        <div class="fact-body"><p>In <strong>February 2016</strong> — six months after mainnet launch — the Ethereum Foundation launched a fundraising initiative to support ongoing development.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">02</span>
+        <div class="fact-body"><p>EF leader <a class="inline" href="https://vandesande.design/" target="_blank">Alex Van de Sande (avsa)</a> deployed two contracts: the <a class="inline" href="https://etherscan.io/address/0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359" target="_blank">Foundation TipJar</a> and <a class="inline" href="https://etherscan.io/token/0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7" target="_blank">Unicorns 🦄</a> — a 0-decimal non-standard ERC-20.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">03</span>
+        <div class="fact-body"><p>Donating <strong>2.014 ETH</strong> (~$20 at the time) to the TipJar — as instructed on <a class="inline" href="https://web.archive.org/web/20160405014834/ethereum.org/donate" target="_blank">ethereum.org/donate</a> — minted 1 Unicorn. To date, only <strong class="gold">2,717</strong> have ever been created.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">04</span>
+        <div class="fact-body"><p>avsa later <a class="inline" href="https://x.com/avsa/status/1410315404107472902" target="_blank">raised the price to 42,329 ETH</a> — a "beeple" — after the Everydays: The First 5000 Days sale.</p></div>
+      </div>
+    </div>
   </div>
   <span class="slide-num">02 / 10</span>
 </section>
@@ -553,12 +626,24 @@
     <span class="tag reveal">Origin Story</span>
     <h2 class="reveal">The Grinder 🍖</h2>
     <div class="divider reveal"></div>
-    <ul class="bullets">
-      <li class="reveal">A month later, avsa deployed the <strong>Unicorn Meat Grinder Association DAO</strong> — allowing any Unicorn holder to "grind" Unicorns into <strong class="accent2">Unicorn Meat 🍖</strong>, a 3-decimal non-standard ERC-20.</li>
-      <li class="reveal">Demonstrated multiple on-chain firsts: a <strong>DAO with quadratic voting</strong>, token swaps, and token mutations.</li>
-      <li class="reveal">Unicorns and Unicorn Meat are the <strong class="gold">only coin tokens ever created and announced by Ethereum</strong> — likely the first on-chain April Fool's joke.</li>
-      <li class="reveal">Only <strong>7 Unicorns</strong> have been ground, producing ~9,000 Unicorn Meat tokens.</li>
-    </ul>
+    <div class="fact-list">
+      <div class="fact reveal">
+        <span class="fact-num">01</span>
+        <div class="fact-body"><p>A month later, avsa deployed the <a class="inline" href="https://etherscan.io/address/0xc7e9ddd5358e08417b1c88ed6f1a73149beeaa32" target="_blank">Unicorn Meat Grinder Association DAO</a> — allowing any Unicorn holder to "grind" their Unicorns into <a class="inline" href="https://etherscan.io/address/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A" target="_blank">Unicorn Meat 🍖</a>, a 3-decimal non-standard ERC-20.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">02</span>
+        <div class="fact-body"><p>It demonstrated multiple on-chain firsts: a <a class="inline" href="https://gist.github.com/alexvandesande/eca0b87da89ab28fa50c" target="_blank">DAO with quadratic voting</a>, token swaps, and token mutations — all in 2016.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">03</span>
+        <div class="fact-body"><p>Unicorns and Unicorn Meat are the <strong class="gold">only coin tokens ever created and <a class="inline" href="https://x.com/ethereum/status/715821110722433024" target="_blank" style="color:var(--gold);text-decoration-color:rgba(240,192,96,0.4)">announced by Ethereum</a></strong> — and likely the first on-chain April Fool's joke.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">04</span>
+        <div class="fact-body"><p>Only <strong>7 Unicorns</strong> have ever been ground, producing approximately <strong>9,000 Unicorn Meat</strong> tokens. The rarity is structural and permanent.</p></div>
+      </div>
+    </div>
   </div>
   <span class="slide-num">03 / 10</span>
 </section>
@@ -571,12 +656,24 @@
     <span class="tag reveal">The Takeover</span>
     <h2 class="reveal">The Coup ⚔️</h2>
     <div class="divider reveal"></div>
-    <ul class="bullets">
-      <li class="reveal">A week after launch, <strong class="accent">Piper Merriam</strong> — a core Ethereum developer — passed a DAO proposal to seize control of the DAO and take <strong>5 ETH</strong> for themselves.</li>
-      <li class="reveal">avsa, Piper, Vitalik, and the community laughed — the community called it the "coup." It became Ethereum lore.</li>
-      <li class="reveal">In <strong>July 2025</strong>, a Unicorn holder repeated the move: passed a proposal, transferred DAO ownership, minted a supply of <strong>100 million</strong>, renounced the contract, and wrapped the token to be tradable on-chain.</li>
-      <li class="reveal">The small team has since focused on: improving the Grinder DAO and building the <span class="gold"><strong>Unicorn Killers Hall of Fame</strong></span>.</li>
-    </ul>
+    <div class="fact-list">
+      <div class="fact reveal">
+        <span class="fact-num">01</span>
+        <div class="fact-body"><p>A week after launch, <a class="inline" href="https://x.com/pipermerriam/status/718546708641124353" target="_blank">Piper Merriam</a> — a core Ethereum developer — passed a DAO proposal to seize control and take 5 ETH for themselves. avsa, Vitalik, and the community laughed. Ethereum lore was born.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">02</span>
+        <div class="fact-body"><p>In July 2025, <a class="inline" href="https://x.com/cartoonitunes/status/1942244684513923330" target="_blank">a Unicorn holder repeated the move</a>: passed a proposal, transferred DAO ownership, <a class="inline" href="https://etherscan.io/tx/0x7e10256cb3be5c28170592724594f223f299911730b84ce5a94834c84e279823" target="_blank">minted 100 million tokens</a>, <a class="inline" href="https://etherscan.io/tx/0x974a2c588199c1d245d704b9a184aee66c19f3c056afec869bd786f94e75b71c" target="_blank">renounced the contract</a>, and wrapped it for trading.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">03</span>
+        <div class="fact-body"><p>The <a class="inline" href="https://etherscan.io/address/0xdfa208bb0b811cfbb5fa3ea98ec37aa86180e668" target="_blank">Unicorn Meat 🍖 contract</a> is renounced — no admin keys, no rugpull vector. The story is complete and immutable on-chain.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">04</span>
+        <div class="fact-body"><p>The team is now building: the <strong class="gold">Unicorn Killers Hall of Fame</strong> and improvements to the Grinder DAO — picking up where avsa left off in 2016.</p></div>
+      </div>
+    </div>
   </div>
   <span class="slide-num">04 / 10</span>
 </section>
@@ -643,12 +740,24 @@
     <span class="tag reveal">Opportunity</span>
     <h2 class="reveal">Why Now</h2>
     <div class="divider reveal"></div>
-    <ul class="bullets">
-      <li class="reveal">Historic Ethereum tokens are having a <strong class="accent">cultural renaissance</strong> — collectors seek provenance and on-chain artifacts from 2015–2016.</li>
-      <li class="reveal">The Unicorn Meat story is <strong>complete</strong>: origin → coup → revival → community. Fully documented, fully on-chain.</li>
-      <li class="reveal">The team is actively building: <strong class="gold">Unicorn Killers Hall of Fame</strong>, Grinder DAO improvements, and community expansion.</li>
-      <li class="reveal">Unicorns and Unicorn Meat are <strong>the only coin tokens ever created and announced by Ethereum</strong> — there is no comparable provenance.</li>
-    </ul>
+    <div class="fact-list">
+      <div class="fact reveal">
+        <span class="fact-num">01</span>
+        <div class="fact-body"><p>Historic Ethereum tokens are having a <strong class="accent">cultural renaissance</strong>. Collectors seek provenance — on-chain artifacts from 2015–2016 are the rarest in existence.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">02</span>
+        <div class="fact-body"><p><a class="inline" href="https://x.com/ethereum/status/715821110722433024" target="_blank">Unicorns and Unicorn Meat are the only coin tokens ever created and announced by Ethereum</a>. There is no comparable provenance anywhere in crypto.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">03</span>
+        <div class="fact-body"><p>The story is <strong>complete and immutable</strong>: origin (avsa, 2016) → the coup (Piper, 2016) → the revival (webtrue.eth, 2025) → community. Every step is on-chain.</p></div>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">04</span>
+        <div class="fact-body"><p>Active development: <strong class="gold">Unicorn Killers Hall of Fame</strong>, Grinder DAO improvements, and growing community — this is not a static artifact, it's a living project.</p></div>
+      </div>
+    </div>
   </div>
   <span class="slide-num">07 / 10</span>
 </section>
