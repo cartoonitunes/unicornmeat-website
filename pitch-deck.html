@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unicorn Meat 🍖 — Pitch Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===========================================
+       THEME: Unicorn Meat — Dark Mythical
+       Near-black purple, gold/pink accents, serif headings
+    =========================================== */
+    :root {
+      --bg:         #08050f;
+      --bg2:        #110d1f;
+      --bg3:        #1a1230;
+      --accent:     #c89cff;
+      --accent2:    #ff6eb4;
+      --gold:       #f0c060;
+      --text:       #f0e8ff;
+      --muted:      #7c6a9e;
+      --border:     rgba(200, 156, 255, 0.15);
+
+      --font-head:  'Cormorant Garamond', Georgia, serif;
+      --font-body:  'DM Sans', system-ui, sans-serif;
+
+      --title-size:    clamp(2.4rem, 7vw, 6rem);
+      --h2-size:       clamp(1.6rem, 4vw, 3.2rem);
+      --h3-size:       clamp(1.1rem, 2.5vw, 1.8rem);
+      --body-size:     clamp(0.78rem, 1.4vw, 1.05rem);
+      --small-size:    clamp(0.65rem, 1vw, 0.85rem);
+      --label-size:    clamp(0.6rem, 0.9vw, 0.75rem);
+
+      --pad:        clamp(1.5rem, 4vw, 4rem);
+      --gap:        clamp(0.6rem, 1.5vw, 1.4rem);
+      --ease:       cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Base reset */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    /* ===========================================
+       SLIDE SYSTEM — Every slide = 100vh, no overflow
+    =========================================== */
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding: var(--pad);
+    }
+
+    .slide-inner {
+      width: 100%;
+      max-width: min(90vw, 1000px);
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+    }
+
+    /* ===========================================
+       BACKGROUND EFFECTS
+    =========================================== */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 10% 90%, rgba(200,100,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 10%, rgba(255,80,160,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Grid overlay */
+    .slide::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,156,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,156,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Slide-specific bg tweaks */
+    .slide-title::before {
+      background:
+        radial-gradient(ellipse 70% 60% at 20% 80%, rgba(200,80,255,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255,100,160,0.12) 0%, transparent 55%);
+    }
+
+    /* ===========================================
+       TYPOGRAPHY
+    =========================================== */
+    h1 {
+      font-family: var(--font-head);
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+    }
+
+    h2 {
+      font-family: var(--font-head);
+      font-size: var(--h2-size);
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--accent);
+    }
+
+    h3 {
+      font-family: var(--font-head);
+      font-size: var(--h3-size);
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    p {
+      font-size: var(--body-size);
+      line-height: 1.65;
+      color: rgba(240,232,255,0.85);
+    }
+
+    .tag {
+      font-size: var(--label-size);
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .accent { color: var(--accent); }
+    .accent2 { color: var(--accent2); }
+    .gold { color: var(--gold); }
+
+    /* ===========================================
+       ANIMATIONS
+    =========================================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
+    }
+
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+    .slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+    .slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+    .slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+    .slide.visible .reveal:nth-child(5) { transition-delay: 0.42s; }
+    .slide.visible .reveal:nth-child(6) { transition-delay: 0.49s; }
+    .slide.visible .reveal:nth-child(7) { transition-delay: 0.56s; }
+    .slide.visible .reveal:nth-child(8) { transition-delay: 0.63s; }
+
+    /* ===========================================
+       DIVIDER
+    =========================================== */
+    .divider {
+      width: clamp(40px, 8vw, 80px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ===========================================
+       BULLET LIST
+    =========================================== */
+    .bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.3rem, 0.8vw, 0.65rem);
+    }
+
+    .bullets li {
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: rgba(240,232,255,0.82);
+      display: flex;
+      align-items: baseline;
+      gap: 0.6em;
+    }
+
+    .bullets li::before {
+      content: '◆';
+      font-size: 0.5em;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 0.2em;
+    }
+
+    /* ===========================================
+       TIMELINE
+    =========================================== */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.3rem, 0.7vw, 0.55rem);
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: clamp(52px, 11vw, 90px);
+      top: 8px;
+      bottom: 8px;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      opacity: 0.3;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: clamp(52px, 11vw, 90px) 12px 1fr;
+      align-items: center;
+      gap: 0 clamp(0.5rem, 1.2vw, 1rem);
+    }
+
+    .timeline-date {
+      font-size: var(--small-size);
+      font-weight: 500;
+      color: var(--accent);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .timeline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+      margin: 0 auto;
+      box-shadow: 0 0 8px rgba(255,110,180,0.6);
+    }
+
+    .timeline-text {
+      font-size: var(--small-size);
+      line-height: 1.4;
+      color: rgba(240,232,255,0.8);
+    }
+
+    /* ===========================================
+       TOKENOMICS (CSS pie + stats)
+    =========================================== */
+    .tokenomics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(1rem, 3vw, 2.5rem);
+      align-items: start;
+    }
+
+    .stats-list {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.35rem, 0.8vw, 0.6rem);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: var(--small-size);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: clamp(0.25rem, 0.5vw, 0.4rem);
+    }
+
+    .stat-label { color: var(--muted); }
+    .stat-val { color: var(--text); font-weight: 500; }
+
+    /* CSS conic pie chart */
+    .pie-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(0.5rem, 1vw, 0.9rem);
+    }
+
+    .pie {
+      width: clamp(80px, 12vw, 130px);
+      height: clamp(80px, 12vw, 130px);
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--accent)   0% 60%,
+        var(--bg3)      60% 80%,
+        var(--accent2)  80% 90%,
+        var(--gold)     90% 100%
+      );
+      box-shadow: 0 0 20px rgba(200,156,255,0.2);
+    }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.2rem, 0.5vw, 0.4rem);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--small-size);
+      color: rgba(240,232,255,0.8);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ===========================================
+       TWO-COL LAYOUT
+    =========================================== */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(1rem, 2.5vw, 2.5rem);
+      align-items: start;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: clamp(0.7rem, 1.5vw, 1.4rem);
+    }
+
+    /* ===========================================
+       LINKS
+    =========================================== */
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(0.4rem, 1vw, 0.8rem);
+    }
+
+    .link-chip {
+      font-size: var(--small-size);
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid rgba(200,156,255,0.3);
+      border-radius: 100px;
+      padding: 0.3em 0.9em;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .link-chip:hover {
+      background: rgba(200,156,255,0.12);
+    }
+
+    /* ===========================================
+       FAMILY SLIDE (sister tokens)
+    =========================================== */
+    .family-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(0.6rem, 1.5vw, 1.2rem);
+    }
+
+    .family-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: clamp(0.7rem, 1.5vw, 1.2rem);
+      text-align: center;
+    }
+
+    .family-card .emoji { font-size: clamp(1.4rem, 3vw, 2.4rem); margin-bottom: 0.3em; display: block; }
+    .family-card .fc-date { font-size: var(--small-size); color: var(--muted); }
+    .family-card .fc-name { font-size: var(--body-size); font-weight: 500; margin: 0.2em 0; }
+
+    /* ===========================================
+       PROGRESS BAR
+    =========================================== */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.3s var(--ease);
+      z-index: 100;
+    }
+
+    /* ===========================================
+       NAV DOTS
+    =========================================== */
+    #nav-dots {
+      position: fixed;
+      right: clamp(10px, 2vw, 20px);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.5);
+    }
+
+    /* ===========================================
+       SLIDE NUMBER
+    =========================================== */
+    .slide-num {
+      position: absolute;
+      bottom: clamp(0.8rem, 2vw, 1.5rem);
+      right: clamp(1rem, 2.5vw, 2rem);
+      font-size: var(--label-size);
+      color: var(--muted);
+      z-index: 10;
+    }
+
+    /* ===========================================
+       RESPONSIVE
+    =========================================== */
+    @media (max-height: 700px) {
+      :root {
+        --pad: clamp(1rem, 3vw, 2rem);
+        --gap: clamp(0.4rem, 1vw, 0.8rem);
+        --title-size: clamp(2rem, 5.5vw, 4rem);
+      }
+    }
+
+    @media (max-height: 600px) {
+      :root { --title-size: clamp(1.6rem, 4.5vw, 3rem); --h2-size: clamp(1.2rem, 3vw, 2rem); }
+      .timeline::before { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .two-col, .tokenomics-grid, .family-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { transition: opacity 0.2s; transform: none; }
+    }
+
+    /* ===========================================
+       TITLE SLIDE EXTRAS
+    =========================================== */
+    .title-emoji {
+      font-size: clamp(2.5rem, 8vw, 7rem);
+      line-height: 1;
+      display: block;
+      margin-bottom: 0.1em;
+    }
+
+    .title-sub {
+      font-size: clamp(0.85rem, 1.8vw, 1.3rem);
+      color: rgba(240,232,255,0.6);
+      font-style: italic;
+      font-family: var(--font-head);
+      max-width: 600px;
+    }
+
+    /* CTA slide */
+    .cta-big {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 6vw, 5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<nav id="nav-dots" aria-label="Slide navigation"></nav>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 1 — TITLE
+═══════════════════════════════════════ -->
+<section class="slide slide-title" id="slide-0" aria-label="Title">
+  <div class="slide-inner">
+    <span class="title-emoji reveal">🍖</span>
+    <h1 class="reveal">Unicorn Meat</h1>
+    <p class="title-sub reveal">A historic Ethereum Foundation token from March 2016</p>
+    <div class="divider reveal"></div>
+    <span class="tag reveal">@UnicornMeatETH · unicornmeateth.com</span>
+  </div>
+  <span class="slide-num">01 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 2 — ORIGIN: UNICORNS
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-1" aria-label="Origin: Unicorns">
+  <div class="slide-inner">
+    <span class="tag reveal">Origin Story</span>
+    <h2 class="reveal">The Unicorns 🦄</h2>
+    <div class="divider reveal"></div>
+    <ul class="bullets">
+      <li class="reveal">In <strong>February 2016</strong> — six months after mainnet launch — the Ethereum Foundation launched a fundraising initiative.</li>
+      <li class="reveal">EF leader <strong class="accent">Alex Van de Sande (avsa)</strong> deployed two contracts: the Foundation TipJar and <strong>Unicorns 🦄</strong> — a 0-decimal non-standard ERC-20.</li>
+      <li class="reveal">Donate <strong>2.014 ETH</strong> (~$20 at the time) to the TipJar → receive 1 Unicorn. To date, <strong class="gold">2,717</strong> have ever been created.</li>
+      <li class="reveal">avsa later raised the price to <strong>42,329 ETH</strong> — a "beeple" — after the Everydays: The First 5000 Days sale.</li>
+    </ul>
+  </div>
+  <span class="slide-num">02 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 3 — ORIGIN: UNICORN MEAT
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-2" aria-label="The Grinder">
+  <div class="slide-inner">
+    <span class="tag reveal">Origin Story</span>
+    <h2 class="reveal">The Grinder 🍖</h2>
+    <div class="divider reveal"></div>
+    <ul class="bullets">
+      <li class="reveal">A month later, avsa deployed the <strong>Unicorn Meat Grinder Association DAO</strong> — allowing any Unicorn holder to "grind" Unicorns into <strong class="accent2">Unicorn Meat 🍖</strong>, a 3-decimal non-standard ERC-20.</li>
+      <li class="reveal">Demonstrated multiple on-chain firsts: a <strong>DAO with quadratic voting</strong>, token swaps, and token mutations.</li>
+      <li class="reveal">Unicorns and Unicorn Meat are the <strong class="gold">only coin tokens ever created and announced by Ethereum</strong> — likely the first on-chain April Fool's joke.</li>
+      <li class="reveal">Only <strong>7 Unicorns</strong> have been ground, producing ~9,000 Unicorn Meat tokens.</li>
+    </ul>
+  </div>
+  <span class="slide-num">03 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 4 — THE COUP
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-3" aria-label="The Coup">
+  <div class="slide-inner">
+    <span class="tag reveal">The Takeover</span>
+    <h2 class="reveal">The Coup ⚔️</h2>
+    <div class="divider reveal"></div>
+    <ul class="bullets">
+      <li class="reveal">A week after launch, <strong class="accent">Piper Merriam</strong> — a core Ethereum developer — passed a DAO proposal to seize control of the DAO and take <strong>5 ETH</strong> for themselves.</li>
+      <li class="reveal">avsa, Piper, Vitalik, and the community laughed — the community called it the "coup." It became Ethereum lore.</li>
+      <li class="reveal">In <strong>July 2025</strong>, a Unicorn holder repeated the move: passed a proposal, transferred DAO ownership, minted a supply of <strong>100 million</strong>, renounced the contract, and wrapped the token to be tradable on-chain.</li>
+      <li class="reveal">The small team has since focused on: improving the Grinder DAO and building the <span class="gold"><strong>Unicorn Killers Hall of Fame</strong></span>.</li>
+    </ul>
+  </div>
+  <span class="slide-num">04 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 5 — TIMELINE
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-4" aria-label="Timeline">
+  <div class="slide-inner">
+    <span class="tag reveal">History</span>
+    <h2 class="reveal">Timeline</h2>
+    <div class="divider reveal"></div>
+    <div class="timeline reveal">
+      <div class="timeline-item"><span class="timeline-date">Jul 2015</span><span class="timeline-dot"></span><span class="timeline-text">avsa helps launch Ethereum mainnet</span></div>
+      <div class="timeline-item"><span class="timeline-date">Nov 2015</span><span class="timeline-dot"></span><span class="timeline-text">avsa &amp; Fabian create MistCoin — the first standard tokens</span></div>
+      <div class="timeline-item"><span class="timeline-date">Dec 2015</span><span class="timeline-dot"></span><span class="timeline-text">avsa creates the Doge-Eth Bounty to fund a Doge bridge</span></div>
+      <div class="timeline-item"><span class="timeline-date">Feb 2016</span><span class="timeline-dot"></span><span class="timeline-text">EF (avsa) creates Foundation TipJar and Unicorns 🦄</span></div>
+      <div class="timeline-item"><span class="timeline-date">Mar 2016</span><span class="timeline-dot"></span><span class="timeline-text">avsa creates Unicorn Meat 🍖 and the Grinder DAO</span></div>
+      <div class="timeline-item"><span class="timeline-date">Apr 2016</span><span class="timeline-dot"></span><span class="timeline-text">Piper Merriam takes over the Unicorn Meat Grinder Association</span></div>
+      <div class="timeline-item"><span class="timeline-date">Jun 2016</span><span class="timeline-dot"></span><span class="timeline-text">avsa cites the Grinder as helpful during The DAO hack</span></div>
+      <div class="timeline-item"><span class="timeline-date">Jul 2025</span><span class="timeline-dot"></span><span class="timeline-text">webtrue.eth takes over the token — makes it collectible</span></div>
+    </div>
+  </div>
+  <span class="slide-num">05 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 6 — MEATONOMICS
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-5" aria-label="Meatonomics">
+  <div class="slide-inner">
+    <span class="tag reveal">Tokenomics</span>
+    <h2 class="reveal">Meatonomics</h2>
+    <div class="divider reveal"></div>
+    <div class="tokenomics-grid reveal">
+      <div class="stats-list">
+        <div class="stat-row"><span class="stat-label">Total Supply</span><span class="stat-val">100 Million</span></div>
+        <div class="stat-row"><span class="stat-label">Contract</span><span class="stat-val accent">Renounced</span></div>
+        <div class="stat-row"><span class="stat-label">Launch</span><span class="stat-val">No presale · 1-sided LP at ~$250K mcap</span></div>
+        <div class="stat-row"><span class="stat-label">ETH LP</span><span class="stat-val">40% · Locked</span></div>
+        <div class="stat-row"><span class="stat-label">Base LP</span><span class="stat-val">16%</span></div>
+        <div class="stat-row"><span class="stat-label">Airdrop</span><span class="stat-val">10% to Unicorn holders &amp; OG grinders</span></div>
+        <div class="stat-row"><span class="stat-label">Team</span><span class="stat-val">10% · Vested over years</span></div>
+      </div>
+      <div class="pie-wrap">
+        <div class="pie"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>60% Liquidity</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--bg3)"></div>20% Treasury</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>10% Rewards</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>10% Team</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">06 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 7 — WHY NOW
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-6" aria-label="Why Now">
+  <div class="slide-inner">
+    <span class="tag reveal">Opportunity</span>
+    <h2 class="reveal">Why Now</h2>
+    <div class="divider reveal"></div>
+    <ul class="bullets">
+      <li class="reveal">Historic Ethereum tokens are having a <strong class="accent">cultural renaissance</strong> — collectors seek provenance and on-chain artifacts from 2015–2016.</li>
+      <li class="reveal">The Unicorn Meat story is <strong>complete</strong>: origin → coup → revival → community. Fully documented, fully on-chain.</li>
+      <li class="reveal">The team is actively building: <strong class="gold">Unicorn Killers Hall of Fame</strong>, Grinder DAO improvements, and community expansion.</li>
+      <li class="reveal">Unicorns and Unicorn Meat are <strong>the only coin tokens ever created and announced by Ethereum</strong> — there is no comparable provenance.</li>
+    </ul>
+  </div>
+  <span class="slide-num">07 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 8 — THE FAMILY
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-7" aria-label="The Family">
+  <div class="slide-inner">
+    <span class="tag reveal">Context</span>
+    <h2 class="reveal">Ethereum Foundation Tokens</h2>
+    <div class="divider reveal"></div>
+    <p class="reveal" style="max-width:600px">Both MistCoin and Unicorn Meat were created by the original Ethereum Foundation team — two chapters in the same story of Ethereum's earliest token experiments.</p>
+    <div class="family-grid reveal">
+      <div class="family-card">
+        <span class="emoji">💠</span>
+        <div class="fc-date">Nov 3, 2015</div>
+        <div class="fc-name accent">MistCoin</div>
+        <p style="font-size:var(--small-size);color:var(--muted)">Created by Fabian Vogelsteller. The first token in the Ethereum Wallet. Led directly to ERC-20.</p>
+      </div>
+      <div class="family-card">
+        <span class="emoji">🦄</span>
+        <div class="fc-date">Feb 2016</div>
+        <div class="fc-name accent">Unicorns</div>
+        <p style="font-size:var(--small-size);color:var(--muted)">Created by avsa for the EF TipJar fundraise. 2,717 ever minted. Donation required.</p>
+      </div>
+      <div class="family-card">
+        <span class="emoji">🍖</span>
+        <div class="fc-date">Mar 2016</div>
+        <div class="fc-name accent2">Unicorn Meat</div>
+        <p style="font-size:var(--small-size);color:var(--muted)">avsa's Grinder DAO. On-chain firsts: quadratic voting, token swaps, mutations. Now collectible.</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">08 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 9 — COMMUNITY
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-8" aria-label="Community">
+  <div class="slide-inner">
+    <span class="tag reveal">The Herd</span>
+    <h2 class="reveal">Community</h2>
+    <div class="divider reveal"></div>
+    <p class="reveal" style="max-width:640px">A growing community of Ethereum heritage collectors, degens, and historians building around the rarest Foundation token. Join us.</p>
+    <div class="two-col reveal" style="margin-top:var(--gap)">
+      <div class="card">
+        <h3 style="margin-bottom:0.5em">Links</h3>
+        <div class="link-row">
+          <a class="link-chip" href="https://unicornmeateth.com" target="_blank">unicornmeateth.com</a>
+          <a class="link-chip" href="https://twitter.com/UnicornMeatETH" target="_blank">@UnicornMeatETH</a>
+          <a class="link-chip" href="https://www.coingecko.com/en/coins/unicorn-meat" target="_blank">CoinGecko</a>
+          <a class="link-chip" href="https://www.dextools.io" target="_blank">Dextools</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:0.5em">Contract</h3>
+        <p style="font-size:var(--small-size);word-break:break-all;color:var(--muted)">Wrapped Unicorn Meat (w🍖)<br><span class="accent">0xDFA2...0e668</span></p>
+        <p style="font-size:var(--small-size);margin-top:0.4em;color:var(--muted)">Also on Base · LP Locked</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">09 / 10</span>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SLIDE 10 — CTA
+═══════════════════════════════════════ -->
+<section class="slide" id="slide-9" aria-label="Join the Herd">
+  <div class="slide-inner" style="text-align:center;align-items:center">
+    <span class="title-emoji reveal">🍖</span>
+    <div class="cta-big reveal">Join the Herd</div>
+    <p class="title-sub reveal">The rarest Ethereum Foundation token — now collectible.</p>
+    <div class="divider reveal" style="margin:0 auto"></div>
+    <div class="link-row reveal" style="justify-content:center;margin-top:0.5rem">
+      <a class="link-chip" href="https://unicornmeateth.com" target="_blank">unicornmeateth.com</a>
+      <a class="link-chip" href="https://twitter.com/UnicornMeatETH" target="_blank">X / Twitter</a>
+      <a class="link-chip" href="https://www.coingecko.com/en/coins/unicorn-meat" target="_blank">CoinGecko</a>
+    </div>
+    <span class="tag reveal" style="margin-top:var(--gap)">unicornmeateth.com</span>
+  </div>
+  <span class="slide-num">10 / 10</span>
+</section>
+
+<script>
+  /* ===========================================
+     SLIDE PRESENTATION CONTROLLER
+     Keyboard nav, scroll snap, dots, progress bar
+  =========================================== */
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const progressBar = document.getElementById('progress-bar');
+  const navDotsEl = document.getElementById('nav-dots');
+  const totalSlides = slides.length;
+  let currentSlide = 0;
+  let isScrolling = false;
+
+  // Build nav dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', `Slide ${i + 1}`);
+    dot.addEventListener('click', () => scrollToSlide(i));
+    navDotsEl.appendChild(dot);
+  });
+
+  function updateUI(idx) {
+    currentSlide = idx;
+    const pct = totalSlides > 1 ? (idx / (totalSlides - 1)) * 100 : 100;
+    progressBar.style.width = pct + '%';
+    navDotsEl.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+  }
+
+  function scrollToSlide(idx) {
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+    updateUI(idx);
+  }
+
+  // Intersection Observer for animations + dot tracking
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        const idx = slides.indexOf(entry.target);
+        if (idx !== -1) updateUI(idx);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => observer.observe(s));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      if (currentSlide < totalSlides - 1) scrollToSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (currentSlide > 0) scrollToSlide(currentSlide - 1);
+    }
+  });
+
+  // Touch/swipe support
+  let touchStart = 0;
+  document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientY; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const delta = touchStart - e.changedTouches[0].clientY;
+    if (Math.abs(delta) > 40) {
+      if (delta > 0 && currentSlide < totalSlides - 1) scrollToSlide(currentSlide + 1);
+      else if (delta < 0 && currentSlide > 0) scrollToSlide(currentSlide - 1);
+    }
+  }, { passive: true });
+
+  // Init
+  updateUI(0);
+</script>
+</body>
+</html>
