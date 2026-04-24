@@ -2039,6 +2039,7 @@
                     <li><a href="#join-herd">🦄 Herd</a></li>
                     <li><a href="/market">🦄 Market</a></li>
                     <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
+                    <li><a href="/provenance">📜 Provenance</a></li>
                     <li><a href="#references">Links</a></li>
                 </ul>
                 <div class="mt-4">
@@ -2135,6 +2136,7 @@
                                 <li><a href="#join-herd">🦄 Herd</a></li>
                                 <li><a href="/market">🦄 Market</a></li>
                     <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
+                    <li><a href="/provenance">📜 Provenance</a></li>
                             </ul>
                         </div>
                         <div class="uc-navbar-right">
@@ -2274,6 +2276,7 @@
               <span>📊 24h Vol: <span id="ticker-volume-um" style="color: #81c784;">—</span></span>
               <span>📈 Mkt Cap: <span id="ticker-mcap-um" style="color: #b39ddb;">—</span></span>
               <span>🕐 24h: <span id="ticker-change-um" style="color: #e0e0e0;">—</span></span>
+              <span>👥 Holders: <span id="ticker-holders-um" style="color: #ffd54f;">—</span></span>
               <span style="color: #9e9e9e; font-size: 0.8rem;">via CoinGecko</span>
             </div>
           </div>
@@ -2305,6 +2308,26 @@
           }
           updateTickerUM();
           setInterval(updateTickerUM, 120000); // CoinGecko rate limit — 2 min refresh
+        })();
+
+        // Holder count from Ethplorer (free tier)
+        (function() {
+          fetch('https://api.ethplorer.io/getTokenInfo/0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668?apiKey=freekey')
+            .then(r => r.json())
+            .then(data => {
+              const holders = data && data.holdersCount;
+              if (!holders) return;
+              const el = document.getElementById('ticker-holders-um');
+              let current = 0;
+              const target = parseInt(holders, 10);
+              const step = Math.max(1, Math.floor(target / 60));
+              const timer = setInterval(() => {
+                current = Math.min(current + step, target);
+                el.textContent = current.toLocaleString();
+                if (current >= target) clearInterval(timer);
+              }, 25);
+            })
+            .catch(() => {});
         })();
         </script>
 
@@ -3639,6 +3662,86 @@
 
         <!-- Section end -->
 
+        <!-- Collector Gallery Section start -->
+        <div id="collectors" class="collectors section panel overflow-hidden">
+            <div class="section-outer panel py-6 sm:py-8 lg:py-9" style="background: #fdf6e8; border-top: 3px solid #000; border-bottom: 3px solid #000;">
+                <div class="container sm:max-w-md xl:max-w-lg">
+                    <div class="section-inner panel"
+                        data-anime="onview: -200; targets: >*; translateY: [24, 0]; opacity: [0, 1]; delay: anime.stagger(80, {start: 100});">
+                        <div class="section-header panel mx-auto mb-4 sm:mb-6 text-center">
+                            <p class="text-uppercase fs-7 fw-bold text-muted mb-1" style="letter-spacing: 2px;">On-Chain</p>
+                            <h2 class="h4 sm:h3 xl:h2 m-0 -rotate-1 text-uppercase ls-0">🦄 The Herd</h2>
+                            <p class="fs-5 xl:fs-4 mt-2 mb-0" style="max-width: 500px; margin-left: auto; margin-right: auto;">Top w🍖 holders, resolved on-chain. Excludes liquidity pools and bridges.</p>
+                        </div>
+                        <div id="collectors-grid" class="section-content panel">
+                            <div class="row g-3" id="collectors-row">
+                                <!-- Cards injected by JS -->
+                                <div class="col-12 text-center py-4" id="collectors-loading">
+                                    <span style="font-family: monospace; font-size: 0.9rem; color: #666;">Loading holders…</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-center mt-3" style="font-size: 0.75rem; color: #888; font-family: monospace;">
+                            Data via <a href="https://ethplorer.io" target="_blank" rel="noopener" style="color: #888;">Ethplorer</a> · ENS via <a href="https://ensideas.com" target="_blank" rel="noopener" style="color: #888;">ENS Ideas</a> · Updated periodically
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Collector Gallery Section end -->
+
+        <script>
+        (function() {
+          fetch('/assets/data/collectors.json')
+            .then(r => r.json())
+            .then(collectors => {
+              const row = document.getElementById('collectors-row');
+              const loading = document.getElementById('collectors-loading');
+              if (loading) loading.remove();
+
+              collectors.forEach((c, i) => {
+                const isNamed = !!c.ens;
+                const rankColors = ['#b8960c', '#aaa', '#cd7f32'];
+                const rankColor = i < 3 ? rankColors[i] : '#333';
+                const avatarHtml = c.avatar
+                  ? `<img src="${c.avatar}" alt="${c.displayName}" style="width:40px;height:40px;border-radius:50%;border:2px solid #000;object-fit:cover;flex-shrink:0;" onerror="this.replaceWith(defaultAvatar())">`
+                  : `<div style="width:40px;height:40px;border-radius:50%;border:2px solid #000;background:#e8dfc8;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🍖</div>`;
+
+                const labelHtml = c.label
+                  ? `<span style="display:inline-block;font-size:0.65rem;font-weight:700;padding:1px 6px;border:1.5px solid #000;background:#fff;margin-top:3px;letter-spacing:0.5px;">${c.label}</span>`
+                  : '';
+
+                const rotation = (i % 4 === 0) ? 'rotate-1' : (i % 4 === 2) ? '-rotate-1' : '';
+                const etherscanUrl = `https://etherscan.io/address/${c.address}`;
+
+                const col = document.createElement('div');
+                col.className = 'col-6 col-sm-4 col-md-3 col-lg-2';
+                col.innerHTML = `
+                  <a href="${etherscanUrl}" target="_blank" rel="noopener" class="text-none" style="display:block;">
+                    <div class="border border-2 border-black contrast-shadow-sm bg-white p-2 p-sm-3 ${rotation} h-100" style="transition: transform 0.15s;">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        ${avatarHtml}
+                        <div style="min-width:0;">
+                          <div style="font-size:0.75rem;font-weight:700;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#000;" title="${c.displayName}">${c.displayName}</div>
+                          ${labelHtml}
+                        </div>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:0.7rem;font-family:monospace;color:#555;">Rank #${i + 1}</span>
+                        <span style="font-size:0.85rem;font-weight:800;color:${rankColor};">${c.share}%</span>
+                      </div>
+                    </div>
+                  </a>`;
+                row.appendChild(col);
+              });
+            })
+            .catch(() => {
+              const loading = document.getElementById('collectors-loading');
+              if (loading) loading.textContent = 'Could not load holder data.';
+            });
+        })();
+        </script>
+
         <!-- Text Marquee Start -->
         <div class="panel z-99">
             <div class="position-absolute top-0 start-0 w-100 h-1/2 bg-secondary-100"></div>
@@ -3815,6 +3918,7 @@
                         <li><a href="#join-herd">🦄 Herd</a></li>
                         <li><a href="/market">🦄 Market</a></li>
                     <li><a href="/grinder-association">🦄🍖 Grinder</a></li>
+                    <li><a href="/provenance">📜 Provenance</a></li>
                     </ul>
                 </div>
             </div>

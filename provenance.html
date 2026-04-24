@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Authenticity — Unicorn Meat (🍖) | Historic Ethereum Token Since 2016</title>
+    <link rel="icon" type="image/png" href="/assets/favicon.ico" />
+    <link rel="canonical" href="https://unicornmeateth.com/provenance" />
+    <meta name="description" content="Official Certificate of Authenticity for Unicorn Meat (🍖) — one of the earliest tokens on Ethereum, created in March 2016 by Alex Van de Sande of the Ethereum Foundation. Verified on-chain provenance.">
+    <meta name="keywords" content="unicorn meat provenance, certificate of authenticity, unicorn meat ethereum, historic token, alex van de sande, avsa, ethereum foundation, 2016 ethereum token">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Certificate of Authenticity — Unicorn Meat (🍖)">
+    <meta property="og:description" content="On-chain provenance certificate for Unicorn Meat — one of the earliest tokens on Ethereum, created in March 2016 by Alex Van de Sande of the Ethereum Foundation.">
+    <meta property="og:url" content="https://unicornmeateth.com/provenance">
+    <meta property="og:image" content="https://gaccdiscordimages.s3.us-east-1.amazonaws.com/unicornmeat-ogsocial.png">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@UnicornMeatETH">
+    <meta name="twitter:creator" content="@UnicornMeatETH">
+    <meta name="twitter:title" content="Certificate of Authenticity — Unicorn Meat (🍖)">
+    <meta name="twitter:description" content="On-chain provenance for one of Ethereum's earliest tokens. Created March 2016 by Alex Van de Sande, Ethereum Foundation.">
+    <meta name="twitter:image" content="https://gaccdiscordimages.s3.us-east-1.amazonaws.com/unicornmeat-ogsocial.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Certificate of Authenticity — Unicorn Meat (🍖)",
+        "description": "Official on-chain provenance record for Unicorn Meat, one of the earliest ERC-20-like tokens on Ethereum, created March 2016 by Alex Van de Sande of the Ethereum Foundation.",
+        "datePublished": "2016-03-01",
+        "author": {
+            "@type": "Person",
+            "name": "Alex Van de Sande",
+            "sameAs": "https://twitter.com/avsa"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Unicorn Meat",
+            "url": "https://unicornmeateth.com"
+        }
+    }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Base styles -->
+    <link rel="stylesheet" href="/assets/css/uni-core.css">
+
+    <style>
+        :root {
+            --parchment: #fdf6e8;
+            --parchment-dark: #f5e9c8;
+            --ink: #1a1008;
+            --ink-light: #3d2b10;
+            --seal-gold: #b8960c;
+            --accent-green: #2d5a27;
+        }
+
+        body {
+            background-color: #e8dfc8;
+            font-family: 'Source Serif 4', Georgia, serif;
+            color: var(--ink);
+        }
+
+        /* Nav bar */
+        .prov-nav {
+            background: var(--ink);
+            border-bottom: 3px solid var(--seal-gold);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .prov-nav a { color: #f5e9c8; text-decoration: none; font-family: monospace; font-size: 0.85rem; }
+        .prov-nav .nav-logo { font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; }
+        .prov-nav .nav-links { display: flex; gap: 1.5rem; }
+        @media (max-width: 576px) { .prov-nav .nav-links { display: none; } }
+
+        /* Certificate wrapper */
+        .certificate-page {
+            max-width: 760px;
+            margin: 2rem auto;
+            padding: 0 1rem 4rem;
+        }
+
+        /* The certificate itself */
+        .certificate {
+            background: var(--parchment);
+            border: 4px double var(--ink);
+            box-shadow: 8px 8px 0 var(--ink);
+            padding: 3rem 2.5rem;
+            position: relative;
+        }
+        @media (max-width: 576px) {
+            .certificate { padding: 1.75rem 1.25rem; }
+        }
+
+        /* Corner ornaments */
+        .certificate::before, .certificate::after {
+            content: '✦';
+            position: absolute;
+            font-size: 1.4rem;
+            color: var(--seal-gold);
+            line-height: 1;
+        }
+        .certificate::before { top: 12px; left: 16px; }
+        .certificate::after  { bottom: 12px; right: 16px; }
+        .corner-tr, .corner-bl {
+            position: absolute;
+            font-size: 1.4rem;
+            color: var(--seal-gold);
+            line-height: 1;
+        }
+        .corner-tr { top: 12px; right: 16px; }
+        .corner-bl { bottom: 12px; left: 16px; }
+
+        /* Header */
+        .cert-header { text-align: center; margin-bottom: 2rem; }
+        .cert-issuer {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            margin-bottom: 0.5rem;
+        }
+        .cert-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 5vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin: 0.25rem 0;
+        }
+        .cert-subtitle {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(1rem, 3vw, 1.35rem);
+            color: var(--ink-light);
+            margin-top: 0.25rem;
+        }
+        .cert-divider {
+            text-align: center;
+            color: var(--seal-gold);
+            font-size: 1.2rem;
+            letter-spacing: 8px;
+            margin: 1.25rem 0;
+        }
+
+        /* Sections */
+        .cert-section { margin-bottom: 2rem; }
+        .cert-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--seal-gold);
+            border-bottom: 1px solid var(--parchment-dark);
+            padding-bottom: 0.3rem;
+            margin-bottom: 0.75rem;
+        }
+        .cert-section p {
+            font-size: 0.95rem;
+            line-height: 1.65;
+            margin: 0;
+        }
+        .cert-section p + p { margin-top: 0.5rem; }
+
+        /* Contract address block */
+        .contract-block {
+            background: var(--parchment-dark);
+            border: 2px solid var(--ink);
+            padding: 0.75rem 1rem;
+            margin-top: 0.75rem;
+        }
+        .contract-label {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            margin-bottom: 0.2rem;
+        }
+        .contract-addr {
+            font-family: monospace;
+            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+            word-break: break-all;
+            color: var(--ink);
+            font-weight: 600;
+        }
+        .contract-addr a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+        /* Tweet card replica */
+        .tweet-placard {
+            background: white;
+            border: 2px solid var(--ink);
+            padding: 1rem 1.25rem;
+            margin-top: 0.75rem;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .tweet-handle { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .tweet-icon { width: 28px; height: 28px; border-radius: 50%; background: #627EEA; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .tweet-name { font-weight: 700; font-size: 0.85rem; }
+        .tweet-at { color: #666; font-size: 0.78rem; }
+        .tweet-body { font-size: 0.88rem; line-height: 1.5; margin-bottom: 6px; }
+        .tweet-meta { font-size: 0.75rem; color: #666; }
+        .tweet-meta a { color: #1DA1F2; text-decoration: none; }
+        .tweet-meta a:hover { text-decoration: underline; }
+
+        /* Stat row */
+        .cert-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+        @media (max-width: 480px) { .cert-stats { grid-template-columns: 1fr 1fr; } }
+        .cert-stat {
+            text-align: center;
+            border: 2px solid var(--ink);
+            padding: 0.6rem 0.5rem;
+            background: var(--parchment-dark);
+        }
+        .cert-stat-value { font-size: 1.1rem; font-weight: 700; }
+        .cert-stat-label { font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-light); }
+
+        /* Verification badges */
+        .cert-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+        .cert-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.75rem; font-weight: 600; padding: 4px 10px;
+            border: 2px solid var(--ink);
+            text-decoration: none; color: var(--ink);
+            background: white;
+        }
+        .cert-badge:hover { background: var(--parchment-dark); }
+
+        /* Chain of custody table */
+        .custody-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.82rem; }
+        .custody-table th, .custody-table td { border: 1px solid var(--ink); padding: 0.4rem 0.6rem; text-align: left; }
+        .custody-table th { background: var(--parchment-dark); font-family: 'Playfair Display', serif; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; }
+        .custody-table a { color: var(--ink); }
+
+        /* Seal */
+        .cert-seal {
+            text-align: center;
+            margin: 1.5rem 0 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--parchment-dark);
+        }
+        .seal-circle {
+            display: inline-block;
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            border: 3px double var(--seal-gold);
+            background: var(--parchment-dark);
+            line-height: 90px;
+            font-size: 2.4rem;
+            box-shadow: inset 0 0 12px rgba(184,150,12,0.2);
+        }
+        .seal-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            margin-top: 0.4rem;
+        }
+
+        /* Action buttons */
+        .cert-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem; }
+        .cert-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: monospace; font-size: 0.85rem; font-weight: 700;
+            padding: 0.6rem 1.2rem;
+            border: 3px solid var(--ink);
+            box-shadow: 4px 4px 0 var(--ink);
+            cursor: pointer; text-decoration: none; color: var(--ink);
+            background: white;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .cert-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); }
+        .cert-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+        .cert-btn.primary { background: var(--ink); color: var(--parchment); box-shadow: 4px 4px 0 var(--seal-gold); }
+        .cert-btn.primary:hover { box-shadow: 6px 6px 0 var(--seal-gold); color: var(--parchment); }
+
+        /* Footer nav */
+        .prov-footer { text-align: center; padding: 2rem 1rem; font-size: 0.8rem; color: var(--ink-light); }
+        .prov-footer a { color: var(--ink); }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="prov-nav">
+    <a href="/" class="nav-logo">🍖 Unicorn Meat</a>
+    <div class="nav-links">
+        <a href="/#about">About</a>
+        <a href="/#trading">Buy</a>
+        <a href="/how-to-buy">How to Buy</a>
+        <a href="/provenance" style="color: var(--seal-gold); font-weight: 700;">Provenance</a>
+        <a href="/market">Market</a>
+        <a href="/grinder-association">DAO</a>
+    </div>
+</nav>
+
+<!-- Certificate -->
+<main class="certificate-page">
+    <div class="certificate" role="main">
+        <span class="corner-tr" aria-hidden="true">✦</span>
+        <span class="corner-bl" aria-hidden="true">✦</span>
+
+        <!-- Header -->
+        <div class="cert-header">
+            <p class="cert-issuer">Ethereum Mainnet · Chain ID 1</p>
+            <h1 class="cert-title">Certificate of Authenticity</h1>
+            <p class="cert-subtitle">Unicorn Meat (🍖) · Established March 2016</p>
+            <div class="cert-divider" aria-hidden="true">— ✦ —</div>
+        </div>
+
+        <!-- Origin -->
+        <div class="cert-section">
+            <p class="cert-section-title">I. Origin &amp; Provenance</p>
+            <p>This certifies that <strong>Unicorn Meat (🍖)</strong> is an authentic historic Ethereum token, deployed on Ethereum Mainnet in <strong>March 2016</strong> by <strong>Alex Van de Sande</strong> (avsa.eth) — creator of the Ethereum Wallet and Mist Browser, co-creator of ENS, and core Ethereum Foundation developer since 2014.</p>
+            <p>The token predates the ERC-20 standard and stands among the earliest smart contract tokens ever deployed on Ethereum. It was <a href="https://x.com/ethereum/status/715821110722433024" target="_blank" rel="noopener">publicly announced by the official @ethereum Twitter account</a> on April 1, 2016.</p>
+        </div>
+
+        <!-- Contracts -->
+        <div class="cert-section">
+            <p class="cert-section-title">II. Contract Addresses</p>
+            <p>The following contracts were deployed from creator address <code style="font-size:0.82rem;">0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb</code> (alex.vandesande.eth):</p>
+
+            <div class="contract-block" style="margin-top:0.75rem;">
+                <p class="contract-label">Original Unicorn Token (🦄) · March 2016</p>
+                <p class="contract-addr"><a href="https://etherscan.io/address/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7" target="_blank" rel="noopener">0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7</a></p>
+            </div>
+            <div class="contract-block">
+                <p class="contract-label">Unicorn Meat Grinder (produces 🍖 from 🦄) · March 2016</p>
+                <p class="contract-addr"><a href="https://etherscan.io/address/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A" target="_blank" rel="noopener">0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A</a></p>
+            </div>
+            <div class="contract-block">
+                <p class="contract-label">Wrapped Unicorn Meat (w🍖) · Modern ERC-20 Wrapper</p>
+                <p class="contract-addr"><a href="https://etherscan.io/token/0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668" target="_blank" rel="noopener">0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668</a></p>
+            </div>
+        </div>
+
+        <!-- Original Announcement -->
+        <div class="cert-section">
+            <p class="cert-section-title">III. Original Announcement</p>
+            <p>Unicorn Meat was publicly announced by the official Ethereum Twitter account on April 1, 2016:</p>
+            <div class="tweet-placard">
+                <div class="tweet-handle">
+                    <div class="tweet-icon" aria-hidden="true">⟠</div>
+                    <div>
+                        <div class="tweet-name">Ethereum <span style="color:#1DA1F2;">✓</span></div>
+                        <div class="tweet-at">@ethereum</div>
+                    </div>
+                </div>
+                <p class="tweet-body">Enter the Unicorn Meat Grinder Smart Contract and Bribable DAO! (by <a href="https://x.com/avsa" target="_blank" rel="noopener">@avsa</a>)</p>
+                <p class="tweet-meta">4:40 AM · Apr 1, 2016 · <span style="color:#E91E63;">♥ 51</span> · <span>🔁 67</span> &nbsp;·&nbsp; <a href="https://x.com/ethereum/status/715821110722433024" target="_blank" rel="noopener">View Original →</a></p>
+            </div>
+        </div>
+
+        <!-- Etherscan Recognition -->
+        <div class="cert-section">
+            <p class="cert-section-title">IV. Official Etherscan Recognition</p>
+            <p>Etherscan, the authoritative Ethereum block explorer, officially recognizes Unicorn Meat as a token <em>"Created by Avsa of the Ethereum Foundation."</em> This recognition is displayed on the <a href="https://etherscan.io/token/0xed6ac8de7c7ca7e3a22952e09c2a2a1232ddef9a" target="_blank" rel="noopener">Etherscan token page</a> and constitutes independent institutional verification of provenance.</p>
+        </div>
+
+        <!-- Historical Firsts -->
+        <div class="cert-section">
+            <p class="cert-section-title">V. Historical Significance</p>
+            <p>Unicorn Meat holds documented firsts in Ethereum's history:</p>
+            <table class="custody-table" style="margin-top:0.75rem;">
+                <thead>
+                    <tr>
+                        <th>Achievement</th>
+                        <th>Date</th>
+                        <th>Significance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Pre-ERC-20 Token</td>
+                        <td>Mar 2016</td>
+                        <td>Deployed before the ERC-20 standard was formalized</td>
+                    </tr>
+                    <tr>
+                        <td>First On-Chain DEX Demo</td>
+                        <td>Mar 2016</td>
+                        <td>Used in earliest known demonstration of decentralized token exchange</td>
+                    </tr>
+                    <tr>
+                        <td>First Token Upgrade Pattern</td>
+                        <td>2016–2024</td>
+                        <td>Community created wrapper (w🍖) — early token migration pattern</td>
+                    </tr>
+                    <tr>
+                        <td>First Quadratic Voting DAO</td>
+                        <td>Mar 2016</td>
+                        <td>Grinder Association used √token voting power, predating Gitcoin</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Supply Facts -->
+        <div class="cert-section">
+            <p class="cert-section-title">VI. Supply &amp; Distribution</p>
+            <div class="cert-stats">
+                <div class="cert-stat">
+                    <div class="cert-stat-value">100B</div>
+                    <div class="cert-stat-label">Total Supply</div>
+                </div>
+                <div class="cert-stat">
+                    <div class="cert-stat-value">Fixed</div>
+                    <div class="cert-stat-label">Mintability</div>
+                </div>
+                <div class="cert-stat">
+                    <div class="cert-stat-value">Renounced</div>
+                    <div class="cert-stat-label">Ownership</div>
+                </div>
+            </div>
+            <p style="margin-top:0.75rem; font-size:0.88rem; color:var(--ink-light);">Ownership of the Wrapped Unicorn Meat contract has been renounced. No minting, burning, or parameter changes are possible. The supply is immutable.</p>
+        </div>
+
+        <!-- External Verification -->
+        <div class="cert-section">
+            <p class="cert-section-title">VII. External Verification</p>
+            <p>This token's provenance has been independently documented by third-party archival services:</p>
+            <div class="cert-badges">
+                <a href="https://etherscan.io/token/0xed6ac8de7c7ca7e3a22952e09c2a2a1232ddef9a" class="cert-badge" target="_blank" rel="noopener">🔍 Etherscan</a>
+                <a href="https://ethereumhistory.com/contract/0xED6aC8de7c7CA7e3A22952e09C2a2A1232DDef9A" class="cert-badge" target="_blank" rel="noopener">📜 EthereumHistory</a>
+                <a href="https://etherscan.io/address/0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7" class="cert-badge" target="_blank" rel="noopener">🦄 Original Contract</a>
+                <a href="https://dexscreener.com/ethereum/0xd835c3e83d9760a8fa1aaabfb9a5a3e363bec995" class="cert-badge" target="_blank" rel="noopener">📊 DexScreener</a>
+            </div>
+        </div>
+
+        <!-- Seal -->
+        <div class="cert-seal">
+            <div class="seal-circle" aria-hidden="true">🍖</div>
+            <p class="seal-text">Unicorn Meat · Est. March 2016 · Ethereum Mainnet</p>
+            <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:0.8rem; color:var(--ink-light); margin-top:0.2rem;">A piece of Ethereum history, verified on-chain.</p>
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="cert-actions">
+        <button class="cert-btn primary" id="share-btn" aria-label="Share this certificate">
+            ↑ Share Certificate
+        </button>
+        <a class="cert-btn" href="/" aria-label="Back to main site">
+            ← Back to Site
+        </a>
+        <a class="cert-btn" href="https://etherscan.io/token/0xed6ac8de7c7ca7e3a22952e09c2a2a1232ddef9a" target="_blank" rel="noopener" aria-label="View on Etherscan">
+            🔍 Verify On-Chain
+        </a>
+    </div>
+</main>
+
+<!-- Footer -->
+<div class="prov-footer">
+    <p><a href="/">Unicorn Meat</a> · <a href="/#references">Links</a> · <a href="/how-to-buy">How to Buy</a> · <a href="/grinder-association">DAO</a></p>
+    <p style="margin-top:0.25rem;">© 2026 Unicorn Meat. On-chain data is immutable and publicly verifiable.</p>
+</div>
+
+<script>
+document.getElementById('share-btn').addEventListener('click', async () => {
+    const shareData = {
+        title: 'Certificate of Authenticity — Unicorn Meat (🍖)',
+        text: 'Unicorn Meat: one of the earliest tokens on Ethereum, created in March 2016 by Alex Van de Sande of the Ethereum Foundation. Verified on-chain.',
+        url: 'https://unicornmeateth.com/provenance'
+    };
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        try { await navigator.share(shareData); } catch(e) { if (e.name !== 'AbortError') copyFallback(); }
+    } else {
+        copyFallback();
+    }
+});
+
+function copyFallback() {
+    navigator.clipboard.writeText('https://unicornmeateth.com/provenance').then(() => {
+        const btn = document.getElementById('share-btn');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ Link Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    }).catch(() => {
+        window.prompt('Copy this link:', 'https://unicornmeateth.com/provenance');
+    });
+}
+</script>
+
+</body>
+</html>
