@@ -1,0 +1,146 @@
+[
+  {
+    "address": "0x96a853Dc027C88DbDB72A07C7C0356f2faf1578d",
+    "ens": "treasury.unicornmeat.eth",
+    "displayName": "treasury.unicornmeat.eth",
+    "avatar": "https://metadata.ens.domains/mainnet/avatar/treasury.unicornmeat.eth",
+    "share": 11.04,
+    "label": "🏛️ Treasury"
+  },
+  {
+    "address": "0xd14430492d0Bb1D1471b9044Fd3C74FDcf67C883",
+    "ens": "ecosystem.unicornmeat.eth",
+    "displayName": "ecosystem.unicornmeat.eth",
+    "avatar": "https://metadata.ens.domains/mainnet/avatar/ecosystem.unicornmeat.eth",
+    "share": 9.4,
+    "label": "🌱 Ecosystem"
+  },
+  {
+    "address": "0x435b5927fb67B9B286e94EfD10B3f47B2091D094",
+    "ens": null,
+    "displayName": "0x435…D094",
+    "avatar": null,
+    "share": 7.88,
+    "label": null
+  },
+  {
+    "address": "0x2d1BB9cbd9bBA9A5Ec0dF23A701226795374Dd70",
+    "ens": null,
+    "displayName": "0x2d1…Dd70",
+    "avatar": null,
+    "share": 1.73,
+    "label": null
+  },
+  {
+    "address": "0x2CDE9919e81b20B4B33DD562a48a84b54C48F00C",
+    "ens": null,
+    "displayName": "0x2CD…F00C",
+    "avatar": null,
+    "share": 1.29,
+    "label": null
+  },
+  {
+    "address": "0x539703EC090045DAe330339BdA752DaEEDE93267",
+    "ens": null,
+    "displayName": "0x539…3267",
+    "avatar": null,
+    "share": 1.11,
+    "label": null
+  },
+  {
+    "address": "0x374139a05Ac55917BADd3F934f1B93f5C8623Ded",
+    "ens": null,
+    "displayName": "0x374…3Ded",
+    "avatar": null,
+    "share": 0.86,
+    "label": null
+  },
+  {
+    "address": "0x000461A73d3985eef4923655782aA5d0De75C111",
+    "ens": "eca.eth",
+    "displayName": "eca.eth",
+    "avatar": "https://metadata.ens.domains/mainnet/avatar/eca.eth",
+    "share": 0.81,
+    "label": null
+  },
+  {
+    "address": "0x471921Daf741eAf0e4C93b0e6E351DFA09eC15aa",
+    "ens": null,
+    "displayName": "0x471…15aa",
+    "avatar": null,
+    "share": 0.77,
+    "label": null
+  },
+  {
+    "address": "0xf39A646296d218CD8f023C8FF500D97D2a7C885B",
+    "ens": null,
+    "displayName": "0xf39…885B",
+    "avatar": null,
+    "share": 0.73,
+    "label": null
+  },
+  {
+    "address": "0x883cF7F49a5202F332eE2c8226A5902AD79c2120",
+    "ens": null,
+    "displayName": "0x883…2120",
+    "avatar": null,
+    "share": 0.6,
+    "label": null
+  },
+  {
+    "address": "0xaf8DCE0CD3616767d728AC3cDA5E452963a8C758",
+    "ens": "pow.eth",
+    "displayName": "pow.eth",
+    "avatar": "https://metadata.ens.domains/mainnet/avatar/pow.eth",
+    "share": 0.56,
+    "label": null
+  },
+  {
+    "address": "0xf2614f36f9c50F36CDA6077E0E63A783D7BdCD82",
+    "ens": null,
+    "displayName": "0xf26…D82",
+    "avatar": null,
+    "share": 0.5,
+    "label": null
+  },
+  {
+    "address": "0x2957fad4633837Cc14EEcC92EC73ec2804016Ff5",
+    "ens": null,
+    "displayName": "0x295…6Ff5",
+    "avatar": null,
+    "share": 0.5,
+    "label": null
+  },
+  {
+    "address": "0x8D73a36d78E2aE4A437053C9cE3BE70D483aB74d",
+    "ens": "pnl.eth",
+    "displayName": "pnl.eth",
+    "avatar": "https://metadata.ens.domains/mainnet/avatar/pnl.eth",
+    "share": 0.45,
+    "label": null
+  },
+  {
+    "address": "0x99fe77963c79DbC6D1A6F48A5c29Df5D5D8Da435",
+    "ens": null,
+    "displayName": "0x99f…a435",
+    "avatar": null,
+    "share": 0.45,
+    "label": null
+  },
+  {
+    "address": "0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb",
+    "ens": "alex.vandesande.eth",
+    "displayName": "alex.vandesande.eth",
+    "avatar": "https://metadata.ens.domains/mainnet/avatar/alex.vandesande.eth",
+    "share": 0.44,
+    "label": "🌈 Creator"
+  },
+  {
+    "address": "0xf7E13a393f1Bf20A0ef5A92328531E10F5602B42",
+    "ens": null,
+    "displayName": "0xf7E…2B42",
+    "avatar": null,
+    "share": 0.44,
+    "label": null
+  }
+]
