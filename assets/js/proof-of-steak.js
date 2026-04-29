@@ -417,6 +417,8 @@
                 statusText = 'Ended';
             }
 
+            updateSeasonLiveCopy(statusText);
+
             document.getElementById('season-status').textContent = statusText;
             document.getElementById('season-start').textContent = startTime > 0 ? new Date(startTime * 1000).toLocaleString() : 'Not started';
             document.getElementById('season-end').textContent = endTime > 0 ? new Date(endTime * 1000).toLocaleString() : 'Not started';
@@ -444,6 +446,28 @@
             hideLoading();
             showError('Failed to load staking information: ' + error.message);
         }
+    }
+
+    function updateSeasonLiveCopy(statusText) {
+        const copyEl = document.getElementById('season-live-copy');
+        if (!copyEl) return;
+
+        if (statusText === 'Active') {
+            copyEl.textContent = 'Season 2 is live with a 750,000 w🍖 reward pool over 45 days using the same mechanic as Season 1.';
+            return;
+        }
+
+        if (statusText === 'Ended') {
+            copyEl.textContent = 'Season 2 has ended. You can still unsteak and check final rewards below.';
+            return;
+        }
+
+        if (statusText === 'Ready to Start') {
+            copyEl.textContent = 'Season 2 is marinating on-chain. First steak kicks off the meat race.';
+            return;
+        }
+
+        copyEl.textContent = 'Season 2 is not live on-chain yet. Check back soon for the live start.';
     }
 
     async function handleRefreshStats() {
@@ -823,6 +847,7 @@
         document.getElementById('time-remaining').textContent = 'Not live yet';
         document.getElementById('total-steaked').textContent = '0 w🍖';
         document.getElementById('reward-pool').textContent = PROOF_OF_STEAK_CONFIG.currentSeason.rewardPoolDisplay;
+        updateSeasonLiveCopy('Awaiting deployment');
     }
 
     function formatSeasonLengthText(seasonLength) {
