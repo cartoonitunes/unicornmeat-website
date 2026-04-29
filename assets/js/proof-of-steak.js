@@ -1,4 +1,4 @@
-// Proof of Steak Season 1 - Contract Interaction
+// Proof of Steak Season 2 loader with Season 1 archive fallback copy
 // Handles staking and unstaking of Unicorn Meat (w🍖)
 
 (function() {
@@ -31,7 +31,20 @@
         originalConsoleWarn.apply(console, args);
     };
 
-    const PROOF_OF_STEAK_CONTRACT_ADDRESS = '0x715d50635fE3CDe8A4b7f4601D266459bee60EcA';
+    const PROOF_OF_STEAK_CONFIG = {
+        currentSeason: {
+            label: 'Season 2',
+            contractAddress: '0x73ca70DBff82fCD269Eb37b1F437DfD7F5CD433e',
+            rewardPoolDisplay: '750,000 w🍖',
+            seasonLengthSeconds: 3888000
+        },
+        archiveSeason: {
+            label: 'Season 1',
+            contractAddress: '0x715d50635fE3CDe8A4b7f4601D266459bee60EcA'
+        }
+    };
+
+    const PROOF_OF_STEAK_CONTRACT_ADDRESS = PROOF_OF_STEAK_CONFIG.currentSeason.contractAddress;
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
     const READ_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For read operations
     const WRITE_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For write operations (wallet provider used for actual txns)
@@ -182,6 +195,13 @@
     });
 
     function init() {
+        applySeasonCopy();
+
+        if (!PROOF_OF_STEAK_CONTRACT_ADDRESS) {
+            showSeasonPending();
+            return;
+        }
+
         // Wait for ethers.js to be available
         if (typeof window.ethers === 'undefined') {
             showError('Ethers.js library is required. Please refresh the page.');
@@ -403,24 +423,7 @@
             
             // Format season length
             const seasonLength = seasonLengthSeconds.toNumber();
-            const seasonDays = Math.floor(seasonLength / 86400);
-            const seasonHours = Math.floor((seasonLength % 86400) / 3600);
-            const seasonMinutes = Math.floor((seasonLength % 3600) / 60);
-            let seasonLengthText = '';
-            if (seasonDays > 0) {
-                seasonLengthText = `${seasonDays} day${seasonDays !== 1 ? 's' : ''}`;
-                if (seasonHours > 0) {
-                    seasonLengthText += ` ${seasonHours} hour${seasonHours !== 1 ? 's' : ''}`;
-                }
-            } else if (seasonHours > 0) {
-                seasonLengthText = `${seasonHours} hour${seasonHours !== 1 ? 's' : ''}`;
-                if (seasonMinutes > 0) {
-                    seasonLengthText += ` ${seasonMinutes} minute${seasonMinutes !== 1 ? 's' : ''}`;
-                }
-            } else {
-                seasonLengthText = `${seasonMinutes} minute${seasonMinutes !== 1 ? 's' : ''}`;
-            }
-            document.getElementById('season-length').textContent = seasonLengthText;
+            document.getElementById('season-length').textContent = formatSeasonLengthText(seasonLength);
             
             if (isStarted && now < endTime) {
                 const remaining = endTime - now;
@@ -769,6 +772,78 @@
         } finally {
             unsteakBtn.disabled = false;
         }
+    }
+
+    function applySeasonCopy() {
+        const currentAddress = document.getElementById('proof-of-steak-current-address');
+        const currentLink = document.getElementById('proof-of-steak-current-address-link');
+        const archiveLink = document.getElementById('proof-of-steak-archive-link');
+
+        if (currentAddress) {
+            currentAddress.textContent = PROOF_OF_STEAK_CONTRACT_ADDRESS;
+        }
+
+        if (currentLink) {
+            currentLink.href = `https://etherscan.io/address/${PROOF_OF_STEAK_CONTRACT_ADDRESS}`;
+            currentLink.textContent = PROOF_OF_STEAK_CONTRACT_ADDRESS;
+        }
+
+        if (archiveLink) {
+            archiveLink.href = `https://etherscan.io/address/${PROOF_OF_STEAK_CONFIG.archiveSeason.contractAddress}#code`;
+            archiveLink.textContent = PROOF_OF_STEAK_CONFIG.archiveSeason.contractAddress;
+        }
+    }
+
+    function showSeasonPending() {
+        hideLoading();
+        showSteakInfo();
+        hideSteakActions();
+        hideUserStats();
+        hideTransactionStatus();
+
+        const connectSection = document.getElementById('steak-connect-wallet');
+        if (connectSection) {
+            connectSection.style.display = 'none';
+        }
+
+        const note = document.getElementById('steak-deployment-note');
+        if (note) {
+            note.classList.remove('d-none');
+        }
+
+        const statsMessage = document.getElementById('steak-stats-not-logged-in');
+        if (statsMessage) {
+            statsMessage.innerHTML = '<p class="fs-7 sm:fs-6 mb-0">Season 2 wallet actions will appear here once the contract is deployed.</p>';
+        }
+
+        document.getElementById('season-status').textContent = 'Awaiting deployment';
+        document.getElementById('season-length').textContent = formatSeasonLengthText(PROOF_OF_STEAK_CONFIG.currentSeason.seasonLengthSeconds);
+        document.getElementById('season-start').textContent = 'TBD';
+        document.getElementById('season-end').textContent = 'TBD';
+        document.getElementById('time-remaining').textContent = 'Not live yet';
+        document.getElementById('total-steaked').textContent = '0 w🍖';
+        document.getElementById('reward-pool').textContent = PROOF_OF_STEAK_CONFIG.currentSeason.rewardPoolDisplay;
+    }
+
+    function formatSeasonLengthText(seasonLength) {
+        const seasonDays = Math.floor(seasonLength / 86400);
+        const seasonHours = Math.floor((seasonLength % 86400) / 3600);
+        const seasonMinutes = Math.floor((seasonLength % 3600) / 60);
+        let seasonLengthText = '';
+        if (seasonDays > 0) {
+            seasonLengthText = `${seasonDays} day${seasonDays !== 1 ? 's' : ''}`;
+            if (seasonHours > 0) {
+                seasonLengthText += ` ${seasonHours} hour${seasonHours !== 1 ? 's' : ''}`;
+            }
+        } else if (seasonHours > 0) {
+            seasonLengthText = `${seasonHours} hour${seasonHours !== 1 ? 's' : ''}`;
+            if (seasonMinutes > 0) {
+                seasonLengthText += ` ${seasonMinutes} minute${seasonMinutes !== 1 ? 's' : ''}`;
+            }
+        } else {
+            seasonLengthText = `${seasonMinutes} minute${seasonMinutes !== 1 ? 's' : ''}`;
+        }
+        return seasonLengthText;
     }
 
     // UI Helper Functions
