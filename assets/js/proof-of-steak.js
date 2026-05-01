@@ -308,12 +308,6 @@
             updateLastRefreshed();
         }, 1000);
 
-        // Sticky bar scroll listener
-        window.addEventListener('scroll', function() {
-            const bar = document.getElementById('steak-sticky-bar');
-            if (bar) bar.classList.toggle('visible', window.scrollY > 380);
-        }, { passive: true });
-
         // Base chain provider for bridge detection
         baseProvider = new window.ethers.providers.JsonRpcProvider('https://mainnet.base.org');
     }

@@ -211,15 +211,11 @@
 
         /* Sticky mini-bar */
         #steak-sticky-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 9999;
+            position: relative;
             background: #000;
             color: #fff;
             height: 44px;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             font-size: 13px;
@@ -229,7 +225,6 @@
             letter-spacing: 0.01em;
             border-bottom: 2px solid #ff4fa3;
         }
-        #steak-sticky-bar.visible { display: flex; }
         #steak-sticky-bar .sticky-sep { opacity: 0.35; }
         @media (max-width: 576px) {
             #steak-sticky-bar { font-size: 11px; gap: 8px; padding: 0 8px; }
@@ -696,7 +691,7 @@
     </script>
     <script defer src="/assets/js/walletkit.umd.js"></script>
     <script defer src="/assets/js/walletkit-integration.js"></script>
-    <script defer src="/assets/js/proof-of-steak.js"></script>
+    <script defer src="/assets/js/proof-of-steak.js?v=3"></script>
     <script defer src="/assets/js/app.js"></script>
 </body>
 
