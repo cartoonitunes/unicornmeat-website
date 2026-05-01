@@ -860,18 +860,20 @@
             return;
         }
 
-        if (!window.ethereum) {
-            showError('Please connect your wallet to stake');
+        let signer;
+        if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected && window.unicornMeatWalletKit.signer) {
+            signer = window.unicornMeatWalletKit.signer;
+        } else if (window.ethereum) {
+            const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
+            signer = walletProvider.getSigner();
+        } else {
+            showError('Please connect your wallet to steak');
             return;
         }
 
         try {
             steakBtn.disabled = true;
             showTransactionStatus('Preparing transaction...');
-
-            // Get signer from wallet provider (for write operations)
-            const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
-            const signer = walletProvider.getSigner();
             const contractWithSigner = writeContract.connect(signer);
             const tokenContractWithSigner = writeTokenContract.connect(signer);
 
@@ -931,7 +933,13 @@
             return;
         }
 
-        if (!window.ethereum) {
+        let signer;
+        if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected && window.unicornMeatWalletKit.signer) {
+            signer = window.unicornMeatWalletKit.signer;
+        } else if (window.ethereum) {
+            const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
+            signer = walletProvider.getSigner();
+        } else {
             showError('Please connect your wallet to unsteak');
             return;
         }
@@ -939,10 +947,6 @@
         try {
             unsteakBtn.disabled = true;
             showTransactionStatus('Preparing unsteak transaction...');
-
-            // Get signer from wallet provider (for write operations)
-            const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
-            const signer = walletProvider.getSigner();
             const contractWithSigner = writeContract.connect(signer);
 
             showTransactionStatus('Unstaking your Meat... Please confirm in your wallet.');
