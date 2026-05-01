@@ -49,6 +49,60 @@
     const READ_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For read operations
     const WRITE_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For write operations (wallet provider used for actual txns)
 
+    // Public steaking UI opens May 1, 2026 at 00:00 US Eastern (EDT, UTC-4).
+    const STEAKING_OPENS_MS = new Date('2026-05-01T04:00:00.000Z').getTime();
+    let steakActionAllowed = false;
+
+    function computeSteakActionAllowed(isStarted, nowSec, endTime) {
+        if (Date.now() < STEAKING_OPENS_MS) {
+            return false;
+        }
+        if (!isStarted) {
+            return false;
+        }
+        if (endTime <= 0) {
+            return false;
+        }
+        return nowSec < endTime;
+    }
+
+    function isBeforePublicSteakOpen() {
+        return Date.now() < STEAKING_OPENS_MS;
+    }
+
+    function canSubmitSteakTransaction() {
+        if (isBeforePublicSteakOpen()) {
+            return false;
+        }
+        return steakActionAllowed;
+    }
+
+    function updateSteakButtonHint(steakBtn) {
+        if (!steakBtn) {
+            return;
+        }
+        if (!canSubmitSteakTransaction()) {
+            if (isBeforePublicSteakOpen()) {
+                steakBtn.title = 'Steaking opens May 1, 2026.';
+            } else {
+                steakBtn.title = 'Steaking is not available until the season is active on-chain.';
+            }
+        } else {
+            steakBtn.title = '';
+        }
+    }
+
+    function lockSteakButtonForGate() {
+        const btn = document.getElementById('steak-btn');
+        if (!btn) {
+            return;
+        }
+        if (!canSubmitSteakTransaction()) {
+            btn.disabled = true;
+            updateSteakButtonHint(btn);
+        }
+    }
+
     // Proof of Steak Contract ABI
     const PROOF_OF_STEAK_ABI = [
         {
@@ -188,6 +242,8 @@
     let readTokenContract; // Token contract for read operations
     let writeTokenContract; // Token contract for write operations (uses wallet provider)
     let userAddress = null;
+    let seasonEndTime = 0;
+    let lastRefreshTime = 0;
 
     // Initialize on DOM ready
     document.addEventListener('DOMContentLoaded', function() {
@@ -196,6 +252,7 @@
 
     function init() {
         applySeasonCopy();
+        lockSteakButtonForGate();
 
         if (!PROOF_OF_STEAK_CONTRACT_ADDRESS) {
             showSeasonPending();
@@ -236,6 +293,17 @@
 
         // Check if wallet is already connected
         checkWalletConnection();
+
+        // Auto-refresh every 30 seconds
+        setInterval(function() {
+            loadSteakData();
+            if (userAddress) loadUserStats();
+        }, 30000);
+        // Live countdown ticker + last-refreshed label (every second)
+        setInterval(function() {
+            updateHeroCountdown();
+            updateLastRefreshed();
+        }, 1000);
     }
 
     function setupEventListeners() {
@@ -263,6 +331,21 @@
 
         if (refreshBtn) {
             refreshBtn.addEventListener('click', handleRefreshStats);
+        }
+
+        const maxBtn = document.getElementById('steak-max-btn');
+        if (maxBtn) {
+            maxBtn.addEventListener('click', handleMaxSteak);
+        }
+
+        const shareXBtn = document.getElementById('share-x-btn');
+        if (shareXBtn) {
+            shareXBtn.addEventListener('click', handleShareX);
+        }
+
+        const shareFcBtn = document.getElementById('share-fc-btn');
+        if (shareFcBtn) {
+            shareFcBtn.addEventListener('click', handleShareFarcaster);
         }
     }
 
@@ -405,6 +488,7 @@
             const now = Math.floor(Date.now() / 1000);
             const startTime = seasonStart.toNumber();
             const endTime = seasonEnd.toNumber();
+            seasonEndTime = endTime;
             const isStarted = seasonStarted;
             const isFunded = rewardPoolFunded;
 
@@ -416,6 +500,8 @@
             } else if (isStarted && now >= endTime) {
                 statusText = 'Ended';
             }
+
+            steakActionAllowed = computeSteakActionAllowed(isStarted, now, endTime);
 
             updateSeasonLiveCopy(statusText);
 
@@ -441,6 +527,22 @@
 
             hideLoading();
             showSteakInfo();
+
+            // Progress bar
+            if (isStarted && startTime > 0) {
+                updateProgressBar(startTime, endTime);
+            }
+            // Staker count
+            loadStakerCount();
+            // Last refreshed
+            lastRefreshTime = Math.floor(Date.now() / 1000);
+            updateLastRefreshed();
+
+            if (userAddress) {
+                validateSteakAmount();
+            } else {
+                lockSteakButtonForGate();
+            }
         } catch (error) {
             console.error('Error loading steak data:', error);
             hideLoading();
@@ -533,11 +635,28 @@
             // user-steak-time is commented out in HTML, so we don't set it
             // document.getElementById('user-steak-time').textContent = formatLargeNumber(userSteakTime.toString());
             document.getElementById('user-max-amount').textContent = formatTokenAmount(userMaxAmount, decimals) + ' w🍖';
-            
+
+            // Eligibility warning
+            const eligibilityDiv = document.getElementById('steak-eligibility-status');
+            if (eligibilityDiv && !userSteakAmount.isZero()) {
+                if (userSteakAmount.lt(userMaxAmount)) {
+                    const deficit = userMaxAmount.sub(userSteakAmount);
+                    eligibilityDiv.className = 'steak-eligibility-warning mt-2 mb-2';
+                    eligibilityDiv.innerHTML = `⚠️ <strong>Off the grill!</strong> You've dropped below your peak of ${formatTokenAmount(userMaxAmount, decimals)} w🍖. Steak at least ${formatTokenAmount(deficit, decimals)} more to stay eligible for the feast.`;
+                } else {
+                    eligibilityDiv.className = 'steak-eligibility-ok mt-2 mb-2';
+                    eligibilityDiv.innerHTML = `✅ <strong>Well done!</strong> Your steak is eligible for the feast.`;
+                }
+                eligibilityDiv.classList.remove('d-none');
+            } else if (eligibilityDiv) {
+                eligibilityDiv.classList.add('d-none');
+            }
+
             // Format last update timestamp
             const lastUpdateTime = lastUpdate.toNumber();
             if (lastUpdateTime > 0) {
-                document.getElementById('user-last-update').textContent = new Date(lastUpdateTime * 1000).toLocaleString();
+                const durationSecs = now - lastUpdateTime;
+                document.getElementById('user-last-update').textContent = formatSteakingDuration(durationSecs) + ' ago';
             } else {
                 document.getElementById('user-last-update').textContent = 'Never';
             }
@@ -615,18 +734,28 @@
             
             // Display pending reward
             const isSeasonEnded = isStarted && now >= endTime;
+            const pendingEl = document.getElementById('user-pending-reward');
             if (simulatedPendingReward.gt(0)) {
-                document.getElementById('user-pending-reward').textContent = formatTokenAmount(simulatedPendingReward, decimals) + ' w🍖';
+                pendingEl.textContent = formatTokenAmount(simulatedPendingReward, decimals) + ' w🍖';
             } else if (isSeasonEnded) {
-                document.getElementById('user-pending-reward').textContent = '0 w🍖 (Not eligible - see requirements)';
+                pendingEl.textContent = '0 w🍖 (Not eligible — see requirements above)';
+            } else if (simulatedUserSteakTime.gt(0) && simulatedTotalSteakTime.gt(0)) {
+                const estBN = rewardPoolBN.mul(simulatedUserSteakTime).div(simulatedTotalSteakTime);
+                pendingEl.textContent = '~' + formatTokenAmount(estBN, decimals) + ' w🍖 (estimated)';
             } else {
-                document.getElementById('user-pending-reward').textContent = '0 w🍖 (Available after season ends)';
+                pendingEl.textContent = '0 w🍖 (Steak to start earning)';
             }
             
             document.getElementById('user-claimed').textContent = steakInfo.claimed ? 'Yes' : 'No';
             document.getElementById('user-meat-balance').textContent = formatTokenAmount(balance, decimals);
 
             showUserStats();
+
+            // Show share section if user has steaked
+            const shareSection = document.getElementById('steak-share-section');
+            if (shareSection && !userSteakAmount.isZero()) {
+                shareSection.classList.remove('d-none');
+            }
 
             // Update button states
             const unsteakBtn = document.getElementById('unsteak-btn');
@@ -644,7 +773,16 @@
         const amountInput = document.getElementById('steak-amount');
         
         if (!steakBtn || !amountInput || !userAddress) {
-            if (steakBtn) steakBtn.disabled = true;
+            if (steakBtn) {
+                steakBtn.disabled = true;
+                updateSteakButtonHint(steakBtn);
+            }
+            return;
+        }
+
+        if (!canSubmitSteakTransaction()) {
+            steakBtn.disabled = true;
+            updateSteakButtonHint(steakBtn);
             return;
         }
 
@@ -652,6 +790,7 @@
         
         if (!amount || amount <= 0 || isNaN(amount)) {
             steakBtn.disabled = true;
+            updateSteakButtonHint(steakBtn);
             return;
         }
 
@@ -664,12 +803,15 @@
             const balanceBN = balance._hex ? window.ethers.BigNumber.from(balance._hex) : balance;
             if (amountWei.gt(balanceBN)) {
                 steakBtn.disabled = true;
+                updateSteakButtonHint(steakBtn);
                 return;
             }
 
             steakBtn.disabled = false;
+            updateSteakButtonHint(steakBtn);
         } catch (error) {
             steakBtn.disabled = true;
+            updateSteakButtonHint(steakBtn);
         }
     }
 
@@ -679,6 +821,15 @@
         
         if (!amountInput || !steakBtn || !userAddress) {
             showError('Please connect your wallet first');
+            return;
+        }
+
+        if (!canSubmitSteakTransaction()) {
+            if (isBeforePublicSteakOpen()) {
+                showError('Steaking opens May 1, 2026.');
+            } else {
+                showError('Steaking is not available until the season is active on-chain.');
+            }
             return;
         }
 
@@ -747,7 +898,7 @@
                 showError('Failed to stake: ' + (error.message || 'Unknown error'));
             }
         } finally {
-            steakBtn.disabled = false;
+            await validateSteakAmount();
         }
     }
 
@@ -819,6 +970,7 @@
     }
 
     function showSeasonPending() {
+        steakActionAllowed = false;
         hideLoading();
         showSteakInfo();
         hideSteakActions();
@@ -848,6 +1000,12 @@
         document.getElementById('total-steaked').textContent = '0 w🍖';
         document.getElementById('reward-pool').textContent = PROOF_OF_STEAK_CONFIG.currentSeason.rewardPoolDisplay;
         updateSeasonLiveCopy('Awaiting deployment');
+
+        const steakBtnPending = document.getElementById('steak-btn');
+        if (steakBtnPending) {
+            steakBtnPending.disabled = true;
+            updateSteakButtonHint(steakBtnPending);
+        }
     }
 
     function formatSeasonLengthText(seasonLength) {
@@ -922,7 +1080,11 @@
         if (resultMessages) {
             const div = document.createElement('div');
             div.className = 'alert alert-success border border-2 border-black contrast-shadow-sm mt-3';
-            div.innerHTML = `<i class="icon icon-check me-2"></i>${message}`;
+            const linkedMsg = message.replace(
+                /Transaction: (0x[0-9a-fA-F]{64})/,
+                'Transaction: <a href="https://etherscan.io/tx/$1" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; word-break: break-all;">$1</a>'
+            );
+            div.innerHTML = `<i class="icon icon-check me-2"></i>${linkedMsg}`;
             resultMessages.appendChild(div);
             
             setTimeout(() => {
@@ -949,6 +1111,111 @@
             minimumFractionDigits: 0,
             maximumFractionDigits: decimals
         });
+    }
+
+    function formatSteakingDuration(seconds) {
+        if (seconds < 60) return `${seconds}s`;
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        if (days > 0) return `${days} day${days !== 1 ? 's' : ''}, ${hours} hr${hours !== 1 ? 's' : ''}`;
+        if (hours > 0) return `${hours} hr${hours !== 1 ? 's' : ''}, ${minutes} min`;
+        return `${minutes} min`;
+    }
+
+    function updateProgressBar(startTime, endTime) {
+        const now = Math.floor(Date.now() / 1000);
+        const total = endTime - startTime;
+        const elapsed = Math.min(Math.max(now - startTime, 0), total);
+        const pct = total > 0 ? Math.round((elapsed / total) * 100) : 0;
+        const dayNum = Math.min(Math.floor(elapsed / 86400) + 1, Math.ceil(total / 86400));
+        const totalDays = Math.ceil(total / 86400);
+
+        const bar = document.getElementById('season-progress-bar');
+        const label = document.getElementById('season-progress-label');
+        const pctEl = document.getElementById('season-progress-pct');
+        if (bar) bar.style.width = pct + '%';
+        if (label) label.textContent = `Day ${dayNum} of ${totalDays}`;
+        if (pctEl) pctEl.textContent = pct + '%';
+    }
+
+    async function loadStakerCount() {
+        try {
+            const topic = window.ethers.utils.id('Steaked(address,uint256)');
+            const logs = await readProvider.getLogs({
+                address: PROOF_OF_STEAK_CONTRACT_ADDRESS,
+                topics: [topic],
+                fromBlock: 0,
+                toBlock: 'latest'
+            });
+            const unique = new Set(logs.map(l => l.topics[1]));
+            const el = document.getElementById('staker-count');
+            if (el) el.textContent = unique.size + ' on the grill';
+        } catch (e) {
+            // Non-critical, ignore silently
+        }
+    }
+
+    function updateHeroCountdown() {
+        const countdownEl = document.getElementById('hero-countdown');
+        const countdownText = document.getElementById('hero-countdown-text');
+        if (!countdownEl || !countdownText || seasonEndTime === 0) return;
+
+        const now = Math.floor(Date.now() / 1000);
+        if (now >= seasonEndTime) {
+            countdownEl.classList.remove('d-none');
+            countdownText.textContent = 'Season ended';
+            return;
+        }
+        const remaining = seasonEndTime - now;
+        const days = Math.floor(remaining / 86400);
+        const hours = Math.floor((remaining % 86400) / 3600);
+        const minutes = Math.floor((remaining % 3600) / 60);
+        const secs = remaining % 60;
+        countdownText.textContent = `${days}d ${hours}h ${minutes}m ${secs}s`;
+        countdownEl.classList.remove('d-none');
+    }
+
+    function updateLastRefreshed() {
+        const el = document.getElementById('last-refreshed-label');
+        if (!el || lastRefreshTime === 0) return;
+        const ago = Math.floor(Date.now() / 1000) - lastRefreshTime;
+        el.textContent = ago < 5 ? 'Just refreshed' : `Updated ${ago}s ago`;
+    }
+
+    async function handleMaxSteak() {
+        if (!userAddress) return;
+        try {
+            const balance = await readTokenContract.balanceOf(userAddress);
+            const decimals = 3;
+            const formatted = window.ethers.utils.formatUnits(balance, decimals);
+            const input = document.getElementById('steak-amount');
+            if (input) {
+                input.value = parseFloat(formatted).toFixed(decimals);
+                input.dispatchEvent(new Event('input'));
+            }
+        } catch (e) {
+            // Ignore
+        }
+    }
+
+    function handleShareX() {
+        const amountEl = document.getElementById('user-steaked-amount');
+        const amount = amountEl ? amountEl.textContent.trim() : '';
+        const text = amount
+            ? `I'm steaking ${amount} on the grill! 🔥🥩 Join the Unicorn Meat Proof of Steak Season 2 — 750,000 w🍖 reward pool. #UnicornMeat #ProofOfSteak`
+            : `I'm on the grill! 🔥🥩 Unicorn Meat Proof of Steak Season 2 is live — 750,000 w🍖 reward pool. #UnicornMeat #ProofOfSteak`;
+        const url = 'https://unicornmeat.xyz/steak';
+        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener,noreferrer');
+    }
+
+    function handleShareFarcaster() {
+        const amountEl = document.getElementById('user-steaked-amount');
+        const amount = amountEl ? amountEl.textContent.trim() : '';
+        const text = amount
+            ? `I'm steaking ${amount} on the grill! 🔥🥩 Unicorn Meat Proof of Steak Season 2 is live — 750,000 w🍖 reward pool. https://unicornmeat.xyz/steak`
+            : `I'm on the grill! 🔥🥩 Unicorn Meat Proof of Steak Season 2 — 750,000 w🍖 reward pool. https://unicornmeat.xyz/steak`;
+        window.open('https://warpcast.com/~/compose?text=' + encodeURIComponent(text), '_blank', 'noopener,noreferrer');
     }
 
     function formatLargeNumber(numStr) {
