@@ -1140,19 +1140,21 @@
     }
 
     async function loadStakerCount() {
+        // Contract deployed at block ~24,988,224; fromBlock:0 causes node to reject the range
+        const DEPLOY_BLOCK = 24988000;
         try {
             const topic = window.ethers.utils.id('Steaked(address,uint256)');
             const logs = await readProvider.getLogs({
                 address: PROOF_OF_STEAK_CONTRACT_ADDRESS,
                 topics: [topic],
-                fromBlock: 0,
+                fromBlock: DEPLOY_BLOCK,
                 toBlock: 'latest'
             });
             const unique = new Set(logs.map(l => l.topics[1]));
             const el = document.getElementById('staker-count');
             if (el) el.textContent = unique.size + ' on the grill';
         } catch (e) {
-            // Non-critical, ignore silently
+            console.warn('loadStakerCount failed:', e);
         }
     }
 
