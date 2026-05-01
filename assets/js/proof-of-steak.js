@@ -244,6 +244,9 @@
     let userAddress = null;
     let seasonEndTime = 0;
     let lastRefreshTime = 0;
+    let baseProvider = null;
+    let prevTotalSteaked = null;
+    let stickyData = { stakerCount: '-', totalSteaked: '-', progressLabel: 'Season active' };
 
     // Initialize on DOM ready
     document.addEventListener('DOMContentLoaded', function() {
@@ -304,6 +307,15 @@
             updateHeroCountdown();
             updateLastRefreshed();
         }, 1000);
+
+        // Sticky bar scroll listener
+        window.addEventListener('scroll', function() {
+            const bar = document.getElementById('steak-sticky-bar');
+            if (bar) bar.classList.toggle('visible', window.scrollY > 380);
+        }, { passive: true });
+
+        // Base chain provider for bridge detection
+        baseProvider = new window.ethers.providers.JsonRpcProvider('https://mainnet.base.org');
     }
 
     function setupEventListeners() {
@@ -481,7 +493,17 @@
 
             // Format and display in Season Information section
             const decimals = 3; // w🍖 has 3 decimals
-            document.getElementById('total-steaked').textContent = formatTokenAmount(totalSteaked, decimals) + ' w🍖';
+            const totalSteakedFormatted = formatTokenAmount(totalSteaked, decimals) + ' w🍖';
+            const totalSteakedEl = document.getElementById('total-steaked');
+            if (prevTotalSteaked !== null && prevTotalSteaked !== totalSteakedFormatted) {
+                totalSteakedEl.classList.remove('steak-pulse');
+                void totalSteakedEl.offsetWidth; // force reflow to restart animation
+                totalSteakedEl.classList.add('steak-pulse');
+                setTimeout(() => totalSteakedEl.classList.remove('steak-pulse'), 1100);
+            }
+            prevTotalSteaked = totalSteakedFormatted;
+            totalSteakedEl.textContent = totalSteakedFormatted;
+            stickyData.totalSteaked = formatTokenAmount(totalSteaked, decimals);
             document.getElementById('reward-pool').textContent = formatTokenAmount(rewardPool, decimals) + ' w🍖';
 
             // Season info
@@ -534,6 +556,8 @@
             }
             // Staker count
             loadStakerCount();
+            // Update sticky bar with current data (staker count updates async when getLogs resolves)
+            updateStickyBar();
             // Last refreshed
             lastRefreshTime = Math.floor(Date.now() / 1000);
             updateLastRefreshed();
@@ -748,6 +772,9 @@
             
             document.getElementById('user-claimed').textContent = steakInfo.claimed ? 'Yes' : 'No';
             document.getElementById('user-meat-balance').textContent = formatTokenAmount(balance, decimals);
+
+            // Check if user has Base w🍖 they should bridge over
+            checkBaseBridgeNeeded(balance).catch(() => {});
 
             showUserStats();
 
@@ -1137,6 +1164,7 @@
         if (bar) bar.style.width = pct + '%';
         if (label) label.textContent = `Day ${dayNum} of ${totalDays}`;
         if (pctEl) pctEl.textContent = pct + '%';
+        stickyData.progressLabel = `Day ${dayNum} of ${totalDays}`;
     }
 
     async function loadStakerCount() {
@@ -1153,6 +1181,8 @@
             const unique = new Set(logs.map(l => l.topics[1]));
             const el = document.getElementById('staker-count');
             if (el) el.textContent = unique.size + ' on the grill';
+            stickyData.stakerCount = unique.size.toString();
+            updateStickyBar();
         } catch (e) {
             console.warn('loadStakerCount failed:', e);
         }
@@ -1218,6 +1248,38 @@
             ? `I'm steaking ${amount} on the grill! 🔥🥩 Unicorn Meat Proof of Steak Season 2 is live — 750,000 w🍖 reward pool. https://unicornmeat.xyz/steak`
             : `I'm on the grill! 🔥🥩 Unicorn Meat Proof of Steak Season 2 — 750,000 w🍖 reward pool. https://unicornmeat.xyz/steak`;
         window.open('https://warpcast.com/~/compose?text=' + encodeURIComponent(text), '_blank', 'noopener,noreferrer');
+    }
+
+    function updateStickyBar() {
+        const sEl = document.getElementById('sticky-staker-count');
+        const tEl = document.getElementById('sticky-total-steaked');
+        const pEl = document.getElementById('sticky-progress-label');
+        if (sEl) sEl.textContent = stickyData.stakerCount;
+        if (tEl) tEl.textContent = stickyData.totalSteaked;
+        if (pEl) pEl.textContent = stickyData.progressLabel;
+    }
+
+    async function checkBaseBridgeNeeded(l1Balance) {
+        if (!userAddress || !baseProvider) return;
+        try {
+            const baseMeatContract = new window.ethers.Contract(
+                '0xa0ff87054690e4a367aeec61d1f13fd712f66a2c',
+                ERC20_ABI,
+                baseProvider
+            );
+            const baseBalance = await baseMeatContract.balanceOf(userAddress);
+            const callout = document.getElementById('base-bridge-callout');
+            if (!callout) return;
+            if (baseBalance.gt(0) && baseBalance.gt(l1Balance)) {
+                document.getElementById('base-balance-display').textContent =
+                    formatTokenAmount(baseBalance, 3);
+                callout.classList.remove('d-none');
+            } else {
+                callout.classList.add('d-none');
+            }
+        } catch (e) {
+            // Non-critical, ignore
+        }
     }
 
     function formatLargeNumber(numStr) {
