@@ -208,6 +208,59 @@
             font-size: 0.95rem;
             letter-spacing: 0.02em;
         }
+
+        /* Sticky mini-bar */
+        #steak-sticky-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: #000;
+            color: #fff;
+            height: 44px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            gap: 20px;
+            padding: 0 16px;
+            letter-spacing: 0.01em;
+            border-bottom: 2px solid #ff4fa3;
+        }
+        #steak-sticky-bar.visible { display: flex; }
+        #steak-sticky-bar .sticky-sep { opacity: 0.35; }
+        @media (max-width: 576px) {
+            #steak-sticky-bar { font-size: 11px; gap: 8px; padding: 0 8px; }
+        }
+
+        /* Base bridge callout */
+        .base-bridge-callout {
+            border: 2px solid #0052ff;
+            border-radius: 8px;
+            background: #eff6ff;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+        }
+        .base-bridge-callout a { color: #0052ff; font-weight: 600; }
+
+        /* Pulse animation when totalSteaked changes */
+        @keyframes steakPulse {
+            0%   { color: inherit; }
+            50%  { color: #4ade80; }
+            100% { color: inherit; }
+        }
+        .steak-pulse { animation: steakPulse 1s ease; }
+
+        /* Mobile improvements */
+        @media (max-width: 767px) {
+            .steak-progress-bar-outer { height: 24px; }
+            #season-progress-label { font-size: 0.95rem; }
+            .steak-share-btns-wrap { flex-direction: column; }
+            .steak-share-btns-wrap .btn { width: 100%; }
+            #steak-info .mb-4 { margin-bottom: 1rem !important; }
+        }
     </style>
 
     <script type="application/ld+json">
@@ -226,6 +279,13 @@
 </head>
 
 <body class="uni-body panel uni-body panel bg-white text-black overflow-x-hidden disable-cursor">
+    <div id="steak-sticky-bar">
+        <span>🥩 <span id="sticky-staker-count">-</span> steakers</span>
+        <span class="sticky-sep">|</span>
+        <span><span id="sticky-total-steaked">-</span> w🍖 on the grill</span>
+        <span class="sticky-sep">|</span>
+        <span id="sticky-progress-label">Season active</span>
+    </div>
     <a href="#main-content" class="skip-to-content">Skip to content</a>
 
     <div id="uc-menu-panel" data-uc-offcanvas="overlay: true;">
@@ -504,6 +564,15 @@
                                         </small>
                                     </p>
 
+                                    <div id="base-bridge-callout" class="base-bridge-callout mb-4 d-none">
+                                        🌉 You have <strong><span id="base-balance-display">-</span> w🍖 on Base</strong>! Bridge to Ethereum to steak.
+                                        <div class="mt-2">
+                                            <a href="https://superbridge.app/base" target="_blank" rel="noopener noreferrer">Superbridge (official)</a> ·
+                                            <a href="https://app.across.to" target="_blank" rel="noopener noreferrer">Across</a> ·
+                                            <a href="https://relay.link" target="_blank" rel="noopener noreferrer">Relay</a> — for instant bridging.
+                                        </div>
+                                    </div>
+
                                     <div class="panel p-4 border border-2 border-black contrast-shadow-sm bg-white mb-4">
                                         <h5 class="h5 mb-3 text-uppercase fw-bold">Steak Your Meat 🥩</h5>
                                         <div class="mb-3">
@@ -530,7 +599,7 @@
 
                                 <div id="steak-share-section" class="d-none panel p-3 border border-2 border-black contrast-shadow-sm bg-white mb-4 text-center">
                                     <p class="fw-bold mb-2">🔥 Tell the herd you're on the grill!</p>
-                                    <div class="d-flex gap-2 justify-content-center">
+                                    <div class="d-flex gap-2 justify-content-center steak-share-btns-wrap">
                                         <button id="share-x-btn" class="btn btn-sm border border-2 border-black share-btn-x">𝕏 Share on X</button>
                                         <button id="share-fc-btn" class="btn btn-sm border border-2 border-black share-btn-fc">🟣 Share on Farcaster</button>
                                     </div>
