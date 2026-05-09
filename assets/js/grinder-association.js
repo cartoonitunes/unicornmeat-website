@@ -137,8 +137,8 @@
         }
     ];
 
-    // RPC endpoint - using Rarible's Ethereum node
-    const RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node';
+    // RPC endpoint for read operations
+    const RPC_ENDPOINT = 'https://ethereum.publicnode.com';
     
     // Proposal transaction hashes in order (oldest to newest)
     const PROPOSAL_TX_HASHES = [

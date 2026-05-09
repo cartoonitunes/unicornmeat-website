@@ -46,8 +46,8 @@
 
     const PROOF_OF_STEAK_CONTRACT_ADDRESS = PROOF_OF_STEAK_CONFIG.currentSeason.contractAddress;
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
-    const READ_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For read operations
-    const WRITE_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For write operations (wallet provider used for actual txns)
+    const READ_RPC_ENDPOINT = 'https://ethereum.publicnode.com'; // For read operations
+    const WRITE_RPC_ENDPOINT = 'https://ethereum.publicnode.com'; // Fallback only — actual writes use the wallet provider
 
     // Public steaking UI opens May 1, 2026 at 00:00 US Eastern (EDT, UTC-4).
     const STEAKING_OPENS_MS = new Date('2026-05-01T04:00:00.000Z').getTime();
@@ -235,7 +235,7 @@
         }
     ];
 
-    let readProvider; // For read operations (Rarible)
+    let readProvider; // For read operations (public RPC)
     let writeProvider; // For write operations (uses wallet provider)
     let readContract; // Contract instance for read operations
     let writeContract; // Contract instance for write operations (uses wallet provider)
@@ -268,7 +268,7 @@
             return;
         }
 
-        // Set up read provider (Rarible) for read operations
+        // Set up read provider (public RPC) for read operations
         readProvider = new window.ethers.providers.JsonRpcProvider(READ_RPC_ENDPOINT);
         
         // Set up write provider (will use wallet provider when available, fallback to RPC)
@@ -280,7 +280,7 @@
             writeProvider = new window.ethers.providers.JsonRpcProvider(WRITE_RPC_ENDPOINT);
         }
 
-        // Create read contract instances (using Rarible for reads)
+        // Create read contract instances (using public RPC for reads)
         readContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, readProvider);
         readTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, readProvider);
         
@@ -474,7 +474,7 @@
             hideError();
             showLoading();
 
-            // Load general stats (using read contract with Rarible)
+            // Load general stats (using read contract with public RPC)
             const [totalSteaked, rewardPool, seasonStart, seasonEnd, seasonStarted, rewardPoolFunded, seasonLengthSeconds] = await Promise.all([
                 readContract.totalSteaked(),
                 readContract.rewardPool(),
@@ -619,7 +619,7 @@
         }
 
         try {
-            // Get all user steak information and related data (using read contract with Rarible)
+            // Get all user steak information and related data (using read contract with public RPC)
             const [steakInfo, balance, seasonEnd, seasonStarted, seasonStart, totalSteakTime, totalSteaked, rewardPool] = await Promise.all([
                 readContract.steaks(userAddress),
                 readTokenContract.balanceOf(userAddress),

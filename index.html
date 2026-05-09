@@ -1403,7 +1403,7 @@
                             }
                             
                             // Use HTTP provider for ENS lookup (more reliable)
-                            const rpcUrl = 'https://rarible.com/nodes/ethereum-node';
+                            const rpcUrl = 'https://ethereum.publicnode.com';
                             const readProvider = rpcUrl 
                                 ? new window.ethers.providers.JsonRpcProvider(rpcUrl)
                                 : new window.ethers.providers.Web3Provider(window.ethereum);
