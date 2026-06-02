@@ -419,14 +419,14 @@
 
     <script>
     // ═══════════════════════════════════════════════════════════════════
-    // UNICORN MARKET — PRODUCTION ONCHAIN ORDERBOOK
+    // UNICORN MARKET - PRODUCTION ONCHAIN ORDERBOOK
     // ═══════════════════════════════════════════════════════════════════
 
     // ─── Config ────────────────────────────────────────────────────────
     const CONTRACT_ADDRESS = '0xA352B50A91C648c97F7aC0a80D686D297b62693E'; // UPDATE ON DEPLOY
     const RPC_URLS = [
         'https://ethereum.publicnode.com',
-        'https://eth-mainnet.g.alchemy.com/v2/J3_kv3R_rj4tIrl60I1dQcLvkmIPaTyE',
+        'https://cloudflare-eth.com',
     ];
     const CHAIN_ID = 1; // Ethereum Mainnet
 
@@ -559,7 +559,6 @@
                     marketRead = c;
                     currentRpcIndex = i;
                     connected = true;
-                    console.log('UnicornMarket connected via RPC', RPC_URLS[i], 'orderCount:', count.toString());
                     break;
                 } catch (e) {
                     lastErr = e;
@@ -767,10 +766,8 @@
     }
 
     async function getLogsChunked(topic0, fromBlock, toBlock) {
-        // Free-tier RPC can cap eth_getLogs ranges and request rates.
-        // Public RPCs can handle larger ranges; Alchemy free-tier may need tiny chunks.
-        const usingPublicRpc = !(RPC_URLS[currentRpcIndex] || '').includes('alchemy.com');
-        const chunkSize = usingPublicRpc ? 250 : 10;
+        // Public RPCs can cap eth_getLogs ranges and request rates, so query in chunks.
+        const chunkSize = 250;
         const out = [];
         for (let start = fromBlock; start <= toBlock; start += chunkSize) {
             const end = Math.min(toBlock, start + chunkSize - 1);
