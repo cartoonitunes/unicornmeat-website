@@ -1,4 +1,4 @@
-// app.jsx — The Cauldron: layout, state orchestration, nav.
+// app.jsx - The Cauldron: layout, state orchestration, nav.
 //
 // Two operating modes:
 //   1. MOCK MODE (current default): window.CAULDRON.address is null. All state comes from

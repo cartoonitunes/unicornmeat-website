@@ -487,7 +487,6 @@
         async function fetchProposersFromTxHashes(provider, numProposals, isEthers) {
             const proposers = [];
             try {
-                console.log(`Fetching proposers from ${numProposals} transaction hashes...`);
                 
                 // Fetch proposer from each transaction hash
                 for (let i = 0; i < Math.min(PROPOSAL_TX_HASHES.length, numProposals); i++) {
@@ -1002,7 +1001,6 @@
             // Get all addresses and their kill counts with timestamps
             const killerData = await getKillerAddressesAndCounts(provider);
             
-            console.log(`Found ${killerData.length} unique killer addresses`);
             
             // Get ENS names for all addresses
             const killers = await Promise.all(
@@ -1029,7 +1027,6 @@
                     return a.earliestTimestamp - b.earliestTimestamp;
                 });
             
-            console.log(`Displaying ${activeKillers.length} active killers`);
 
             // Display the hall of fame
             listDiv.innerHTML = '';
@@ -1133,7 +1130,6 @@
         ];
         
         try {
-            console.log(`Fetching ${TXN_HASHES.length} transactions for Hall of Fame...`);
             
             // Fetch each transaction and extract the 'from' address and timestamp
             for (const txnHash of TXN_HASHES) {
@@ -1193,7 +1189,6 @@
                 earliestTimestamp: data.earliestTimestamp
             }));
             
-            console.log(`Found ${result.length} unique killer addresses with ${result.reduce((sum, k) => sum + k.count, 0)} total kills`);
             
             return result;
             

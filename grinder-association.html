@@ -1093,32 +1093,25 @@
                         const amountWei = web3.utils.toBN(amount.toString());
 
                         // Check if user has enough Unicorn tokens
-                        console.log('Checking Unicorn token balance...');
                         const balance = await unicornTokenContract.methods.balanceOf(userAddress).call();
                         const balanceBN = web3.utils.toBN(balance);
-                        
-                        console.log(`User has ${balance.toString()} Unicorn tokens`);
-                        
+
                         if (balanceBN.lt(amountWei)) {
                             showGrindError(`Insufficient Unicorn tokens. You have ${balance.toString()} but need ${amount}.`);
                             return;
                         }
 
                         // First, approve the grinder contract to spend Unicorn tokens
-                        console.log('Approving Unicorn tokens...');
-                        const approveTx = await unicornTokenContract.methods.approve(grinderAddress, amountWei).send({
+                        await unicornTokenContract.methods.approve(grinderAddress, amountWei).send({
                             from: userAddress,
                             gas: 100000
                         });
-                        console.log('Approval transaction:', approveTx);
 
                         // Then, call grindUnicorns
-                        console.log('Grinding Unicorns...');
-                        const grindTx = await grinderContract.methods.grindUnicorns(amountWei).send({
+                        await grinderContract.methods.grindUnicorns(amountWei).send({
                             from: userAddress,
                             gas: 200000
                         });
-                        console.log('Grind transaction:', grindTx);
 
                         showGrindSuccess(`Successfully ground ${amount} Unicorns! Check your wallet for Unicorn Meat tokens.`);
 

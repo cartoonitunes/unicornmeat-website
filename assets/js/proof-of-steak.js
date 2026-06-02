@@ -47,7 +47,7 @@
     const PROOF_OF_STEAK_CONTRACT_ADDRESS = PROOF_OF_STEAK_CONFIG.currentSeason.contractAddress;
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
     const READ_RPC_ENDPOINT = 'https://ethereum.publicnode.com'; // For read operations
-    const WRITE_RPC_ENDPOINT = 'https://ethereum.publicnode.com'; // Fallback only — actual writes use the wallet provider
+    const WRITE_RPC_ENDPOINT = 'https://ethereum.publicnode.com'; // Fallback only - actual writes use the wallet provider
 
     // Public steaking UI opens May 1, 2026 at 00:00 US Eastern (EDT, UTC-4).
     const STEAKING_OPENS_MS = new Date('2026-05-01T04:00:00.000Z').getTime();
@@ -1168,15 +1168,22 @@
     async function loadStakerCount() {
         // Contract deployed at block ~24,988,224; fromBlock:0 causes node to reject the range
         const DEPLOY_BLOCK = 24988000;
+        // publicnode caps eth_getLogs at 50,000 blocks per request - query in chunks
+        const CHUNK_SIZE = 49000;
         try {
             const topic = window.ethers.utils.id('Steaked(address,uint256)');
-            const logs = await readProvider.getLogs({
-                address: PROOF_OF_STEAK_CONTRACT_ADDRESS,
-                topics: [topic],
-                fromBlock: DEPLOY_BLOCK,
-                toBlock: 'latest'
-            });
-            const unique = new Set(logs.map(l => l.topics[1]));
+            const latestBlock = await readProvider.getBlockNumber();
+            const unique = new Set();
+            for (let from = DEPLOY_BLOCK; from <= latestBlock; from += CHUNK_SIZE + 1) {
+                const to = Math.min(from + CHUNK_SIZE, latestBlock);
+                const logs = await readProvider.getLogs({
+                    address: PROOF_OF_STEAK_CONTRACT_ADDRESS,
+                    topics: [topic],
+                    fromBlock: from,
+                    toBlock: to
+                });
+                for (const log of logs) unique.add(log.topics[1]);
+            }
             const el = document.getElementById('staker-count');
             if (el) el.textContent = unique.size + ' on the grill';
             stickyData.stakerCount = unique.size.toString();

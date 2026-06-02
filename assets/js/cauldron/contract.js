@@ -1,4 +1,4 @@
-// contract.js — Cauldron on-chain bindings (read + write).
+// contract.js - Cauldron on-chain bindings (read + write).
 //
 // Pre-deployment shim. The Cauldron contract is not yet on mainnet, so this module is
 // inert until `window.CAULDRON.address` is populated. While inert, every reader returns
@@ -39,7 +39,7 @@
   // fallback for quote math when the live `feeBps()` read is unavailable.
   const FEE_BPS_DEFAULT = 30;
 
-  // publicnode caps eth_getLogs at 50,000 blocks per request — query history in chunks.
+  // publicnode caps eth_getLogs at 50,000 blocks per request - query history in chunks.
   const GETLOGS_CHUNK = 49000;
 
   const ERC20_ABI = [
@@ -116,7 +116,7 @@
   // ---- site-wide walletkit bridge ----
   //
   // The rest of the site (steak.html, etc.) routes wallet connections through
-  // window.unicornMeatWalletKit — a Reown/WalletConnect-backed singleton defined
+  // window.unicornMeatWalletKit - a Reown/WalletConnect-backed singleton defined
   // in /assets/js/walletkit-integration.js. We let it own the wallet picker UI
   // and connection lifecycle; cauldron just listens for the resulting state.
   //
@@ -124,7 +124,7 @@
   //   const addr = await Cauldron.connectViaWalletKit();      // opens modal, awaits connect
   //   Cauldron.onWalletChange(addr => { ... });                // subscribe to changes
   //
-  // No-ops if walletkit is missing — falls back to connectInjected so the page
+  // No-ops if walletkit is missing - falls back to connectInjected so the page
   // still works if walletkit-integration.js failed to load.
 
   const _walletListeners = new Set();
@@ -206,7 +206,7 @@
   let _attempts = 0;
   function _waitForWalletKit() {
     if (window.unicornMeatWalletKit) { _hookWalletKit(); _startWatching(); return; }
-    if (_attempts++ > 50) return; // ~10s, then give up — page still works with connectInjected
+    if (_attempts++ > 50) return; // ~10s, then give up - page still works with connectInjected
     setTimeout(_waitForWalletKit, 200);
   }
   if (typeof document !== 'undefined') {
@@ -220,7 +220,7 @@
   async function connectViaWalletKit() {
     const wk = window.unicornMeatWalletKit;
     if (!wk) {
-      // Walletkit unavailable — fall back to a plain injected connect.
+      // Walletkit unavailable - fall back to a plain injected connect.
       return connectInjected();
     }
     _hookWalletKit();
@@ -502,7 +502,7 @@
       tokenIn: TOKEN_ADDRESS,
       tokenOut: WETH_ADDRESS,
       fee: POOL_FEE,
-      recipient, // contract overrides this to itself on sells — supply as informational
+      recipient, // contract overrides this to itself on sells - supply as informational
       deadline,
       amountIn,
       amountOutMinimum: minOut,
@@ -597,7 +597,7 @@
           };
         }
       }
-    } catch (_e) { /* RPC range issues — treat as nothing claimable */ }
+    } catch (_e) { /* RPC range issues - treat as nothing claimable */ }
     return null;
   }
 
@@ -626,7 +626,7 @@
       for (const ev of past.slice(-max)) {
         push(ev.args.roundId, ev.args.winner, ev.blockNumber);
       }
-    } catch (_e) { /* RPC may not support filter range — silent */ }
+    } catch (_e) { /* RPC may not support filter range - silent */ }
 
     const handler = (roundId, winner, _participants, _weight, ev) => {
       push(roundId, winner, ev.blockNumber);

@@ -1,4 +1,4 @@
-// panels.jsx — presentational panels for The Cauldron (stats, raffle standing, recent winners, pot, raffle)
+// panels.jsx - presentational panels for The Cauldron (stats, raffle standing, recent winners, pot, raffle)
 
 // ---------- Your Stats ----------
 function StatsPanel({

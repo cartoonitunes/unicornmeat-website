@@ -1,4 +1,4 @@
-// data.jsx — mock chain data, pricing, and gamification math for The Cauldron
+// data.jsx - mock chain data, pricing, and gamification math for The Cauldron
 // Token facts pulled from the wrapped contract via unicornmeateth.com:
 //   name "Unicorn Meat", symbol "w🍖", decimals 3, 0xDFA2…668 on Ethereum mainnet.
 

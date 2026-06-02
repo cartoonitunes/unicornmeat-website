@@ -76,9 +76,7 @@ class UnicornMeatWalletKit {
             this.walletKit.on('disconnect', () => {
                 this.handleDisconnection();
             });
-            
-            console.log('WalletKit initialized successfully');
-            
+
         } catch (error) {
             console.error('Error initializing WalletKit:', error);
             this.createFallbackModal();

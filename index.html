@@ -628,40 +628,15 @@
                                 const claimBtn = document.getElementById('claim-btn');
                                 const joinHerdSection = document.getElementById('join-herd');
                                 
-                                console.log('Input event - elements check:', {
-                                    validationMessages: !!validationMessages,
-                                    validationText: !!validationText,
-                                    claimBtn: !!claimBtn,
-                                    joinHerdSection: !!joinHerdSection,
-                                    sectionVisible: joinHerdSection ? joinHerdSection.style.display !== 'none' : false
-                                });
-                                
                                 // Try to recover missing validationText element
                                 let finalValidationText = validationText;
                                 if (!finalValidationText && validationMessages) {
-                                    console.log('Attempting to recover validationText element');
                                     const recoveredValidationText = validationMessages.querySelector('#validation-text');
                                     if (recoveredValidationText) {
-                                        console.log('Recovered validationText element');
                                         finalValidationText = recoveredValidationText;
-                                    } else {
-                                        console.log('Failed to recover validationText element');
                                     }
                                 }
-                                
-                                console.log('Final validationText status:', !!finalValidationText);
-                                
-                                // Debug: Check what's actually in the validationMessages container
-                                if (validationMessages) {
-                                    console.log('validationMessages innerHTML:', validationMessages.innerHTML);
-                                    console.log('validationMessages children:', validationMessages.children.length);
-                                    if (validationMessages.children.length > 0) {
-                                        Array.from(validationMessages.children).forEach((child, index) => {
-                                            console.log(`Child ${index}:`, child.tagName, child.id, child.className);
-                                        });
-                                    }
-                                }
-                                
+
                                 // Only validate if ALL required elements exist and section is visible
                                 if (validationMessages && finalValidationText && claimBtn && joinHerdSection && joinHerdSection.style.display !== 'none') {
                                     // Store element references for the debounced validation
@@ -677,20 +652,9 @@
                                         if (currentValidationMessages && currentValidationText && currentClaimBtn) {
                                             const currentElements = { validationMessages: currentValidationMessages, validationText: currentValidationText, claimBtn: currentClaimBtn };
                                             this.validateLabelWithElements(e.target.value, currentElements);
-                                        } else {
-                                            console.log('Elements no longer exist, skipping validation');
                                         }
                                     }, 500);
                                 } else {
-                                    console.log('Missing elements, cannot validate:', {
-                                        missing: {
-                                            validationMessages: !validationMessages,
-                                            validationText: !finalValidationText,
-                                            claimBtn: !claimBtn,
-                                            joinHerdSection: !joinHerdSection
-                                        }
-                                    });
-                                    
                                     // Reset button state when we can't validate
                                     if (claimBtn) {
                                         claimBtn.disabled = true;
@@ -993,7 +957,6 @@
                             // Check if the label is reserved by the smart contract
                             const isReserved = await this.contract.methods.isReserved(normalizedLabel).call();
                             if (isReserved) {
-                                console.log('Label is reserved by smart contract');
                                 return false; // Reserved labels cannot be claimed
                             }
                             
@@ -1382,7 +1345,7 @@
                                 }
                             }
                         } catch (error) {
-                            console.log('Could not update gas price display:', error);
+                            console.warn('Could not update gas price display:', error);
                         }
                     },
                     
@@ -1494,7 +1457,6 @@
                             this.updateWalletStatusDisplay();
                         } catch (error) {
                             // Silently fail - reverse lookup is optional
-                            console.log("Reverse ENS lookup failed (this is normal if reverse record not set):", error);
                             this.ensName = null;
                             this.updateWalletStatusDisplay();
                         }
@@ -1600,7 +1562,6 @@
                                 } catch (ownerError) {
                                     // If ownerOf fails, the name might not be wrapped or token doesn't exist
                                     // Fall back to checking if user is the one who claimed it
-                                    console.log('NameWrapper.ownerOf failed, checking claimer contract:', ownerError);
                                     // For wrapped subdomains created by claimer, the user should be the owner
                                     // If we can't verify via NameWrapper, trust the claimer contract
                                     effectiveOwner = this.userAddress;
@@ -2020,7 +1981,7 @@
             width: 100%;
             justify-content: center;
         }
-        /* Remove tweet card rotation — near-full-width card clips viewport */
+        /* Remove tweet card rotation - near-full-width card clips viewport */
         .tweet-card-rotate {
             transform: none !important;
         }
@@ -2379,10 +2340,10 @@
                 el.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
                 el.style.color = chg >= 0 ? '#81c784' : '#ef9a9a';
               }
-            } catch(e) { console.log('Ticker error:', e); }
+            } catch(e) { console.warn('Ticker error:', e); }
           }
           updateTickerUM();
-          setInterval(updateTickerUM, 120000); // CoinGecko rate limit — 2 min refresh
+          setInterval(updateTickerUM, 120000); // CoinGecko rate limit - 2 min refresh
         })();
 
         // Holder count from Ethplorer (free tier)
@@ -4089,103 +4050,6 @@
                     const modal = new bootstrap.Modal(document.getElementById('coming-soon-modal'));
                     modal.show();
                 });
-
-                /* 
-                // TODO: Uncomment this block when ready to enable actual grinding functionality
-                // This is the original grinding logic that's temporarily disabled
-                grindButton.addEventListener('click', async () => {
-                    const amount = grindAmountInput.value;
-                    if (!amount || amount <= 0) {
-                        showGrindError('Please enter a valid amount of Unicorns to grind');
-                        return;
-                    }
-
-                    try {
-                        // Check if wallet is connected
-                        if (!window.ethereum || !window.ethereum.selectedAddress) {
-                            showGrindError('Please connect your wallet first');
-                            return;
-                        }
-
-                        // Get the contract instances
-                        const web3 = new Web3(window.ethereum);
-                        const accounts = await web3.eth.getAccounts();
-                        const userAddress = accounts[0];
-
-                        // Unicorn token contract (0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7)
-                        const unicornTokenABI = [
-                            {
-                                "constant": true,
-                                "inputs": [{"name": "_owner", "type": "address"}],
-                                "name": "balanceOf",
-                                "outputs": [{"name": "balance", "type": "uint256"}],
-                                "type": "function"
-                            },
-                            {
-                                "constant": false,
-                                "inputs": [
-                                    {"name": "_spender", "type": "address"},
-                                    {"name": "_value", "type": "uint256"}
-                                ],
-                                "name": "approve",
-                                "outputs": [{"name": "success", "type": "bool"}],
-                                "type": "function"
-                            }
-                        ];
-                        const unicornTokenAddress = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7';
-                        const unicornTokenContract = new web3.eth.Contract(unicornTokenABI, unicornTokenAddress);
-
-                        // Meat Grinders Association contract (0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32)
-                        const grinderABI = [
-                            {
-                                "constant": false,
-                                "inputs": [{"name": "amountOfUnicornsToGrind", "type": "uint256"}],
-                                "name": "grindUnicorns",
-                                "outputs": [],
-                                "type": "function"
-                            }
-                        ];
-                        const grinderAddress = '0xc7e9dDd5358e08417b1C88ed6f1a73149BEeaa32';
-                        const grinderContract = new web3.eth.Contract(grinderABI, grinderAddress);
-
-                        // Convert amount to wei (Unicorn is 0 decimal token, so no conversion needed)
-                        const amountWei = web3.utils.toBN(amount.toString());
-
-                        // Check if user has enough Unicorn tokens
-                        console.log('Checking Unicorn token balance...');
-                        const balance = await unicornTokenContract.methods.balanceOf(userAddress).call();
-                        const balanceBN = web3.utils.toBN(balance);
-                        
-                        console.log(`User has ${balance.toString()} Unicorn tokens`);
-                        
-                        if (balanceBN.lt(amountWei)) {
-                            showGrindError(`Insufficient Unicorn tokens. You have ${balance.toString()} but need ${amount}.`);
-                            return;
-                        }
-
-                        // First, approve the grinder contract to spend Unicorn tokens
-                        console.log('Approving Unicorn tokens...');
-                        const approveTx = await unicornTokenContract.methods.approve(grinderAddress, amountWei).send({
-                            from: userAddress,
-                            gas: 100000
-                        });
-                        console.log('Approval transaction:', approveTx);
-
-                        // Then, call grindUnicorns
-                        console.log('Grinding Unicorns...');
-                        const grindTx = await grinderContract.methods.grindUnicorns(amountWei).send({
-                            from: userAddress,
-                            gas: 200000
-                        });
-                        console.log('Grind transaction:', grindTx);
-
-                        showGrindSuccess(`Successfully ground ${amount} Unicorns! Check your wallet for Unicorn Meat tokens.`);
-
-                    } catch (error) {
-                        showGrindError(`Failed to grind Unicorns: ${error.message}`);
-                    }
-                });
-                */
             }
 
         });
