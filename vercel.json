@@ -22,6 +22,7 @@
   "redirects": [
     { "source": "/contact", "destination": "/", "statusCode": 301 },
     { "source": "/newsletter", "destination": "/", "statusCode": 301 },
-    { "source": "/api/:path*", "destination": "/", "statusCode": 301 }
+    { "source": "/api/:path*", "destination": "/", "statusCode": 301 },
+    { "source": "/how-to-buy", "destination": "/swap", "permanent": true }
   ]
 }
