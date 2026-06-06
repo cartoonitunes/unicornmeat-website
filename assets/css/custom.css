@@ -52,6 +52,21 @@
 .uc-navbar-nav a.um-nav-active { color: #000; border-bottom: 2px solid #FFBA00; padding-bottom: 2px; }
 .learn-nav-menu a.um-nav-active { color: #000; font-weight: 700; }
 
+/* "Swap" is the primary action: a subtle ghost button (thin brand-gold outline, no fill, no shadow)
+   so it stands out tastefully from the plain text links without shouting like a filled pill. */
+.uc-navbar-nav a.um-nav-cta,
+.nav-y a.um-nav-cta {
+  color: #B45309;
+  font-weight: 700;
+  border: 1.5px solid #FFBA00;
+  border-radius: 8px;
+  padding: 4px 13px;
+  transition: background .12s ease, border-color .12s ease;
+}
+.uc-navbar-nav a.um-nav-cta:hover,
+.nav-y a.um-nav-cta:hover { color: #B45309; background: rgba(255, 186, 0, .14); border-color: #F59E0B; }
+.nav-y a.um-nav-cta { display: inline-block; }
+
 /* Group the secondary "More" dropdown apart from the primary items with a thin divider. */
 @media (min-width: 992px) {
   .uc-navbar-nav > li:has(> .learn-nav-dropdown) {

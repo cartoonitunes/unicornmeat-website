@@ -31,7 +31,8 @@ const NAV = [{
 }, {
   label: 'Swap',
   href: '/swap',
-  active: true
+  active: true,
+  cta: true
 }, {
   label: 'Steak',
   href: '/steak'
@@ -79,7 +80,7 @@ function Nav({
   }, NAV.map(n => /*#__PURE__*/React.createElement("a", {
     key: n.label,
     href: n.href,
-    className: n.active ? 'um-nav-active' : ''
+    className: ((n.cta ? 'um-nav-cta ' : '') + (n.active ? 'um-nav-active' : '')).trim()
   }, n.label)), /*#__PURE__*/React.createElement("details", {
     className: "nav-more"
   }, /*#__PURE__*/React.createElement("summary", null, "More"), /*#__PURE__*/React.createElement("div", {
@@ -118,7 +119,16 @@ function Nav({
     href: n.href,
     target: n.target || null,
     rel: n.target ? 'noopener' : null,
-    style: {
+    style: n.cta ? {
+      alignSelf: 'flex-start',
+      margin: '2px 0',
+      padding: '6px 14px',
+      fontWeight: 700,
+      color: '#B45309',
+      textDecoration: 'none',
+      border: '1.5px solid var(--gold)',
+      borderRadius: 8
+    } : {
       padding: '8px 4px',
       fontWeight: 700,
       color: n.active ? 'var(--gold-deep)' : 'var(--ink-2)',

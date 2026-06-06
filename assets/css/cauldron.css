@@ -107,6 +107,9 @@ body {
 .nav-links a.active { color: var(--gold-deep); border-bottom-color: var(--gold); }
 /* active page: gold underline */
 .nav-links a.um-nav-active { color: var(--ink); border-bottom-color: var(--gold); }
+/* "Swap" = subtle ghost button (thin brand-gold outline, no fill) so it stands out tastefully */
+.nav-links a.um-nav-cta { color: #B45309; font-weight: 700; border: 1.5px solid var(--gold); border-radius: 8px; padding: 4px 13px; transition: background .12s ease; }
+.nav-links a.um-nav-cta:hover { color: #B45309; background: rgba(255, 186, 0, .14); }
 /* divider grouping the secondary "More" dropdown apart from the primary items */
 .nav-more { border-left: 1px solid var(--gold-line); padding-left: 14px; margin-left: 4px; }
 /* "More" dropdown in the nav (matches the site's Learn/More dropdown) */
