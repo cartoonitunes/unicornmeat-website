@@ -31,7 +31,59 @@
   },
   {
     "type": "function",
+    "name": "AUTO_PAY_BUNDLE_GAS_LIMIT",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "AUTO_PAY_GAS_LIMIT",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "BPS_DENOMINATOR",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "HOLDER_BONUS_COEFF",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "HOLDER_BONUS_FLOOR",
     "inputs": [],
     "outputs": [
       {
@@ -57,7 +109,7 @@
   },
   {
     "type": "function",
-    "name": "MAX_RAFFLE_WINDOW",
+    "name": "MAX_HOLDER_MULTIPLIER_BPS",
     "inputs": [],
     "outputs": [
       {
@@ -83,20 +135,7 @@
   },
   {
     "type": "function",
-    "name": "MIN_RAFFLE_WINDOW",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "activeRaffleId",
+    "name": "RECLAIM_DELAY_BLOCKS",
     "inputs": [],
     "outputs": [
       {
@@ -127,6 +166,29 @@
   },
   {
     "type": "function",
+    "name": "addNFTPrizeForRound",
+    "inputs": [
+      {
+        "name": "nft",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "addPrize",
     "inputs": [
       {
@@ -142,6 +204,36 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "addPrizeForRound",
+    "inputs": [
+      {
+        "name": "prizeToken",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "boostPrize",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "payable"
   },
   {
     "type": "function",
@@ -172,9 +264,53 @@
     "name": "claim",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "completedRounds",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "currentRound",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "deliverBundle",
+    "inputs": [
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [],
@@ -186,6 +322,19 @@
     "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "drawable",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -202,10 +351,29 @@
   },
   {
     "type": "function",
+    "name": "getEffectiveWeight",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getEntries",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -226,10 +394,29 @@
   },
   {
     "type": "function",
+    "name": "getHolderMultiplier",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "bps",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getParticipantCount",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -248,7 +435,7 @@
     "name": "getParticipants",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -264,8 +451,14 @@
   },
   {
     "type": "function",
-    "name": "getQueuedPrizeNFTs",
-    "inputs": [],
+    "name": "getQueuedNFTsForRound",
+    "inputs": [
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "outputs": [
       {
         "name": "nfts",
@@ -282,8 +475,14 @@
   },
   {
     "type": "function",
-    "name": "getQueuedPrizeTokens",
-    "inputs": [],
+    "name": "getQueuedPrizesForRound",
+    "inputs": [
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "outputs": [
       {
         "name": "tokens",
@@ -300,10 +499,10 @@
   },
   {
     "type": "function",
-    "name": "getRaffle",
+    "name": "getRound",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -312,30 +511,35 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct Cauldron.Raffle",
+        "internalType": "struct Cauldron.Round",
         "components": [
-          {
-            "name": "startBlock",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "endBlock",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
           {
             "name": "prizeETH",
             "type": "uint256",
             "internalType": "uint256"
           },
           {
-            "name": "settled",
+            "name": "drawnBlock",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "drawn",
             "type": "bool",
             "internalType": "bool"
           },
           {
-            "name": "claimed",
+            "name": "ethPaid",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "tokensPaid",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "settled",
             "type": "bool",
             "internalType": "bool"
           },
@@ -351,10 +555,29 @@
   },
   {
     "type": "function",
-    "name": "getRafflePrizeNFTs",
+    "name": "getRoundBoost",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoundPrizeNFTs",
+    "inputs": [
+      {
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -375,10 +598,10 @@
   },
   {
     "type": "function",
-    "name": "getRafflePrizeTokens",
+    "name": "getRoundPrizeTokens",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -399,13 +622,34 @@
   },
   {
     "type": "function",
-    "name": "isRaffleActive",
-    "inputs": [],
+    "name": "getRoundResult",
+    "inputs": [
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "outputs": [
       {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
+        "name": "winner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "prizeETH",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "participantCount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "drawnAtBlock",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -439,19 +683,6 @@
         "internalType": "address"
       }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "nextRaffleId",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
@@ -510,6 +741,26 @@
   },
   {
     "type": "function",
+    "name": "pause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "paused",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "pendingFeeBps",
     "inputs": [],
     "outputs": [
@@ -549,36 +800,16 @@
   },
   {
     "type": "function",
-    "name": "raffleWindow",
-    "inputs": [],
-    "outputs": [
+    "name": "reclaimExpired",
+    "inputs": [
       {
-        "name": "",
+        "name": "roundId",
         "type": "uint256",
         "internalType": "uint256"
       }
     ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "retire",
-    "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "retired",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -623,19 +854,6 @@
     "inputs": [
       {
         "name": "newThreshold",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setRaffleWindow",
-    "inputs": [
-      {
-        "name": "newWindow",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -783,6 +1001,19 @@
   },
   {
     "type": "function",
+    "name": "unclaimedRounds",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "uniqueSwappers",
     "inputs": [],
     "outputs": [
@@ -796,7 +1027,7 @@
   },
   {
     "type": "function",
-    "name": "unretire",
+    "name": "unpause",
     "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -839,7 +1070,7 @@
     "name": "EntryRegistered",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
@@ -899,7 +1130,7 @@
   },
   {
     "type": "event",
-    "name": "FeeSkimmed",
+    "name": "FeeCollected",
     "inputs": [
       {
         "name": "swapper",
@@ -949,27 +1180,8 @@
   },
   {
     "type": "event",
-    "name": "PotBoosted",
-    "inputs": [
-      {
-        "name": "from",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "amount",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "newPot",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
+    "name": "Paused",
+    "inputs": [],
     "anonymous": false
   },
   {
@@ -987,10 +1199,72 @@
   },
   {
     "type": "event",
+    "name": "PrizeAutoPaid",
+    "inputs": [
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "winner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "ethAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "ethPaid",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "tokensPaid",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PrizeBoosted",
+    "inputs": [
+      {
+        "name": "roundId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "booster",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "PrizeClaimed",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
@@ -1015,6 +1289,12 @@
     "name": "PrizeQueued",
     "inputs": [
       {
+        "name": "roundId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
         "name": "asset",
         "type": "address",
         "indexed": true,
@@ -1037,52 +1317,33 @@
   },
   {
     "type": "event",
-    "name": "RaffleStarted",
+    "name": "PrizeReclaimed",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
       },
       {
-        "name": "startBlock",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
+        "name": "winner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
       },
       {
-        "name": "endBlock",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
+        "name": "to",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
       },
       {
-        "name": "prizeETH",
+        "name": "ethAmount",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
       }
     ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "RaffleWindowSet",
-    "inputs": [
-      {
-        "name": "newWindow",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "Retired",
-    "inputs": [],
     "anonymous": false
   },
   {
@@ -1118,7 +1379,7 @@
   },
   {
     "type": "event",
-    "name": "Unretired",
+    "name": "Unpaused",
     "inputs": [],
     "anonymous": false
   },
@@ -1127,7 +1388,7 @@
     "name": "WinnerDrawn",
     "inputs": [
       {
-        "name": "raffleId",
+        "name": "roundId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
@@ -1228,7 +1489,7 @@
   },
   {
     "type": "error",
-    "name": "NoActiveRaffle",
+    "name": "IsPaused",
     "inputs": []
   },
   {
@@ -1238,7 +1499,7 @@
   },
   {
     "type": "error",
-    "name": "NotRetired",
+    "name": "NotPaused",
     "inputs": []
   },
   {
@@ -1248,22 +1509,42 @@
   },
   {
     "type": "error",
-    "name": "RaffleAlreadyClaimed",
+    "name": "NothingToClaim",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "RaffleNotEnded",
+    "name": "OnlySelf",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "RaffleStillActive",
+    "name": "PotBelowThreshold",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ReclaimNotReady",
     "inputs": []
   },
   {
     "type": "error",
     "name": "ReentrancyGuardReentrantCall",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RoundAlreadySettled",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RoundInPast",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RoundNotDrawn",
     "inputs": []
   },
   {
@@ -1284,12 +1565,12 @@
   },
   {
     "type": "error",
-    "name": "UnsupportedPair",
+    "name": "UnclaimedRoundsExist",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "WindowOutOfBounds",
+    "name": "UnsupportedPair",
     "inputs": []
   },
   {

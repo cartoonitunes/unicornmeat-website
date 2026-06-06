@@ -54,6 +54,11 @@
     'function quoteExactInputSingle((address tokenIn,address tokenOut,uint256 amountIn,uint24 fee,uint160 sqrtPriceLimitX96)) returns (uint256 amountOut,uint160 sqrtPriceX96After,uint32 initializedTicksCrossed,uint256 gasEstimate)',
   ];
 
+  // Minimal Uniswap V3 SwapRouter ABI for the direct-swap bypass (no Cauldron, no fee, no entries).
+  const V3_ROUTER_ABI = [
+    'function exactInputSingle((address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountIn,uint256 amountOutMinimum,uint160 sqrtPriceLimitX96)) payable returns (uint256 amountOut)',
+  ];
+
   // Loaded asynchronously from /assets/data/cauldron-abi.json so we don't inline a 25KB
   // JSON blob into every script bundle.
   let _cauldronAbi = null;
@@ -67,6 +72,12 @@
     walletProvider: null,   // injected Web3Provider (from walletkit or window.ethereum)
     account: null,
   };
+
+  // Truncate an address for compact display (0x1234…abcd). Self-contained so it does not depend on
+  // data.js load order.
+  function _short(addr) {
+    return addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : '';
+  }
 
   // Convenience: chain reads use the read-only RPC; writes use the wallet provider.
   function readProvider() {
@@ -246,16 +257,17 @@
     if (!isLive()) return null;
     const c = cauldronContract(readProvider());
     if (!c) return null;
-    const [pot, threshold, retired, drawable] = await Promise.all([
-      c.pot(), c.potThreshold(), c.retired(), c.drawable(),
+    const [pot, threshold, paused, drawable, unclaimedRounds] = await Promise.all([
+      c.pot(), c.potThreshold(), c.paused(), c.drawable(), c.unclaimedRounds(),
     ]);
     return {
       ethWei: pot,
       thresholdWei: threshold,
       ethFloat: Number(window.ethers.utils.formatEther(pot)),
       thresholdFloat: Number(window.ethers.utils.formatEther(threshold)),
-      retired,
+      paused,
       drawable,
+      unclaimedRounds: unclaimedRounds.toNumber(),
     };
   }
 
@@ -268,9 +280,10 @@
     const c = cauldronContract(readProvider());
     if (!c) return null;
     const roundId = await c.currentRound();
-    const [participants, totalWeight] = await Promise.all([
+    const [participants, totalWeight, boost] = await Promise.all([
       c.getParticipantCount(roundId),
       c.totalSqrtWeight(roundId),
+      c.getRoundBoost(roundId),
     ]);
     let userEntries = window.ethers.BigNumber.from(0);
     if (userAddress) {
@@ -281,6 +294,9 @@
       participants: participants.toNumber(),
       totalSqrtWeight: totalWeight.toString(),
       userEntries: userEntries.toString(),
+      // Permissionless ETH boost folded into this round's prize at draw time. Held apart from
+      // the pot, so it never moves the draw threshold or earns entries.
+      roundBoostFloat: Number(window.ethers.utils.formatEther(boost)),
     };
   }
 
@@ -327,17 +343,20 @@
     };
   }
 
-  // Bonus prizes queued for the NEXT raffle to trigger (getQueuedPrizeTokens / NFTs).
-  async function readQueuedPrizes() {
+  // Bonus prizes queued for a specific round (getQueuedPrizesForRound / getQueuedNFTsForRound).
+  // Defaults to the current round (the prizes that bundle into the next draw).
+  async function readQueuedPrizes(roundId) {
     await _abiReady;
     if (!isLive()) return null;
     const c = cauldronContract(readProvider());
     if (!c) return null;
+    const rid = roundId == null ? await c.currentRound() : roundId;
     const [[tokens, amounts], [nfts, ids]] = await Promise.all([
-      c.getQueuedPrizeTokens(),
-      c.getQueuedPrizeNFTs(),
+      c.getQueuedPrizesForRound(rid),
+      c.getQueuedNFTsForRound(rid),
     ]);
     return {
+      roundId: window.ethers.BigNumber.from(rid).toNumber(),
       tokens: await _resolveTokenPrizes(tokens, amounts),
       nfts: nfts.map((addr, i) => ({ address: addr, tokenId: ids[i].toString() })),
     };
@@ -388,13 +407,36 @@
     const rows = [];
     for (let id = done; id >= 1 && rows.length < max; id--) {
       try {
-        const r = await c.getRoundResult(id);
+        // getRoundResult gives the headline numbers; getRound adds the auto-pay delivery flags so the
+        // panel can show whether the prize was paid out automatically or is still awaiting a claim.
+        const [res, full] = await Promise.all([c.getRoundResult(id), c.getRound(id)]);
+        // Bundled ERC-20 / ERC-721 prizes for this round, so the panel can show the full bundle, not
+        // just the ETH. Best-effort: a failed read just leaves the row ETH-only.
+        let tokens = [];
+        let nfts = [];
+        try {
+          const [[tAddrs, tAmts], [nAddrs, nIds]] = await Promise.all([
+            c.getRoundPrizeTokens(id),
+            c.getRoundPrizeNFTs(id),
+          ]);
+          if (tAddrs.length) {
+            const resolved = await _resolveTokenPrizes(tAddrs, tAmts);
+            tokens = resolved.map((t) => ({
+              sym: t.sym || _short(t.address),
+              amount: window.compact ? window.compact(t.amount) : String(t.amount),
+            }));
+          }
+          nfts = nAddrs.map((addr, i) => ({ label: _short(addr) + ' #' + nIds[i].toString() }));
+        } catch (_e) { /* leave bundle empty */ }
         rows.push({
           roundId: id,
-          winner: r.winner,
-          prizeEthFloat: Number(window.ethers.utils.formatEther(r.prizeETH)),
-          participantCount: r.participantCount.toNumber(),
-          drawnAtBlock: r.drawnAtBlock.toNumber(),
+          winner: res.winner,
+          prizeEthFloat: Number(window.ethers.utils.formatEther(res.prizeETH)),
+          participantCount: res.participantCount.toNumber(),
+          drawnAtBlock: res.drawnAtBlock.toNumber(),
+          settled: full.settled,
+          tokens,
+          nfts,
         });
       } catch (_e) { /* skip unreadable round */ }
     }
@@ -432,28 +474,112 @@
     };
   }
 
+  // Read the w🍖 token's on-chain symbol + decimals so the UI never assumes them. Falls back to
+  // the known w🍖 / 3-decimal values if the read fails. Cached after the first successful read.
+  let _tokenMeta = null;
+  async function readTokenMeta() {
+    if (_tokenMeta) return _tokenMeta;
+    if (!window.ethers) return { symbol: 'w🍖', decimals: TOKEN_DECIMALS };
+    const provider = readProvider();
+    if (!provider) return { symbol: 'w🍖', decimals: TOKEN_DECIMALS };
+    try {
+      const tok = tokenContract(provider);
+      const [symbol, decimals] = await Promise.all([tok.symbol(), tok.decimals()]);
+      _tokenMeta = { symbol, decimals: Number(decimals) };
+      return _tokenMeta;
+    } catch (_e) {
+      return { symbol: 'w🍖', decimals: TOKEN_DECIMALS };
+    }
+  }
+
+  // Recent permissionless prize boosts for a round (PrizeBoosted events, newest first). Defaults to
+  // the current round. Boosts top up that round's ETH prize without earning entries or moving the
+  // draw threshold. Scanned client-side in chunks (no indexer).
+  async function readRecentBoosts(roundId, max = 5, lookbackBlocks = 200000) {
+    await _abiReady;
+    if (!isLive()) return [];
+    const provider = readProvider();
+    const c = cauldronContract(provider);
+    if (!c) return [];
+    try {
+      const rid = roundId == null ? await c.currentRound() : roundId;
+      const head = await provider.getBlockNumber();
+      const from = Math.max(0, head - lookbackBlocks);
+      const filter = c.filters.PrizeBoosted(window.ethers.BigNumber.from(rid));
+      const evs = await _queryFilterChunked(c, filter, from, head);
+      const rows = evs.map((ev) => ({
+        booster: ev.args.booster,
+        amountEth: Number(window.ethers.utils.formatEther(ev.args.amount)),
+        blockNumber: ev.blockNumber,
+      }));
+      rows.sort((a, b) => b.blockNumber - a.blockNumber);
+      return rows.slice(0, max);
+    } catch (_e) {
+      return [];
+    }
+  }
+
+  // Lifetime-volume leaderboard, built client-side from SwapTracked events (the contract exposes no
+  // enumeration of swappers). Each event carries the swapper's running lifetimeVolume + swapCount, so
+  // we keep the highest (latest) figure seen per address and rank descending. lifetimeVolume mixes
+  // ETH (buys) and w🍖 (sells) units on-chain, so it is surfaced as a raw activity figure, not ETH.
+  async function readLeaderboard(max = 8, lookbackBlocks = 400000) {
+    await _abiReady;
+    if (!isLive()) return [];
+    const provider = readProvider();
+    const c = cauldronContract(provider);
+    if (!c) return [];
+    try {
+      const head = await provider.getBlockNumber();
+      const from = Math.max(0, head - lookbackBlocks);
+      const evs = await _queryFilterChunked(c, c.filters.SwapTracked(), from, head);
+      const best = new Map();
+      for (const ev of evs) {
+        const addr = ev.args.swapper;
+        const vol = ev.args.lifetimeVolume;
+        const count = ev.args.swapCount.toNumber();
+        const prev = best.get(addr);
+        // lifetimeVolume only ever grows, so the largest value is the most recent.
+        if (!prev || vol.gt(prev.vol)) best.set(addr, { vol, count });
+      }
+      const rows = Array.from(best.entries()).map(([address, v]) => ({
+        address,
+        volumeRaw: Number(window.ethers.utils.formatEther(v.vol)),
+        swaps: v.count,
+      }));
+      rows.sort((a, b) => b.volumeRaw - a.volumeRaw);
+      return rows.slice(0, max);
+    } catch (_e) {
+      return [];
+    }
+  }
+
   // ---- live pricing (QuoterV2) ----
 
   // Ask Uniswap's QuoterV2 for the real expected output of a swap (C1). QuoterV2's
   // quoteExactInputSingle is a non-view function (it mutates then reverts internally), so
   // it must be invoked via callStatic to read the return value without sending a tx.
   //
-  // For a BUY the Cauldron skims its fee from the ETH input before forwarding to the
+  // For a BUY the Cauldron collects its fee from the ETH input before forwarding to the
   // router, so we quote against the net forwarded amount to match what the pool sees.
-  // For a SELL the router runs on the full token amountIn and the Cauldron skims its fee
+  // For a SELL the router runs on the full token amountIn and the Cauldron collects its fee
   // from the WETH output afterwards; the router enforces amountOutMinimum against the
   // gross WETH out, so the quote (and the slippage floor derived from it) is on the gross.
   //
   // Returns the expected output as a BigNumber: tokens-out (3 decimals) for a buy, gross
   // WETH-out (18 decimals) for a sell. Null if the quoter cannot be reached.
-  async function quote({ side, amountInWei }) {
+  //
+  // `useCauldron` (default true) quotes the Cauldron path: a buy nets the 0.3% fee out of the input
+  // before it hits the pool. For the direct bypass (useCauldron false) the full input hits the pool, so
+  // the buy quote is on the gross amount.
+  async function quote({ side, amountInWei, useCauldron = true }) {
     if (!window.ethers || !amountInWei) return null;
     const provider = readProvider();
     const q = quoterContract(provider);
     if (!q) return null;
 
     let quoteAmountIn = amountInWei;
-    if (side === 'buy') {
+    if (side === 'buy' && useCauldron) {
       const feeBps = await readFeeBps();
       const bps = feeBps == null ? FEE_BPS_DEFAULT : feeBps;
       const fee = amountInWei.mul(bps).div(10000);
@@ -532,10 +658,41 @@
     return receipt;
   }
 
+  // Direct-swap bypass: route straight to the Uniswap V3 SwapRouter, skipping the Cauldron entirely.
+  // No 0.3% fee, no raffle entries, no holder bonus. Same pool and liquidity. Does not require the
+  // Cauldron to be deployed or unpaused. Note: a direct SELL delivers WETH to the user (the Cauldron's
+  // native-ETH unwrap is part of the Cauldron path, not the bare router), so the UI labels this.
+  async function swapDirect({ side, amountInWei, minOutWei }) {
+    if (!window.ethers) throw new Error('Wallet library not loaded.');
+    if (!state.walletProvider || !state.account) throw new Error('Connect a wallet first.');
+    const signer = state.walletProvider.getSigner();
+    const router = new window.ethers.Contract(V3_ROUTER, V3_ROUTER_ABI, signer);
+
+    if (side === 'sell') {
+      const tok = tokenContract(signer);
+      const allowance = await tok.allowance(state.account, V3_ROUTER);
+      if (allowance.lt(amountInWei)) {
+        const atx = await tok.approve(V3_ROUTER, window.ethers.constants.MaxUint256);
+        await atx.wait();
+      }
+    }
+    const params = buildSwapParams({
+      side,
+      amountIn: amountInWei,
+      minOut: minOutWei,
+      recipient: state.account,
+    });
+    const overrides = side === 'buy' ? { value: amountInWei } : {};
+    const tx = await router.exactInputSingle(params, overrides);
+    return tx.wait();
+  }
+
   // Draw the current round. Callable by anyone once the pot has reached the threshold; it
   // picks a sqrt-weighted winner from every entry since the last draw, commits the pot (plus
-  // any queued bonus prizes) as the prize, and opens a fresh round. After this the winner can
-  // claim(). Reverts with PotBelowThreshold if the pot is not full, or IsRetired if retired.
+  // any queued bonus prizes) as the prize, and opens a fresh round. The prize is auto-paid to
+  // the winner inside the draw, so no follow-up action is needed on the normal path; claim() is
+  // only a fallback if a payout leg fails. Reverts with PotBelowThreshold if the pot is not
+  // full. Works even while paused.
   async function draw() {
     if (!isLive()) throw new Error('Cauldron is not yet deployed.');
     if (!state.walletProvider || !state.account) throw new Error('Connect a wallet first.');
@@ -546,7 +703,9 @@
     return tx.wait();
   }
 
-  // Winner claims a settled, unclaimed raffle's prize (P6).
+  // Fallback claim: deliver the still-owed legs of a round whose auto-pay did not fully land at
+  // draw time. On the normal path the prize is auto-paid and this is never needed; it reverts
+  // (RoundAlreadySettled) once a round is fully settled.
   async function claim(raffleId) {
     if (!isLive()) throw new Error('Cauldron is not yet deployed.');
     if (!state.walletProvider || !state.account) throw new Error('Connect a wallet first.');
@@ -554,6 +713,21 @@
     const c = cauldronContract(signer);
     if (!c) throw new Error('Cauldron contract unavailable.');
     const tx = await c.claim(raffleId);
+    return tx.wait();
+  }
+
+  // Permissionlessly top up the current round's ETH prize. Anyone can boost, including while the
+  // contract is paused (so the launch round can be seeded). The sent ETH is held apart from the pot,
+  // so it never earns raffle entries, never moves the draw threshold, and never triggers a draw; it
+  // is folded into the prize when that round draws. Reverts (InvalidParams) on a zero amount.
+  async function boostPrize(amountWei) {
+    if (!isLive()) throw new Error('Cauldron is not yet deployed.');
+    if (!state.walletProvider || !state.account) throw new Error('Connect a wallet first.');
+    if (!amountWei || amountWei.lte(0)) throw new Error('Enter an amount to boost.');
+    const signer = state.walletProvider.getSigner();
+    const c = cauldronContract(signer);
+    if (!c) throw new Error('Cauldron contract unavailable.');
+    const tx = await c.boostPrize({ value: amountWei });
     return tx.wait();
   }
 
@@ -573,9 +747,12 @@
     return out;
   }
 
-  // Find a drawn round the connected user won but has not yet claimed, so the UI can
-  // surface a claim button (P6). Scans WinnerDrawn events (winner is an indexed topic) in
-  // chunks, newest-first, and confirms against getRaffle that it is drawn and unclaimed.
+  // Find a drawn round the connected user won whose auto-pay did not fully land, so the UI can
+  // surface the fallback claim button. Prizes are pushed to the winner at draw time, so this is
+  // only non-null in the rare case a leg failed to deliver (the winner could not receive the ETH,
+  // or a bundled token/NFT transfer reverted). A round is settled once every leg is delivered, so
+  // `!r.settled` is exactly "something is still owed". Scans WinnerDrawn events (winner is an
+  // indexed topic) in chunks, newest-first, and confirms against getRound.
   async function findClaimableForUser(userAddress, lookbackBlocks = 200000) {
     await _abiReady;
     if (!isLive() || !userAddress) return null;
@@ -590,10 +767,12 @@
       for (let i = evs.length - 1; i >= 0; i--) {
         const roundId = evs[i].args.roundId;
         const r = await c.getRound(roundId);
-        if (r.drawn && !r.claimed && r.winner && r.winner.toLowerCase() === userAddress.toLowerCase()) {
+        if (r.drawn && !r.settled && r.winner && r.winner.toLowerCase() === userAddress.toLowerCase()) {
           return {
             raffleId: roundId.toString(),
             prizeEthFloat: Number(window.ethers.utils.formatEther(r.prizeETH)),
+            ethOwed: !r.ethPaid && r.prizeETH.gt(0),
+            tokensOwed: !r.tokensPaid,
           };
         }
       }
@@ -636,8 +815,11 @@
   }
 
   window.CAULDRON = {
-    // Config
-    address: null,
+    // Config. `address` is a live getter/setter over the internal state, so BOTH
+    // `window.CAULDRON.address = '0x...'` and `setAddress('0x...')` work and `.address`
+    // always reflects the address the reads actually use.
+    get address() { return state.address; },
+    set address(v) { state.address = v || null; },
     setAddress,
     setWalletProvider,
     TOKEN_ADDRESS, WETH_ADDRESS, V3_ROUTER, V3_QUOTER, POOL_FEE,
@@ -661,6 +843,9 @@
     readFeeBps,
     readBalances,
     readRoundHistory,
+    readTokenMeta,
+    readRecentBoosts,
+    readLeaderboard,
     findClaimableForUser,
 
     // Pricing
@@ -668,8 +853,10 @@
 
     // Writes
     swap,
+    swapDirect,
     draw,
     claim,
+    boostPrize,
 
     // Events
     watchRecentWinners,

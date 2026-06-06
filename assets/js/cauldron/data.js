@@ -156,12 +156,18 @@ const USER_SEED = {
   holderTokens: 500000 // display-unit w🍖 held -> ~1.36x in the mock
 };
 
-// Completed-round history for the mock "Past winners" panel (matches getRoundResult shape).
+// Completed-round history for the mock "Past winners" panel. Matches getRoundResult plus the `settled`
+// flag from getRound; settled === true renders the "auto-paid" badge (the normal path).
+// Past winners. A prize is always the ETH pot and may bundle owner-queued ERC-20 tokens and ERC-721
+// NFTs; `tokens` ([{sym, amount}]) and `nfts` ([{label}]) carry those extras so the panel can show the
+// full bundle, not just the ETH. Round 6 below exercises the full ETH + token + NFT bundle case.
 const HISTORY_SEED = [
-  { roundId: 6, winner: '0x4Cd2bE7a91F035c8d24eB0a7f6C19D8350a2e9aF', prizeEthFloat: 2.41, participantCount: 286, drawnAtBlock: 20512887 },
-  { roundId: 5, winner: '0x9A8e44bcD2e7F1a0C3b5D6e8F09112233aaBBccD', prizeEthFloat: 1.92, participantCount: 204, drawnAtBlock: 20498120 },
-  { roundId: 4, winner: '0x1f2E3d4C5b6A79880910aAbBcCdDeEfF00112233', prizeEthFloat: 3.05, participantCount: 331, drawnAtBlock: 20471550 },
-  { roundId: 3, winner: '0x7777Cc88aa99Bb00112233445566778899AaBbCc', prizeEthFloat: 1.50, participantCount: 158, drawnAtBlock: 20450010 }
+  { roundId: 6, winner: '0x4Cd2bE7a91F035c8d24eB0a7f6C19D8350a2e9aF', prizeEthFloat: 2.41, participantCount: 286, drawnAtBlock: 20512887, settled: true,
+    tokens: [{ sym: 'w🍖', amount: '50K' }], nfts: [{ label: 'Unicorn Relics #014' }] },
+  { roundId: 5, winner: '0x9A8e44bcD2e7F1a0C3b5D6e8F09112233aaBBccD', prizeEthFloat: 1.92, participantCount: 204, drawnAtBlock: 20498120, settled: true },
+  { roundId: 4, winner: '0x1f2E3d4C5b6A79880910aAbBcCdDeEfF00112233', prizeEthFloat: 3.05, participantCount: 331, drawnAtBlock: 20471550, settled: true,
+    tokens: [{ sym: '$NUTS', amount: '4,200' }] },
+  { roundId: 3, winner: '0x7777Cc88aa99Bb00112233445566778899AaBbCc', prizeEthFloat: 1.50, participantCount: 158, drawnAtBlock: 20450010, settled: true }
 ];
 const RAFFLE_SEED = {
   roundId: 7,
@@ -195,8 +201,8 @@ const PRIZE_SEED = {
   }]
 };
 
-// Bonus prizes queued for the NEXT raffle (getQueuedPrizeTokens / getQueuedPrizeNFTs).
-// These bundle into the next round that is drawn (on top of the ETH pot).
+// Bonus prizes queued for the current round (getQueuedPrizesForRound / getQueuedNFTsForRound).
+// These bundle into that round when it is drawn (on top of the ETH pot).
 const QUEUED_SEED = {
   tokens: [{
     sym: '$NUTS',
@@ -215,6 +221,36 @@ const POT_SEED = {
   eth: 1.86,
   threshold: 2.5
 };
+
+// Permissionless prize boosts for the current round (getRoundBoost + PrizeBoosted events).
+// A boost tops up the round's ETH prize but is held apart from the pot: it never affects the
+// draw threshold, earns no entries, and triggers no draw. `roundEth` is the boost accumulated
+// for the open round; `recent` mirrors recent PrizeBoosted events (newest first).
+const BOOST_SEED = {
+  roundEth: 0.35,
+  recent: [{
+    booster: '0x9A8e44bcD2e7F1a0C3b5D6e8F09112233aaBBccD',
+    amountEth: 0.2
+  }, {
+    booster: '0x1f2E3d4C5b6A79880910aAbBcCdDeEfF00112233',
+    amountEth: 0.1
+  }, {
+    booster: '0x4Cd2bE7a91F035c8d24eB0a7f6C19D8350a2e9aF',
+    amountEth: 0.05
+  }]
+};
+
+// Leaderboard: lifetime swap volume ranking, built client-side from SwapTracked events
+// (the contract has no on-chain enumeration of swappers). `volumeRaw` is the contract's
+// lifetimeVolume accumulator (amountIn summed across swaps); units are mixed (ETH on buys,
+// w🍖 on sells), so it is shown as a raw activity figure, not an ETH total.
+const LEADERBOARD_SEED = [
+  { address: '0x7777Cc88aa99Bb00112233445566778899AaBbCc', volumeRaw: 184.2, swaps: 96 },
+  { address: '0x1f2E3d4C5b6A79880910aAbBcCdDeEfF00112233', volumeRaw: 121.7, swaps: 73 },
+  { address: '0x9A8e44bcD2e7F1a0C3b5D6e8F09112233aaBBccD', volumeRaw: 88.4, swaps: 51 },
+  { address: '0x4Cd2bE7a91F035c8d24eB0a7f6C19D8350a2e9aF', volumeRaw: 64.1, swaps: 43 },
+  { address: '0x0d5eA77f44CdaA3aa1bb22Cc33dd44Ee55Ff6071', volumeRaw: 33.9, swaps: 28 }
+];
 Object.assign(window, {
   TOKEN,
   ETH_USD,
@@ -241,5 +277,7 @@ Object.assign(window, {
   POT_SEED,
   PRIZE_SEED,
   QUEUED_SEED,
-  HISTORY_SEED
+  HISTORY_SEED,
+  BOOST_SEED,
+  LEADERBOARD_SEED
 });

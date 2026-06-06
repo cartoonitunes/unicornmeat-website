@@ -1,26 +1,216 @@
-// panels.jsx - presentational panels for The Cauldron (stats, raffle standing, recent winners, pot, raffle)
+// panels.jsx - presentational panels for The Cauldron.
+//
+// Layout is three zones: the hero, the primary swap+round row, and one tabbed secondary card.
+// RoundStatus folds the old raffle banner + pot indicator into a single compact card; the secondary
+// panels (stats, leaderboard, past winners, boost) live as tabs in SecondaryTabs.
 
-// ---------- Your Stats ----------
-function StatsPanel({
+// ---------- Token glyphs (real logos, not emoji) ----------
+// ETH renders the standard Ethereum diamond as inline SVG; w🍖 uses the site's token logo image.
+// Any other asset shows its symbol text (see the chip renderers below), never a placeholder emoji.
+function TokenGlyph({
+  kind,
+  size = 26
+}) {
+  if (kind === 'eth') {
+    return /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 256 417",
+      xmlns: "http://www.w3.org/2000/svg",
+      style: {
+        display: 'block'
+      }
+    }, /*#__PURE__*/React.createElement("polygon", {
+      fill: "#343434",
+      points: "127.9611,0.0367 125.1661,9.5 125.1661,285.168 127.9611,287.958 255.9231,212.32"
+    }), /*#__PURE__*/React.createElement("polygon", {
+      fill: "#8C8C8C",
+      points: "127.962,0.0367 0,212.32 127.962,287.959 127.962,154.158"
+    }), /*#__PURE__*/React.createElement("polygon", {
+      fill: "#3C3C3B",
+      points: "127.9611,312.1866 126.3861,314.1066 126.3861,412.3056 127.9611,416.9066 255.9991,236.5866"
+    }), /*#__PURE__*/React.createElement("polygon", {
+      fill: "#8C8C8C",
+      points: "127.962,416.9052 127.962,312.1852 0,236.5852"
+    }), /*#__PURE__*/React.createElement("polygon", {
+      fill: "#141414",
+      points: "127.9611,287.9577 255.9211,212.3207 127.9611,154.1587"
+    }), /*#__PURE__*/React.createElement("polygon", {
+      fill: "#393939",
+      points: "0.0009,212.3208 127.9609,287.9578 127.9609,154.1588"
+    }));
+  }
+  return /*#__PURE__*/React.createElement("img", {
+    src: "/assets/images/home-two/unicornmeat-logo.webp",
+    width: size,
+    height: size,
+    alt: "w🍖",
+    style: {
+      display: 'block',
+      objectFit: 'contain'
+    }
+  });
+}
+
+// ---------- Current round status (primary zone, beside the swap card) ----------
+// One card that carries everything about the open round: round number, the prize (pot + boost +
+// bundled extras), a labelled pot-progress bar toward the threshold, participants, and your entries.
+// Replaces the separate raffle banner and pot indicator so the same numbers are not shown twice.
+function RoundStatus({
+  raffle,
+  pot,
+  boostEth,
+  prize,
+  drawable,
+  onDraw,
+  drawing,
+  paused,
+  raffleLive
+}) {
+  const pct = Math.max(0, Math.min(1, pot.threshold ? pot.eth / pot.threshold : 0));
+  const tokens = prize && prize.tokens || [];
+  const nfts = prize && prize.nfts || [];
+  const hasExtras = tokens.length > 0 || nfts.length > 0;
+  const odds = raffleLive && raffle.totalEntries ? raffle.userEntries / raffle.totalEntries * 100 : 0;
+  const status = paused ? 'Paused' : pct >= 1 ? 'Pot full' : 'Live';
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card round-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-h"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ico"
+  }, "🎲"), /*#__PURE__*/React.createElement("h3", null, "Current Round"), raffle.roundId ? /*#__PURE__*/React.createElement("span", {
+    className: "pill",
+    style: {
+      fontSize: 11.5,
+      padding: '4px 9px'
+    }
+  }, "#", raffle.roundId) : null, /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: 'round-state' + (paused ? ' paused' : pct >= 1 ? ' full' : '')
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dot"
+  }), status)),
+  // Prize: ETH (pot + boost) and any bundled token / NFT prizes.
+  /*#__PURE__*/React.createElement("div", {
+    className: "prize-line"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "prize-glyph"
+  }, /*#__PURE__*/React.createElement(TokenGlyph, {
+    kind: "eth",
+    size: 34
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "prize-amt"
+  }, fmtEth(prize.ethFloat), " ", /*#__PURE__*/React.createElement("span", {
+    className: "u"
+  }, "ETH")), /*#__PURE__*/React.createElement("div", {
+    className: "prize-cap"
+  }, "Prize pot", boostEth > 0 ? " (incl. " + fmtEth(boostEth) + " boost)" : "", hasExtras ? " plus bundled prizes" : ""))), hasExtras && /*#__PURE__*/React.createElement("div", {
+    className: "chip-row"
+  }, tokens.map((t, i) => /*#__PURE__*/React.createElement("span", {
+    className: "sym-chip",
+    key: 't' + i
+  }, t.amount, " ", t.sym)), nfts.map((n, i) => /*#__PURE__*/React.createElement("span", {
+    className: "sym-chip nft",
+    key: 'n' + i
+  }, n.collection, " ", n.id))),
+  // Pot progress toward the draw threshold, clearly labelled.
+  /*#__PURE__*/React.createElement("div", {
+    className: "potbar-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "potbar-top"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "potbar-label"
+  }, "Pot: ", fmtEth(pot.eth), " / ", pot.threshold, " ETH"), /*#__PURE__*/React.createElement("span", {
+    className: "potbar-pct"
+  }, Math.round(pct * 100), "%")), /*#__PURE__*/React.createElement("div", {
+    className: "potbar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "potbar-fill",
+    style: {
+      width: pct * 100 + '%'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "potbar-note"
+  }, paused ? "Swaps are disabled until the owner unpauses. The prize can still be boosted." : pct >= 1 ? "Pot is full. The next swap draws a winner automatically." : "Each swap adds a 0.3% fee to the pot. When it fills, a winner is drawn automatically.")),
+  // Round stats: participants, your entries, win odds.
+  /*#__PURE__*/React.createElement("div", {
+    className: "round-stats"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "rk"
+  }, "Participants"), /*#__PURE__*/React.createElement("div", {
+    className: "rv"
+  }, commas(raffle.participants))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "rk"
+  }, "Your Entries"), /*#__PURE__*/React.createElement("div", {
+    className: "rv gold"
+  }, raffleLive ? commas(raffle.userEntries) : '0')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "rk"
+  }, "Win Odds"), /*#__PURE__*/React.createElement("div", {
+    className: "rv"
+  }, raffleLive ? `${odds.toFixed(odds < 10 ? 2 : 1)}%` : '·'))), drawable && /*#__PURE__*/React.createElement("div", {
+    className: "draw-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "draw-note"
+  }, "The pot is full. Anyone can draw the winner now."), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: onDraw,
+    disabled: drawing,
+    style: drawing ? {
+      opacity: .6,
+      cursor: 'not-allowed'
+    } : {}
+  }, drawing ? 'Drawing…' : 'Draw now')));
+}
+
+// ---------- How it works (accordion, collapsed by default) ----------
+// Below the swap area. New visitors expand it; returning visitors skip past it.
+function HowItWorks() {
+  const [open, setOpen] = React.useState(false);
+  const steps = [["💧", "0.3% fee", "Every swap collects 0.3% of the ETH side into the prize pot, on top of the Uniswap pool fee."], ["🎟️", "Entries", "That same swap earns sqrt-weighted entries: a buy earns full, a sell earns half."], ["✨", "Holder bonus", "Holding w🍖 multiplies your entries up to 2x, read from your live balance at the draw."], ["🎲", "Auto-draw", "When the pot reaches the threshold, the next swap draws a winner automatically."], ["🏆", "Auto-pay", "The winner is paid automatically in the same draw: the ETH pot plus any bundled token and NFT prizes land straight in their wallet, no claim needed."]];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card accordion" + (open ? ' open' : '')
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "accordion-head",
+    onClick: () => setOpen(o => !o),
+    "aria-expanded": open
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ico"
+  }, "📜"), /*#__PURE__*/React.createElement("span", {
+    className: "accordion-title"
+  }, "How does The Cauldron work?"), /*#__PURE__*/React.createElement("span", {
+    className: "accordion-chevron"
+  }, open ? "−" : "+")), open && /*#__PURE__*/React.createElement("div", {
+    className: "how-list",
+    style: {
+      marginTop: 16
+    }
+  }, steps.map((s, i) => /*#__PURE__*/React.createElement("div", {
+    className: "how-row",
+    key: i
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "how-ic"
+  }, s[0]), /*#__PURE__*/React.createElement("div", {
+    className: "how-txt"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "how-t"
+  }, s[1]), /*#__PURE__*/React.createElement("div", {
+    className: "how-d"
+  }, s[2]))))));
+}
+
+// ---------- Stats tab content (no card wrapper; SecondaryTabs provides it) ----------
+// Lifetime volume (hidden in live mode until an indexer ships), swap count, last active, and the
+// holder multiplier with its reference scale folded in as line items (no separate card).
+function StatsContent({
   stats,
   flashKey
 }) {
   const daysSince = stats.daysSinceLastSwap;
   const sinceLabel = daysSince == null ? 'never' : daysSince === 0 ? 'today' : daysSince === 1 ? '1d ago' : `${daysSince}d ago`;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "ico"
-  }, "\uD83D\uDCCA"), /*#__PURE__*/React.createElement("h3", null, "Your Stats"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "pill",
-    style: {
-      fontSize: 12
-    }
-  }, "last: ", sinceLabel)), /*#__PURE__*/React.createElement("div", {
+  const bps = stats.holderBps == null ? 10000 : stats.holderBps;
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "stat-grid"
   }, stats.volEth != null && /*#__PURE__*/React.createElement("div", {
     className: "stat",
@@ -45,38 +235,18 @@ function StatsPanel({
     className: "v"
   }, commas(stats.swaps)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, "via The Cauldron"))));
-}
-
-// ---------- Your Raffle Standing ----------
-// Trimmed to the two fields the contract directly exposes for the current round:
-// roundEntries = getEntries(currentRound, user); odds = roundEntries / totalSqrtWeight.
-// Lifetime wins / all-time entries / best win require an event indexer, so they are
-// intentionally absent until one ships.
-function RaffleStanding({
-  raffleLive,
-  roundEntries,
-  totalEntries
-}) {
-  const odds = raffleLive && totalEntries ? roundEntries / totalEntries * 100 : 0;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "card"
+  }, "via The Cauldron")), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "card-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "ico"
-  }, "\uD83C\uDF9F\uFE0F"), /*#__PURE__*/React.createElement("h3", null, "Raffle Standing"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "pill",
+    className: "k"
+  }, "Last Active"), /*#__PURE__*/React.createElement("div", {
+    className: "v",
     style: {
-      fontSize: 12,
-      color: raffleLive ? 'var(--brew-deep)' : 'var(--muted)',
-      borderColor: raffleLive ? 'var(--brew)' : 'var(--gold-line)'
+      fontSize: 18
     }
-  }, raffleLive ? '● Live' : '○ Idle')), /*#__PURE__*/React.createElement("div", {
-    className: "stat-grid"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, sinceLabel), /*#__PURE__*/React.createElement("div", {
+    className: "sub"
+  }, "last swap")), /*#__PURE__*/React.createElement("div", {
     className: "stat",
     style: {
       borderColor: 'rgba(139,92,246,.3)',
@@ -84,66 +254,26 @@ function RaffleStanding({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, "This Round"), /*#__PURE__*/React.createElement("div", {
+  }, "Holder Multiplier"), /*#__PURE__*/React.createElement("div", {
     className: "v",
     style: {
-      color: raffleLive ? 'var(--brew-deep)' : 'var(--muted)'
+      color: 'var(--brew-deep)'
     }
-  }, raffleLive ? commas(roundEntries) : '0'), /*#__PURE__*/React.createElement("div", {
+  }, fmtMult(bps)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, raffleLive ? 'entries' : 'no raffle running')), /*#__PURE__*/React.createElement("div", {
-    className: "stat"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "k"
-  }, "Win Odds"), /*#__PURE__*/React.createElement("div", {
-    className: "v",
-    style: {
-      color: raffleLive ? 'var(--brew-deep)' : 'var(--muted)'
-    }
-  }, raffleLive ? `${odds.toFixed(odds < 10 ? 2 : 1)}%` : '·'), /*#__PURE__*/React.createElement("div", {
-    className: "sub"
-  }, "your share of total entries"))));
-}
-
-// ---------- Holder Bonus ----------
-// The connected user's current holder multiplier (10000 bps = 1x, capped at 2x) plus a reference
-// scale computed from the same formula the contract uses (data.HOLDER_SCALE).
-function HolderBonus({
-  holderBps,
-  holderTokens
-}) {
-  const bps = holderBps == null ? 10000 : holderBps;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "ico"
-  }, "✨"), /*#__PURE__*/React.createElement("h3", null, "Holder Bonus"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "pill",
-    style: {
-      fontSize: 13,
-      color: 'var(--brew-deep)',
-      borderColor: 'var(--brew)'
-    }
-  }, fmtMult(bps), " weight")), /*#__PURE__*/React.createElement("div", {
+  }, stats.holderTokens != null ? compact(stats.holderTokens) + ' w🍖 held' : 'raffle weight'))),
+  // Holder bonus reference scale, folded in as line items instead of its own card.
+  /*#__PURE__*/React.createElement("div", {
+    className: "scale-head"
+  }, "Holder bonus scale"), /*#__PURE__*/React.createElement("div", {
     className: "muted",
     style: {
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: 700,
-      lineHeight: 1.5
+      lineHeight: 1.45,
+      marginBottom: 8
     }
-  }, "Hold w🍖 for bonus raffle weight. Positions from ~10k tokens up earn a multiplier that scales with your stake, capped at 2x around 5M tokens (~5% of supply). Read from your live balance at the draw."), holderTokens != null && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 8,
-      fontWeight: 800,
-      fontSize: 13.5
-    }
-  }, "You hold ", compact(holderTokens), " w🍖 ", /*#__PURE__*/React.createElement("span", {
-    className: "muted"
-  }, "(", fmtMult(bps), " weight)")), /*#__PURE__*/React.createElement("div", {
+  }, "Hold w🍖 for bonus raffle weight, from ~10k tokens up to a 2x cap around 5M (~5% of supply). Read from your live balance at the draw."), /*#__PURE__*/React.createElement("div", {
     className: "holder-scale"
   }, HOLDER_SCALE.map((s, i) => /*#__PURE__*/React.createElement("div", {
     className: "hs-row",
@@ -155,66 +285,68 @@ function HolderBonus({
   }, fmtMult(s.mult))))));
 }
 
-// ---------- How it works ----------
-// A compact run-through of the full Cauldron mechanic: fee, entries, holder bonus, auto-draw, claim.
-function HowItWorks() {
-  const steps = [
-    ["💧", "0.3% fee", "Every swap skims 0.3% of the ETH side into the prize pot, on top of the Uniswap pool fee."],
-    ["🎟️", "Entries", "That same swap earns sqrt-weighted entries: a buy earns full, a sell earns half."],
-    ["✨", "Holder bonus", "Holding w🍖 multiplies your entries up to 2x, read from your live balance at the draw."],
-    ["🎲", "Auto-draw", "When the pot reaches the threshold, the next swap draws a winner automatically."],
-    ["🏆", "Claim", "The winner claims the ETH pot plus any bundled token and NFT prizes."]
-  ];
-  return /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "ico"
-  }, "📜"), /*#__PURE__*/React.createElement("h3", null, "How it works")), /*#__PURE__*/React.createElement("div", {
-    className: "how-list"
-  }, steps.map((s, i) => /*#__PURE__*/React.createElement("div", {
-    className: "how-row",
-    key: i
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "how-ic"
-  }, s[0]), /*#__PURE__*/React.createElement("div", {
-    className: "how-txt"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "how-t"
-  }, s[1]), /*#__PURE__*/React.createElement("div", {
-    className: "how-d"
-  }, s[2]))))));
-}
-
-// ---------- Past Winners / round history ----------
-// Reads completed rounds straight from the contract (getRoundResult / completedRounds), so it works
-// with nothing more than an RPC endpoint: round number, winner, prize ETH, participant count.
-function RoundHistory({
+// ---------- Leaderboard tab content ----------
+// Lifetime swap-volume ranking from SwapTracked events (no on-chain enumeration of swappers).
+// volumeRaw is the contract's lifetimeVolume accumulator; units are mixed (ETH buys / w🍖 sells).
+function LeaderboardContent({
   rows,
   userAddress
 }) {
-  return /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "ico"
-  }, "\uD83C\uDFC6"), /*#__PURE__*/React.createElement("h3", null, "Past Winners"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "muted mono",
-    style: {
-      fontSize: 11.5,
-      fontWeight: 700
-    }
-  }, "round history")), rows && rows.length > 0 ? /*#__PURE__*/React.createElement("div", {
+  const list = rows || [];
+  return /*#__PURE__*/React.createElement("div", null, list.length > 0 ? /*#__PURE__*/React.createElement("div", {
     className: "lb"
-  }, rows.map((r, i) => {
-    const you = userAddress && r.winner && r.winner.toLowerCase() === userAddress.toLowerCase();
+  }, list.map((r, i) => {
+    const you = userAddress && r.address && r.address.toLowerCase() === userAddress.toLowerCase();
     return /*#__PURE__*/React.createElement("div", {
       className: 'lb-row' + (you ? ' you' : ''),
-      key: r.roundId + ':' + i
+      key: r.address + ':' + i
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "rk"
+    }, i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1), /*#__PURE__*/React.createElement("div", {
+      className: "who"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "a"
+    }, you ? 'You · ' : '', trunc(r.address))), /*#__PURE__*/React.createElement("div", {
+      className: "vol"
+    }, compact(r.volumeRaw), " ", /*#__PURE__*/React.createElement("span", {
+      className: "muted"
+    }, r.swaps ? commas(r.swaps) + ' swaps' : '')));
+  })) : /*#__PURE__*/React.createElement("div", {
+    className: "tab-empty"
+  }, "No swaps tracked yet. Traders rank here by lifetime volume once swapping opens."), /*#__PURE__*/React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      marginTop: 10,
+      lineHeight: 1.4
+    }
+  }, "Ranked from SwapTracked events. Volume is the raw on-chain figure (buys in ETH, sells in w🍖)."));
+}
+
+// ---------- Past winners tab content ----------
+// Completed rounds from getRoundResult / getRound: winner, prize ETH, participants, auto-pay status.
+function WinnersContent({
+  rows,
+  userAddress
+}) {
+  const [open, setOpen] = React.useState(null);
+  if (!rows || rows.length === 0) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "tab-empty"
+    }, "No rounds drawn yet. Winners appear here once the pot fills and a winner is drawn.");
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "lb winners"
+  }, rows.map((r, i) => {
+    const you = userAddress && r.winner && r.winner.toLowerCase() === userAddress.toLowerCase();
+    const tokens = r.tokens || [];
+    const nfts = r.nfts || [];
+    const extras = tokens.length + nfts.length;
+    const isOpen = open === i;
+    const row = /*#__PURE__*/React.createElement("div", {
+      className: 'lb-row' + (you ? ' you' : '') + (extras ? ' clickable' : ''),
+      onClick: extras ? () => setOpen(o => o === i ? null : i) : undefined
     }, /*#__PURE__*/React.createElement("div", {
       className: "rk"
     }, ['🥇', '🥈', '🥉', '🎟️', '🎟️'][Math.min(i, 4)]), /*#__PURE__*/React.createElement("div", {
@@ -232,267 +364,182 @@ function RoundHistory({
         fontSize: 10.5,
         fontWeight: 700
       }
-    }, "round #", r.roundId, r.participantCount ? ' · ' + commas(r.participantCount) + ' in' : '')), /*#__PURE__*/React.createElement("div", {
+    }, "round #", r.roundId, r.participantCount ? ' · ' + commas(r.participantCount) + ' in' : '', r.settled === false ? ' · ⏳ claim pending' : r.settled === true ? ' · ✅ auto-paid' : '')), /*#__PURE__*/React.createElement("div", {
       className: "vol"
     }, fmtEth(r.prizeEthFloat), " ", /*#__PURE__*/React.createElement("span", {
       className: "muted"
-    }, "ETH")));
-  })) : /*#__PURE__*/React.createElement("div", {
+    }, "ETH"), extras ? /*#__PURE__*/React.createElement("span", {
+      className: "more-pill"
+    }, "+", extras, " more ", isOpen ? "−" : "+") : null));
+    const detail = isOpen && extras ? /*#__PURE__*/React.createElement("div", {
+      className: "bundle-detail"
+    }, tokens.map((t, j) => /*#__PURE__*/React.createElement("span", {
+      className: "sym-chip",
+      key: 't' + j
+    }, t.amount, " ", t.sym)), nfts.map((n, j) => /*#__PURE__*/React.createElement("span", {
+      className: "sym-chip nft",
+      key: 'n' + j
+    }, n.label))) : null;
+    return /*#__PURE__*/React.createElement(React.Fragment, {
+      key: r.roundId + ':' + i
+    }, row, detail);
+  }));
+}
+
+// ---------- Boost tab content ----------
+// Anyone can permissionlessly top up the current round's ETH prize with boostPrize(). A boost earns no
+// entries, never moves the draw threshold, and never triggers a draw; it works even while paused.
+function BoostContent({
+  roundId,
+  boostEth,
+  recent,
+  onBoost,
+  busy,
+  connected,
+  onConnect,
+  paused
+}) {
+  const [amt, setAmt] = React.useState('0.05');
+  const val = parseFloat(amt) || 0;
+  const canBoost = connected && val > 0 && !busy;
+  const rows = recent || [];
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "muted",
     style: {
       fontSize: 13,
       fontWeight: 700,
-      textAlign: 'center',
-      padding: '14px 6px',
       lineHeight: 1.5
     }
-  }, "No rounds drawn yet. Winners appear here once the pot fills and a winner is drawn."));
-}
-
-// ---------- Cauldron Pot indicator ----------
-function CauldronPot({
-  eth,
-  threshold,
-  intensity,
-  queued
-}) {
-  const queuedTokens = queued && queued.tokens || [];
-  const queuedNfts = queued && queued.nfts || [];
-  const hasQueued = queuedTokens.length > 0 || queuedNfts.length > 0;
-  const pct = Math.max(0, Math.min(1, eth / threshold));
-  // Heat status tracks the actual fill: only "Boiled over" once the threshold is met.
-  const heat = pct >= 1 ? 'Boiled over' : pct >= 0.9 ? 'Almost boiling' : pct >= 0.5 ? 'Heating up' : 'Simmering';
-  const fillH = 8 + pct * 92; // % of bowl height
-  const bubbles = intensity === 'minimal' ? [] : [{
-    l: '24%',
-    s: 7,
-    d: 2.4,
-    delay: 0
-  }, {
-    l: '46%',
-    s: 10,
-    d: 3.1,
-    delay: .6
-  }, {
-    l: '63%',
-    s: 6,
-    d: 2.0,
-    delay: 1.2
-  }, {
-    l: '78%',
-    s: 8,
-    d: 2.8,
-    delay: .3
-  }, {
-    l: '37%',
-    s: 5,
-    d: 2.2,
-    delay: 1.6
-  }];
-  return /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-h"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "ico"
-  }, "\uD83C\uDF72"), /*#__PURE__*/React.createElement("h3", null, "The Cauldron"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
+  }, "Add ETH to ", roundId ? "round #" + roundId + "'s" : "the current round's", " prize", boostEth > 0 ? " (currently +" + fmtEth(boostEth) + " ETH boosted)" : "", ". A boost is pure generosity: it does ", /*#__PURE__*/React.createElement("strong", null, "not"), " earn raffle entries, does ", /*#__PURE__*/React.createElement("strong", null, "not"), " move the draw threshold, and never triggers a draw."), /*#__PURE__*/React.createElement("div", {
+    className: "boost-field"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "boost-in",
+    inputMode: "decimal",
+    value: amt,
+    placeholder: "0.0",
+    onChange: e => setAmt(e.target.value.replace(/[^0-9.]/g, ''))
   }), /*#__PURE__*/React.createElement("span", {
-    className: "muted mono",
+    className: "boost-unit"
+  }, /*#__PURE__*/React.createElement(TokenGlyph, {
+    kind: "eth",
+    size: 18
+  }), "ETH")), connected ? /*#__PURE__*/React.createElement("button", {
+    className: "btn brew",
+    style: {
+      width: '100%',
+      marginTop: 10,
+      ...(canBoost ? {} : {
+        opacity: .55,
+        cursor: 'not-allowed'
+      })
+    },
+    disabled: !canBoost,
+    onClick: () => canBoost && onBoost(val)
+  }, busy ? '🔥 Boosting…' : val > 0 ? "Boost prize by " + fmtEth(val) + " ETH" : "Enter an amount") : /*#__PURE__*/React.createElement("button", {
+    className: "btn brew connect-wallet-btn",
+    style: {
+      width: '100%',
+      marginTop: 10
+    },
+    onClick: onConnect
+  }, "Connect Wallet to Boost 🦄"), paused && /*#__PURE__*/React.createElement("div", {
+    className: "muted",
     style: {
       fontSize: 11.5,
-      fontWeight: 700
+      fontWeight: 700,
+      marginTop: 8,
+      lineHeight: 1.4
     }
-  }, heat, " \xB7 ", Math.round(pct * 100), "%")), /*#__PURE__*/React.createElement("div", {
-    className: "pot-wrap"
+  }, "✓ Boosting works even while swaps are paused, so the launch round can be seeded."), rows.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "boost-recent"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "pot"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "pot-rim"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "pot-bowl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "brew-fill",
-    style: {
-      height: fillH + '%'
-    }
-  }, bubbles.map((b, i) => /*#__PURE__*/React.createElement("span", {
-    className: "bubble",
-    key: i,
-    style: {
-      left: b.l,
-      width: b.s,
-      height: b.s,
-      animationDuration: b.d + 's',
-      animationDelay: b.delay + 's'
-    }
-  })))), /*#__PURE__*/React.createElement("div", {
-    className: "pot-legs"
-  }, /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null))), /*#__PURE__*/React.createElement("div", {
-    className: "pot-pct"
-  }, fmtEth(eth), " ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 16,
-      color: 'var(--muted)'
-    }
-  }, "/ ", threshold, " ETH")), /*#__PURE__*/React.createElement("div", {
-    className: "muted",
+    className: "scale-head"
+  }, "Recent boosts"), rows.map((b, i) => /*#__PURE__*/React.createElement("div", {
+    className: "boost-row",
+    key: i
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mono",
     style: {
       fontSize: 12.5,
       fontWeight: 700,
-      marginTop: 6,
-      textAlign: 'center',
-      lineHeight: 1.4
+      color: 'var(--ink-2)'
     }
-  }, pct >= 1 ? '🔥 Pot is full. The next swap draws a winner automatically.' : 'Each swap adds a 0.3% fee, on top of the Uniswap pool fee, to the pot and earns raffle entries. When the pot fills, a winner is drawn automatically.'), hasQueued && /*#__PURE__*/React.createElement("div", {
-    className: "queued"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "queued-eyebrow"
-  }, "Bonus prizes for the next draw"), /*#__PURE__*/React.createElement("div", {
-    className: "q-grid"
-  }, queuedTokens.map((t, i) => /*#__PURE__*/React.createElement("span", {
-    className: "q-chip",
-    key: 'qt' + i
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "g"
-  }, t.glyph || '🎁'), t.amount, " ", t.sym)), queuedNfts.map((n, i) => /*#__PURE__*/React.createElement("span", {
-    className: "q-chip nft",
-    key: 'qn' + i
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "g"
-  }, n.glyph || '🖼️'), n.collection, " ", n.id))))));
+  }, trunc(b.booster)), /*#__PURE__*/React.createElement("span", {
+    className: "mono",
+    style: {
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: 'var(--brew-deep)'
+    }
+  }, "+", fmtEth(b.amountEth), " ETH")))));
 }
 
-// ---------- Prize showcase (renders inside the raffle banner) ----------
-// A prize is always the ETH pot, optionally bundled with ERC-20 tokens and NFTs. `prize`
-// is { ethFloat, tokens: [{sym, amount, glyph}], nfts: [{collection, id, glyph}] }. Empty
-// token/NFT arrays render the ETH-only case; this single path covers all three
-// compositions (ETH only, ETH + tokens, ETH + tokens + NFTs).
-function PrizeShow({
-  prize
+// ---------- Secondary tabbed section (one card, four tabs) ----------
+// Collapses the old stack of secondary cards into a single card with a tab bar.
+function SecondaryTabs({
+  stats,
+  flashKey,
+  leaderboard,
+  history,
+  account,
+  boost
 }) {
-  if (!prize) return null;
-  const tokens = prize.tokens || [];
-  const nfts = prize.nfts || [];
-  const hasExtras = tokens.length > 0 || nfts.length > 0;
+  const [tab, setTab] = React.useState('stats');
+  const tabs = [['stats', '📊', 'Stats'], ['leaders', '🏆', 'Leaders'], ['winners', '🎲', 'Winners'], ['boost', '🔥', 'Boost']];
   return /*#__PURE__*/React.createElement("div", {
-    className: "prize-show"
+    className: "card tabs-card"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "prize-eyebrow"
-  }, "Prize Pot"), /*#__PURE__*/React.createElement("div", {
-    className: "prize-eth"
+    className: "tabs",
+    role: "tablist"
+  }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t[0],
+    className: 'tab' + (tab === t[0] ? ' on' : ''),
+    role: "tab",
+    title: t[2],
+    "aria-selected": tab === t[0],
+    onClick: () => setTab(t[0])
   }, /*#__PURE__*/React.createElement("span", {
-    className: "coin-stack"
-  }, "\uD83E\uDE99"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "prize-title"
-  }, fmtEth(prize.ethFloat), " ETH"), /*#__PURE__*/React.createElement("div", {
-    className: "prize-sub"
-  }, hasExtras ? 'plus bundled prizes' : 'Winner takes the ETH pot'))), hasExtras && /*#__PURE__*/React.createElement("div", {
-    className: "pack-grid"
-  }, tokens.map((t, i) => /*#__PURE__*/React.createElement("span", {
-    className: "tok-chip",
-    key: 't' + i
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "g"
-  }, t.glyph || '\uD83C\uDF81'), t.amount, " ", t.sym)), nfts.map((n, i) => /*#__PURE__*/React.createElement("span", {
-    className: "tok-chip nft",
-    key: 'n' + i
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "g"
-  }, n.glyph || '\uD83D\uDDBC\uFE0F'), n.collection, " ", n.id))));
+    className: "tab-ic"
+  }, t[1]), /*#__PURE__*/React.createElement("span", {
+    className: "tab-lbl"
+  }, t[2])))), /*#__PURE__*/React.createElement("div", {
+    className: "tab-body"
+  }, tab === 'stats' && /*#__PURE__*/React.createElement(StatsContent, {
+    stats: stats,
+    flashKey: flashKey
+  }), tab === 'leaders' && /*#__PURE__*/React.createElement(LeaderboardContent, {
+    rows: leaderboard,
+    userAddress: account
+  }), tab === 'winners' && /*#__PURE__*/React.createElement(WinnersContent, {
+    rows: history,
+    userAddress: account
+  }), tab === 'boost' && /*#__PURE__*/React.createElement(BoostContent, {
+    roundId: boost.roundId,
+    boostEth: boost.boostEth,
+    recent: boost.recent,
+    onBoost: boost.onBoost,
+    busy: boost.busy,
+    connected: boost.connected,
+    onConnect: boost.onConnect,
+    paused: boost.paused
+  })));
 }
 
-// ---------- Active Raffle Banner ----------
-// There is no time window: entries accrue on every swap and the round stays open until
-// someone draws. `drawable` is true once the pot has reached the threshold; the winner is
-// never picked automatically, so in that state anyone can press Draw winner to settle it
-// on-chain (committing the pot + queued prizes and opening a fresh round).
-function RaffleBanner({
-  raffle,
-  prize,
-  drawable,
-  onDraw,
-  drawing
-}) {
-  const odds = raffle.totalEntries ? raffle.userEntries / raffle.totalEntries * 100 : 0;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "raffle"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "sparkle",
-    style: {
-      top: 14,
-      right: 34,
-      fontSize: 18
-    }
-  }, "\u2728"), /*#__PURE__*/React.createElement("span", {
-    className: "sparkle",
-    style: {
-      top: 52,
-      right: 90,
-      fontSize: 13,
-      animationDelay: '.8s'
-    }
-  }, "\uD83C\uDF1F"), /*#__PURE__*/React.createElement("span", {
-    className: "sparkle",
-    style: {
-      bottom: 22,
-      right: 18,
-      fontSize: 15,
-      animationDelay: '1.4s'
-    }
-  }, "\u2728"), /*#__PURE__*/React.createElement("div", {
-    className: "raffle-head"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: drawable ? "live ended" : "live"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "dot"
-  }), drawable ? "Pot full" : "Raffle live"), /*#__PURE__*/React.createElement("span", {
-    className: "raffle-title"
-  }, drawable ? "Winner draws automatically" : "Swap to earn entries"), /*#__PURE__*/React.createElement("span", {
-    className: "odds-chip"
-  }, "Your odds: ", odds.toFixed(odds < 10 ? 2 : 1), "%")), /*#__PURE__*/React.createElement("div", {
-    className: "raffle-body"
-  }, /*#__PURE__*/React.createElement(PrizeShow, {
-    prize: prize
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "raffle-stats"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "rk"
-  }, "Participants"), /*#__PURE__*/React.createElement("div", {
-    className: "rv"
-  }, commas(raffle.participants))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "rk"
-  }, "Your Entries"), /*#__PURE__*/React.createElement("div", {
-    className: "rv gold"
-  }, commas(raffle.userEntries))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "rk"
-  }, "Total Entries"), /*#__PURE__*/React.createElement("div", {
-    className: "rv sm"
-  }, commas(raffle.totalEntries)))), drawable ? /*#__PURE__*/React.createElement("div", {
-    className: "raffle-draw"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "raffle-draw-note"
-  }, "The pot is full. The next swap draws a winner automatically. You can also draw it now."), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: onDraw,
-    disabled: drawing,
-    style: drawing ? {
-      opacity: .6,
-      cursor: 'not-allowed'
-    } : {}
-  }, drawing ? 'Drawing…' : 'Draw now')) : /*#__PURE__*/React.createElement("div", {
-    className: "raffle-foot"
-  }, /*#__PURE__*/React.createElement("span", null, "Entries accruing"), /*#__PURE__*/React.createElement("span", null, "A winner draws automatically when the pot fills"))));
-}
-// ---------- Claim prize (P6) ----------
-// Shown only when the connected account is the winner of a settled, unclaimed raffle.
-// `claimable` is { raffleId, prizeEthFloat } from contract.findClaimableForUser, or null.
+// ---------- Claim prize (fallback only) ----------
+// Prizes are auto-paid at draw time, so this is hidden on the normal path. It appears only when an
+// auto-pay leg could not deliver (winner could not receive ETH, or a bundled transfer reverted),
+// letting the winner pull the still-owed remainder. `claimable` is from findClaimableForUser, or null.
 function ClaimPrize({
   claimable,
   busy,
   onClaim
 }) {
   if (!claimable) return null;
+  const flagged = claimable.ethOwed !== undefined || claimable.tokensOwed !== undefined;
+  const owedBits = [];
+  if (!flagged || claimable.ethOwed) owedBits.push(fmtEth(claimable.prizeEthFloat) + ' ETH');
+  if (!flagged || claimable.tokensOwed) owedBits.push('the bundled token and NFT prizes');
+  const owedText = owedBits.join(' plus ');
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -511,12 +558,12 @@ function ClaimPrize({
       lineHeight: 1.5,
       marginBottom: 14
     }
-  }, "You're the winner of raffle ", /*#__PURE__*/React.createElement("span", {
+  }, "You won raffle ", /*#__PURE__*/React.createElement("span", {
     className: "mono",
     style: {
       fontWeight: 800
     }
-  }, "#", claimable.raffleId), ". Claim ", /*#__PURE__*/React.createElement("strong", null, fmtEth(claimable.prizeEthFloat), " ETH"), " plus any bundled token and NFT prizes."), /*#__PURE__*/React.createElement("button", {
+  }, "#", claimable.raffleId), ", but the automatic payout could not reach your wallet. Collect ", /*#__PURE__*/React.createElement("strong", null, owedText), " here."), /*#__PURE__*/React.createElement("button", {
     className: "btn cta big brew",
     onClick: onClaim,
     disabled: busy,
@@ -524,16 +571,16 @@ function ClaimPrize({
       opacity: .6,
       cursor: 'not-allowed'
     } : {}
-  }, busy ? '🪄 Claiming…' : 'Claim prize 🎉'));
+  }, busy ? '🪄 Collecting…' : 'Collect prize 🎉'));
 }
 Object.assign(window, {
-  StatsPanel,
-  RaffleStanding,
-  HolderBonus,
+  TokenGlyph,
+  RoundStatus,
   HowItWorks,
-  RoundHistory,
-  CauldronPot,
-  RaffleBanner,
-  PrizeShow,
+  SecondaryTabs,
+  StatsContent,
+  LeaderboardContent,
+  WinnersContent,
+  BoostContent,
   ClaimPrize
 });

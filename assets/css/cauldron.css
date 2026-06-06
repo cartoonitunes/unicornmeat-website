@@ -105,6 +105,25 @@ body {
 .nav-links a { color: var(--ink-2); text-decoration: none; font-weight: 700; font-size: 15px; padding: 6px 2px; border-bottom: 2px solid transparent; white-space: nowrap; }
 .nav-links a:hover { color: var(--ink); }
 .nav-links a.active { color: var(--gold-deep); border-bottom-color: var(--gold); }
+/* active page: gold underline */
+.nav-links a.um-nav-active { color: var(--ink); border-bottom-color: var(--gold); }
+/* Swap = primary CTA pill (site's black-border + contrast-shadow style) */
+.nav-links a.um-nav-cta { background: var(--gold); color: #000; border: 2px solid #000; border-bottom: 2px solid #000;
+  border-radius: 999px; padding: 5px 16px; box-shadow: 2px 2px 0 0 #000; transition: transform .1s ease, box-shadow .1s ease; }
+.nav-links a.um-nav-cta:hover { color: #000; transform: translate(-1px, -1px); box-shadow: 3px 3px 0 0 #000; }
+.nav-links a.um-nav-cta:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 0 #000; }
+/* divider grouping the secondary "More" dropdown apart from the primary items */
+.nav-more { border-left: 1px solid var(--gold-line); padding-left: 14px; margin-left: 4px; }
+/* "More" dropdown in the nav (matches the site's Learn/More dropdown) */
+.nav-more { position: relative; }
+.nav-more > summary { list-style: none; cursor: pointer; color: var(--ink-2); font-weight: 700; font-size: 15px; padding: 6px 2px; white-space: nowrap; }
+.nav-more > summary::-webkit-details-marker { display: none; }
+.nav-more > summary::after { content: ' \25BE'; }
+.nav-more[open] > summary { color: var(--ink); }
+.nav-more-menu { position: absolute; top: 100%; right: 0; margin-top: 10px; background: #fff; border: 2px solid #000;
+  border-radius: 12px; box-shadow: var(--shadow); padding: 8px; min-width: 160px; display: flex; flex-direction: column; gap: 2px; z-index: 40; }
+.nav-more-menu a { color: var(--ink-2); text-decoration: none; font-weight: 700; font-size: 14px; padding: 8px 10px; border-radius: 8px; white-space: nowrap; border: none; }
+.nav-more-menu a:hover { background: var(--field); color: var(--ink); }
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 
 /* buttons - site pattern: 2px black border + hard offset contrast-shadow */
@@ -196,6 +215,16 @@ h1,h2,h3,h4 { font-family: var(--display); }
 .seg button { border: none; background: transparent; font-family: var(--display); font-weight: 600; font-size: 14px; padding: 7px 18px; border-radius: 999px; cursor: pointer; color: var(--ink-2); transition: .15s; }
 .seg button.on.buy { background: var(--up); color: #fff; box-shadow: 0 6px 14px -7px var(--up); }
 .seg button.on.sell { background: var(--down); color: #fff; box-shadow: 0 6px 14px -7px var(--down); }
+
+/* raffle-entries toggle: a plain checkbox that explains what you get and what it costs in one line.
+   Checked (default) routes through the fee+entries path; unchecked routes directly to Uniswap V3. */
+.raffle-toggle { display: flex; align-items: center; gap: 10px; margin: 14px 0 6px; padding: 11px 14px;
+  background: var(--field); border: 2px solid #000; border-radius: 12px; box-shadow: 2px 2px 0 0 #000;
+  cursor: pointer; user-select: none; }
+.raffle-toggle input { width: 20px; height: 20px; flex: none; accent-color: var(--brew); cursor: pointer; margin: 0; }
+.rt-text { font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--ink); }
+.rt-cost { color: var(--muted); font-weight: 700; }
+.bypass-note { font-size: 11.5px; font-weight: 700; color: var(--muted); line-height: 1.4; margin-bottom: 12px; }
 
 .rows { margin-top: 14px; display: flex; flex-direction: column; gap: 9px; }
 .row { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; }
@@ -386,6 +415,151 @@ h1,h2,h3,h4 { font-family: var(--display); }
 .foot { text-align: center; margin-top: 46px; color: var(--ink-2); font-weight: 700; font-size: 13px; }
 .foot a { color: var(--gold-deep); }
 
+/* boost the prize */
+.boost-badge {
+  margin: 8px auto 0; display: flex; align-items: center; justify-content: center; gap: 6px;
+  flex-wrap: wrap; max-width: 100%; text-align: center;
+  font-family: var(--mono); font-weight: 800; font-size: 12px; color: var(--brew-deep);
+  background: rgba(139,92,246,.1); border: 1.5px solid var(--brew); border-radius: 14px; padding: 5px 12px;
+}
+.boost-field {
+  display: flex; align-items: center; gap: 10px; margin-top: 12px;
+  background: var(--field); border: 2px solid #000; border-radius: 14px; padding: 12px 14px; box-shadow: 2px 2px 0 0 #000;
+}
+.boost-field:focus-within { box-shadow: 0 0 0 4px rgba(139,92,246,.25); }
+.boost-in { flex: 1; min-width: 0; border: none; background: transparent; outline: none;
+  font-family: var(--display); font-weight: 700; font-size: 26px; color: var(--ink); }
+.boost-in::placeholder { color: #D8CBB0; }
+.boost-unit { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(--ink-2);
+  background: #fff; border: 2px solid #000; border-radius: 999px; padding: 5px 13px; box-shadow: 2px 2px 0 0 #000; flex: none; }
+.boost-recent { margin-top: 14px; border-top: 1.5px solid var(--hair); padding-top: 12px; }
+.boost-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; padding: 5px 2px; }
+.boost-row + .boost-row { border-top: 1px solid var(--hair); }
+
+/* pause banner */
+.pause-banner {
+  margin: 14px auto 0; max-width: 560px; text-align: left;
+  background: #FFF1F5; border: 2px solid #000; border-radius: 14px; box-shadow: 3px 3px 0 0 #000;
+  padding: 12px 16px; font-size: 13.5px; font-weight: 700; color: var(--ink); line-height: 1.5;
+}
+.pause-banner strong { color: var(--down); }
+
+/* ============================================================
+   Overhauled layout: hero + primary (swap | round) + accordion + tabs
+   ============================================================ */
+
+/* page layout. Mobile (default): single column, round status first, then swap, accordion, tabs.
+   Desktop: two columns via grid-areas so the tall tabbed section fills the space beside the swap
+   card and the round card hugs its content with no trapped whitespace below it. */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "round" "swap" "accordion" "tabs";
+  gap: 16px; align-items: start; margin-top: 22px;
+}
+.layout > .swap-col { grid-area: swap; }
+.layout > .round-col { grid-area: round; }
+.layout > .accordion { grid-area: accordion; }
+.layout > .tabs-card { grid-area: tabs; }
+.swap-col, .round-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+@media (min-width: 901px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    grid-template-areas:
+      "swap      round"
+      "swap      tabs"
+      "accordion tabs";
+    gap: 20px;
+  }
+}
+
+/* real token logos inside the swap card chips: show the logo on a clean white disc */
+.tok .ic { background: #fff; overflow: hidden; }
+.tok .ic.meat { background: #fff; }
+
+/* round status card */
+.round-state { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono);
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--up); white-space: nowrap; }
+.round-state .dot { background: var(--up); }
+.round-state.full { color: var(--gold-deep); }
+.round-state.full .dot { background: var(--gold); box-shadow: 0 0 0 3px rgba(255,186,0,.2); }
+.round-state.paused { color: var(--muted); }
+.round-state.paused .dot { background: var(--muted); box-shadow: none; }
+
+.prize-line { display: flex; align-items: center; gap: 14px; }
+.prize-glyph { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+  background: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 0 #000; flex: none; }
+.prize-amt { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; color: var(--ink); }
+.prize-amt .u { font-size: 15px; color: var(--muted); }
+.prize-cap { font-size: 12.5px; font-weight: 700; color: var(--gold-deep); margin-top: 4px; line-height: 1.3; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0 2px; }
+.sym-chip { display: inline-flex; align-items: center; max-width: 100%; min-width: 0; overflow-wrap: anywhere;
+  background: var(--field); border: 1.5px solid var(--gold-line); border-radius: 999px; padding: 5px 11px;
+  font-family: var(--display); font-weight: 700; font-size: 12.5px; color: var(--ink); }
+.sym-chip.nft { border-color: var(--brew); color: var(--brew-deep); }
+
+.potbar-wrap { margin: 16px 0 4px; }
+.potbar-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 7px; }
+.potbar-label { font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--ink); }
+.potbar-pct { font-family: var(--mono); font-weight: 700; font-size: 12px; color: var(--muted); flex: none; }
+.potbar { height: 12px; border-radius: 999px; background: var(--field); border: 2px solid #000; overflow: hidden; }
+.potbar-fill { height: 100%; border-radius: 999px 0 0 999px; background: linear-gradient(90deg, var(--brew), var(--brew-2));
+  transition: width .7s cubic-bezier(.2,.7,.2,1); }
+.potbar-note { font-size: 11.5px; font-weight: 700; color: var(--muted); line-height: 1.4; margin-top: 8px; }
+
+.round-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px;
+  padding-top: 14px; border-top: 1.5px solid var(--hair); }
+.round-stats .rk { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; }
+.round-stats .rv { font-family: var(--display); font-weight: 700; font-size: 22px; color: var(--ink); margin-top: 3px; line-height: 1; }
+.round-stats .rv.gold { color: var(--gold-deep); }
+
+.draw-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap;
+  padding-top: 14px; border-top: 1.5px solid var(--hair); }
+.draw-note { flex: 1; min-width: 150px; font-size: 12.5px; font-weight: 700; color: var(--ink-2); line-height: 1.4; }
+.draw-row .btn { flex: none; }
+
+/* how it works accordion */
+.accordion-head { width: 100%; display: flex; align-items: center; gap: 10px; background: none; border: none;
+  cursor: pointer; padding: 0; text-align: left; }
+.accordion-title { font-family: var(--display); font-weight: 700; font-size: 17px; flex: 1; color: var(--ink); }
+.accordion-chevron { font-family: var(--mono); font-weight: 800; font-size: 20px; width: 30px; height: 30px;
+  display: grid; place-items: center; border: 2px solid #000; border-radius: 9px; background: var(--gold);
+  box-shadow: 2px 2px 0 0 #000; color: #000; flex: none; line-height: 1; }
+
+/* secondary tabbed section */
+.tabs-card { padding: 0; overflow: hidden; }
+.tabs { display: flex; border-bottom: 2px solid #000; background: var(--card-2); }
+/* tabs stack the emoji over a short label (app tab-bar style) so labels stay visible and never wrap,
+   even when the tab bar sits in the narrower right column on desktop. */
+.tab { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  border: none; border-right: 2px solid #000; background: transparent; cursor: pointer; padding: 11px 6px;
+  font-family: var(--display); font-weight: 700; color: var(--ink-2); transition: background .12s; }
+.tab:last-child { border-right: none; }
+.tab.on { background: var(--gold); color: #000; }
+.tab:not(.on):hover { background: var(--field); }
+.tab-ic { font-size: 18px; line-height: 1; }
+.tab-lbl { font-size: 12.5px; line-height: 1; white-space: nowrap; }
+.tab-body { padding: 22px; }
+.tab-empty { font-size: 13px; font-weight: 700; text-align: center; color: var(--muted); padding: 18px 6px; line-height: 1.5; }
+.scale-head { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-2); font-weight: 800; margin: 16px 0 6px; }
+
+/* past winners: expandable bundle prizes */
+.lb-row.clickable { cursor: pointer; }
+.lb-row.clickable:hover { background: var(--field); }
+.more-pill { display: inline-block; font-family: var(--mono); font-size: 10.5px; font-weight: 800;
+  color: var(--brew-deep); background: rgba(139,92,246,.1); border: 1px solid var(--brew); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+/* winner rows stack the ETH amount over the "+N more" pill so the pill never widens the price column
+   and squeezes the address/meta column (which otherwise wraps one character per line on narrow screens). */
+.lb.winners .vol { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.bundle-detail { display: flex; flex-wrap: wrap; gap: 7px; padding: 2px 6px 12px 40px; }
+
+/* boost field unit now carries the ETH glyph + label */
+.boost-unit { display: inline-flex; align-items: center; gap: 6px; }
+
+
 /* mobile */
 .hamb { display: none; }
 @media (max-width: 1080px) {
@@ -460,4 +634,24 @@ h1,h2,h3,h4 { font-family: var(--display); }
   .raffle-stats { grid-template-columns: 1fr; }
   .raffle-stats .rv { font-size: 20px; }
   .stat-grid { grid-template-columns: 1fr; }
+}
+
+/* overhauled layout: mobile refinements */
+@media (max-width: 760px) {
+  .tab-body { padding: 16px; }
+  .prize-amt { font-size: 26px; }
+  .prize-glyph { width: 42px; height: 42px; }
+  .round-stats { gap: 10px; }
+  .round-stats .rv { font-size: 19px; }
+  .accordion-title { font-size: 16px; }
+}
+@media (max-width: 600px) {
+  /* tight widths: stack the emoji over a short text label, app-tab-bar style, so labels stay visible */
+  .tab { flex-direction: column; gap: 3px; padding: 9px 3px; }
+  .tab-ic { font-size: 18px; }
+  .tab-lbl { font-size: 10.5px; font-weight: 700; line-height: 1; white-space: nowrap; }
+}
+@media (max-width: 480px) {
+  .round-stats .rv { font-size: 18px; }
+  .prize-amt { font-size: 24px; }
 }

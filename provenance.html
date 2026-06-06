@@ -78,7 +78,9 @@
         }
         .prov-nav a { color: #f5e9c8; text-decoration: none; font-family: monospace; font-size: 0.85rem; }
         .prov-nav .nav-logo { font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; }
-        .prov-nav .nav-links { display: flex; gap: 1.5rem; }
+        .prov-nav .nav-links { display: flex; align-items: center; gap: 1.25rem; }
+        .prov-nav .nav-cta { background: #FFBA00; color: #1a1008; border: 2px solid #000; border-radius: 999px; padding: 4px 14px; font-weight: 700; box-shadow: 2px 2px 0 #000; }
+        .prov-nav .nav-active { color: var(--seal-gold); font-weight: 700; border-bottom: 2px solid var(--seal-gold); }
         @media (max-width: 576px) { .prov-nav .nav-links { display: none; } }
 
         /* Certificate wrapper */
@@ -296,14 +298,14 @@
 
 <!-- Nav -->
 <nav class="prov-nav">
-    <a href="/" class="nav-logo">🍖 Unicorn Meat</a>
+    <a href="/" class="nav-logo">Unicorn Meat</a>
     <div class="nav-links">
         <a href="/#about">About</a>
-        <a href="/#trading">Buy</a>
-        <a href="/swap">🍲 Swap</a>
-        <a href="/provenance" style="color: var(--seal-gold); font-weight: 700;">Provenance</a>
+        <a href="/swap" class="nav-cta">Swap</a>
+        <a href="/steak">Steak</a>
         <a href="/market">Market</a>
-        <a href="/grinder-association">DAO</a>
+        <a href="/#join-herd">ENS</a>
+        <a href="/provenance" class="nav-active">Provenance</a>
     </div>
 </nav>
 
@@ -508,7 +510,7 @@
 
 <!-- Footer -->
 <div class="prov-footer">
-    <p><a href="/">Unicorn Meat</a> · <a href="/#references">Links</a> · <a href="/swap">🍲 Swap</a> · <a href="/grinder-association">DAO</a></p>
+    <p><a href="/">Unicorn Meat</a> · <a href="/#references">Links</a> · <a href="/swap">Swap</a> · <a href="/grinder-association">DAO</a></p>
     <p style="margin-top:0.25rem;">© 2026 Unicorn Meat. On-chain data is immutable and publicly verifiable.</p>
 </div>
 
