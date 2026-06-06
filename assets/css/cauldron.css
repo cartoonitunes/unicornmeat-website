@@ -107,11 +107,6 @@ body {
 .nav-links a.active { color: var(--gold-deep); border-bottom-color: var(--gold); }
 /* active page: gold underline */
 .nav-links a.um-nav-active { color: var(--ink); border-bottom-color: var(--gold); }
-/* Swap = primary CTA pill (site's black-border + contrast-shadow style) */
-.nav-links a.um-nav-cta { background: var(--gold); color: #000; border: 2px solid #000; border-bottom: 2px solid #000;
-  border-radius: 999px; padding: 5px 16px; box-shadow: 2px 2px 0 0 #000; transition: transform .1s ease, box-shadow .1s ease; }
-.nav-links a.um-nav-cta:hover { color: #000; transform: translate(-1px, -1px); box-shadow: 3px 3px 0 0 #000; }
-.nav-links a.um-nav-cta:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 0 #000; }
 /* divider grouping the secondary "More" dropdown apart from the primary items */
 .nav-more { border-left: 1px solid var(--gold-line); padding-left: 14px; margin-left: 4px; }
 /* "More" dropdown in the nav (matches the site's Learn/More dropdown) */

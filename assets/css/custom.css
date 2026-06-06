@@ -41,31 +41,12 @@
   outline: 0 !important;
 } 
 /* ============================================================
-   Site nav rework: consistent global nav with a primary CTA,
-   active-page treatment, dropdown, and subtle grouping.
+   Site nav: consistent global nav with an active-page underline,
+   dropdown, and subtle grouping. All top-level links are plain text;
+   the only button in the nav is "Connect Wallet".
    Shared by index / steak / market / grinder-association.
    ============================================================ */
 .uc-navbar-nav { align-items: center; }
-
-/* "Swap" is the primary call to action: the site's signature black-border,
-   gold, hard contrast-shadow pill. */
-.uc-navbar-nav a.um-nav-cta,
-.nav-y a.um-nav-cta {
-  display: inline-block;
-  background: #FFBA00;
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 999px;
-  padding: 5px 16px;
-  box-shadow: 2px 2px 0 0 #000;
-  font-weight: 700;
-  line-height: 1.45;
-  transition: transform .1s ease, box-shadow .1s ease;
-}
-.uc-navbar-nav a.um-nav-cta:hover,
-.nav-y a.um-nav-cta:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 0 #000; color: #000; }
-.uc-navbar-nav a.um-nav-cta:active,
-.nav-y a.um-nav-cta:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 0 #000; }
 
 /* Active page link: gold underline so visitors know where they are. */
 .uc-navbar-nav a.um-nav-active { color: #000; border-bottom: 2px solid #FFBA00; padding-bottom: 2px; }
