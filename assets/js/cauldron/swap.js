@@ -46,6 +46,11 @@ function SwapCard({
   const haveOut = !liveMode || liveQuote != null;
   const output = liveMode ? liveQuote == null ? 0 : liveQuote : mockOutput;
   const minRecv = output * (1 - slippage / 100);
+  // Exchange-rate label ("1 ETH = X w🍖"). In live mode derive it from the current QuoterV2 quote
+  // (buy: tokensOut / ethIn; sell: tokensIn / ethOut), never the mock rate; show a placeholder until
+  // a quote lands. In mock mode keep the illustrative PER_ETH constant.
+  const perEthLive = liveMode && amt > 0 && liveQuote != null && liveQuote > 0 ? side === 'buy' ? liveQuote / amt : amt / liveQuote : null;
+  const rateStr = liveMode ? perEthLive != null ? compact(perEthLive) : '…' : compact(PER_ETH);
   // The Cauldron path is unavailable while the contract is paused; the direct path always works.
   const cauldronBlocked = useCauldron && paused;
   // Sells earn half the entries of an equivalent-volume buy (P4).
@@ -276,7 +281,7 @@ function SwapCard({
     className: "swapfield"
   }, /*#__PURE__*/React.createElement("div", {
     className: "top"
-  }, /*#__PURE__*/React.createElement("span", null, "You receive (est.)"), /*#__PURE__*/React.createElement("span", null, "1 ETH \u2248 ", compact(PER_ETH), " ", tokenSym)),/*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, "You receive (est.)"), /*#__PURE__*/React.createElement("span", null, "1 ETH \u2248 ", rateStr, " ", tokenSym)),/*#__PURE__*/React.createElement("div", {
     className: "mid"
   }, /*#__PURE__*/React.createElement("input", {
     className: "amt-in",
