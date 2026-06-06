@@ -9,10 +9,14 @@ const TOKEN = {
   address: '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'
 };
 
-// Pricing (mock, stable for the prototype)
-const ETH_USD = 3000;
-const TOKEN_USD = 0.004; // 1 ETH ≈ 750,000 w🍖
-const PER_ETH = ETH_USD / TOKEN_USD; // tokens per ETH
+// Pricing. ETH_USD is a FALLBACK only: app.js fetches the live ETH price from CoinGecko on load and
+// passes it down, so the swap card USD figures track the real market. This constant is used only
+// before/if that fetch resolves. Keep it roughly current.
+const ETH_USD = 1560;
+// Mock tokens-per-ETH for the preview only; live mode prices from real QuoterV2 quotes.
+const PER_ETH = 750000;
+// Mock token USD, kept consistent with the mock rate (so mock-mode pay/receive USD agree).
+const TOKEN_USD = ETH_USD / PER_ETH;
 const FEE_BPS = 30; // 0.30% cauldron fee
 
 // Tier thresholds in lifetime ETH volume

@@ -205,7 +205,8 @@ function HowItWorks() {
 // holder multiplier with its reference scale folded in as line items (no separate card).
 function StatsContent({
   stats,
-  flashKey
+  flashKey,
+  ethUsd = ETH_USD
 }) {
   const daysSince = stats.daysSinceLastSwap;
   const sinceLabel = daysSince == null ? 'never' : daysSince === 0 ? 'today' : daysSince === 1 ? '1d ago' : `${daysSince}d ago`;
@@ -226,7 +227,7 @@ function StatsContent({
     }
   }, "ETH")), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, fmtUsd(stats.volEth * ETH_USD))), /*#__PURE__*/React.createElement("div", {
+  }, fmtUsd(stats.volEth * ethUsd))), /*#__PURE__*/React.createElement("div", {
     className: "stat",
     key: 's' + flashKey
   }, /*#__PURE__*/React.createElement("div", {
@@ -482,6 +483,7 @@ function SecondaryTabs({
   leaderboard,
   history,
   account,
+  ethUsd,
   boost
 }) {
   const [tab, setTab] = React.useState('stats');
@@ -506,7 +508,8 @@ function SecondaryTabs({
     className: "tab-body"
   }, tab === 'stats' && /*#__PURE__*/React.createElement(StatsContent, {
     stats: stats,
-    flashKey: flashKey
+    flashKey: flashKey,
+    ethUsd: ethUsd
   }), tab === 'leaders' && /*#__PURE__*/React.createElement(LeaderboardContent, {
     rows: leaderboard,
     userAddress: account

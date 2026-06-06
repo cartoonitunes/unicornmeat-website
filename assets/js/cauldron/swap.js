@@ -19,7 +19,8 @@ function SwapCard({
   useCauldron = true,
   onToggleCauldron,
   paused,
-  tokenSym = 'w🍖'
+  tokenSym = 'w🍖',
+  ethUsd = ETH_USD
 }) {
   const [side, setSide] = useStateSwap('buy'); // buy | sell
   const [amount, setAmount] = useStateSwap('0.5');
@@ -51,6 +52,9 @@ function SwapCard({
   // a quote lands. In mock mode keep the illustrative PER_ETH constant.
   const perEthLive = liveMode && amt > 0 && liveQuote != null && liveQuote > 0 ? side === 'buy' ? liveQuote / amt : amt / liveQuote : null;
   const rateStr = liveMode ? perEthLive != null ? compact(perEthLive) : '…' : compact(PER_ETH);
+  // Token USD derived from the live ETH price and the current rate, so the "you receive" USD on a buy
+  // tracks the real market and stays consistent with the "you pay" USD.
+  const tokenUsd = ethUsd / (perEthLive || PER_ETH);
   // The Cauldron path is unavailable while the contract is paused; the direct path always works.
   const cauldronBlocked = useCauldron && paused;
   // Sells earn half the entries of an equivalent-volume buy (P4).
@@ -259,7 +263,7 @@ function SwapCard({
     style: {
       marginTop: 4
     }
-  }, /*#__PURE__*/React.createElement("span", null, fmtUsd(ethVol * ETH_USD)), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, fmtUsd(ethVol * ethUsd)), /*#__PURE__*/React.createElement("span", {
     style: {
       display: 'flex',
       gap: 6
@@ -300,7 +304,7 @@ function SwapCard({
     style: {
       marginTop: 4
     }
-  }, /*#__PURE__*/React.createElement("span", null, fmtUsd(side === 'buy' ? output * TOKEN_USD : output * ETH_USD)), /*#__PURE__*/React.createElement("span", null))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, fmtUsd(side === 'buy' ? output * tokenUsd : output * ethUsd)), /*#__PURE__*/React.createElement("span", null))), /*#__PURE__*/React.createElement("div", {
     className: "rows"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row"

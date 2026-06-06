@@ -228,6 +228,9 @@ function App() {
   const [leaderboard, setLeaderboard] = useState(liveMode ? [] : LEADERBOARD_SEED);
   // Token symbol read from chain (never assumed). Defaults to the known w🍖 until the read lands.
   const [tokenSym, setTokenSym] = useState(TOKEN.symbol);
+  // Live ETH/USD price (CoinGecko); falls back to the ETH_USD constant until the fetch lands. Drives
+  // the swap card USD figures in both mock and live mode so they track the real market, not $3,000.
+  const [ethUsd, setEthUsd] = useState(ETH_USD);
 
   // Every (Cauldron) swap earns entries, so the raffle accrues continuously while open. When paused,
   // swaps revert, so no entries accrue. When the bypass is off the user trades directly and earns none.
@@ -347,6 +350,21 @@ function App() {
       cancelled = true;
     };
   }, [liveMode]);
+  // Live ETH/USD price from CoinGecko (both modes). Fetch on mount and refresh every 2 minutes; on any
+  // failure the ETH_USD fallback stays in place.
+  useEffect(() => {
+    if (!window.CAULDRON || !window.CAULDRON.readEthUsd) return;
+    let cancelled = false;
+    const load = () => window.CAULDRON.readEthUsd().then(p => {
+      if (!cancelled && p) setEthUsd(p);
+    }).catch(() => {});
+    load();
+    const iv = setInterval(load, 120000);
+    return () => {
+      cancelled = true;
+      clearInterval(iv);
+    };
+  }, []);
   // Scan for a failed-auto-pay prize the user can still collect, once per account change. Kept out
   // of the 15s poll loop because it walks WinnerDrawn logs in chunked getLogs calls. Normally returns
   // null (prizes are auto-paid at draw); it is non-null only when an auto-pay leg failed to deliver.
@@ -613,14 +631,14 @@ function App() {
       ),
       React.createElement("div", { className: "layout" },
         React.createElement("div", { className: "swap-col" },
-          React.createElement(SwapCard, { connected: connected, raffleActive: entriesLive, earned: earned, intensity: CAULDRON_CONFIG.intensity, onSwap: handleSwap, onConnect: handleConnect, liveMode: liveMode, balances: balances, useCauldron: useCauldron, onToggleCauldron: setUseCauldron, paused: paused, tokenSym: tokenSym }),
+          React.createElement(SwapCard, { connected: connected, raffleActive: entriesLive, earned: earned, intensity: CAULDRON_CONFIG.intensity, onSwap: handleSwap, onConnect: handleConnect, liveMode: liveMode, balances: balances, useCauldron: useCauldron, onToggleCauldron: setUseCauldron, paused: paused, tokenSym: tokenSym, ethUsd: ethUsd }),
           React.createElement(ClaimPrize, { claimable: claimable, busy: claiming, onClaim: handleClaim })
         ),
         React.createElement("div", { className: "round-col" },
           React.createElement(RoundStatus, { raffle: raffle, pot: pot, boostEth: boostEth, prize: prize, drawable: drawable, onDraw: handleDraw, drawing: drawing, paused: paused, raffleLive: entriesLive })
         ),
         React.createElement(HowItWorks, null),
-        React.createElement(SecondaryTabs, { stats: stats, flashKey: flashKey, leaderboard: leaderboard, history: history, account: account, boost: { roundId: raffle.roundId, boostEth: boostEth, recent: recentBoosts, onBoost: handleBoost, busy: boosting, connected: connected, onConnect: handleConnect, paused: paused } })
+        React.createElement(SecondaryTabs, { stats: stats, flashKey: flashKey, leaderboard: leaderboard, history: history, account: account, ethUsd: ethUsd, boost: { roundId: raffle.roundId, boostEth: boostEth, recent: recentBoosts, onBoost: handleBoost, busy: boosting, connected: connected, onConnect: handleConnect, paused: paused } })
       ),
       React.createElement("div", { className: "foot" }, "🍖 Routes through Uniswap V3 · ", tokenSym, " token ", React.createElement("span", { className: "mono" }, trunc(TOKEN.address)))
     ),

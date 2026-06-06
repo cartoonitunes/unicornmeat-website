@@ -554,6 +554,21 @@
     }
   }
 
+  // Live ETH/USD spot price from CoinGecko's free simple-price API (no key, CORS-enabled). Used only
+  // for the swap card's USD display, so a failure (offline, rate limit, blocker) just falls back to
+  // the static ETH_USD constant. Independent of the contract, so it works in both mock and live mode.
+  async function readEthUsd() {
+    try {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+      if (!r.ok) return null;
+      const j = await r.json();
+      const p = j && j.ethereum && j.ethereum.usd;
+      return typeof p === 'number' && p > 0 ? p : null;
+    } catch (_e) {
+      return null;
+    }
+  }
+
   // ---- live pricing (QuoterV2) ----
 
   // Ask Uniswap's QuoterV2 for the real expected output of a swap (C1). QuoterV2's
@@ -846,6 +861,7 @@
     readTokenMeta,
     readRecentBoosts,
     readLeaderboard,
+    readEthUsd,
     findClaimableForUser,
 
     // Pricing
