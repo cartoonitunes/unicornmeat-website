@@ -46,8 +46,8 @@
 
     const PROOF_OF_STEAK_CONTRACT_ADDRESS = PROOF_OF_STEAK_CONFIG.currentSeason.contractAddress;
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
-    const READ_RPC_ENDPOINT = 'https://ethereum.publicnode.com'; // For read operations
-    const WRITE_RPC_ENDPOINT = 'https://ethereum.publicnode.com'; // Fallback only - actual writes use the wallet provider
+    const READ_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For read operations (same node the Rarible site uses)
+    const WRITE_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // Fallback only - actual writes use the wallet provider
 
     // Public steaking UI opens May 1, 2026 at 00:00 US Eastern (EDT, UTC-4).
     const STEAKING_OPENS_MS = new Date('2026-05-01T04:00:00.000Z').getTime();
@@ -1168,7 +1168,7 @@
     async function loadStakerCount() {
         // Contract deployed at block ~24,988,224; fromBlock:0 causes node to reject the range
         const DEPLOY_BLOCK = 24988000;
-        // publicnode caps eth_getLogs at 50,000 blocks per request - query in chunks
+        // Public RPCs cap eth_getLogs at 50,000 blocks per request - query in chunks
         const CHUNK_SIZE = 49000;
         try {
             const topic = window.ethers.utils.id('Steaked(address,uint256)');
