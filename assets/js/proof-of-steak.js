@@ -46,11 +46,10 @@
 
     const PROOF_OF_STEAK_CONTRACT_ADDRESS = PROOF_OF_STEAK_CONFIG.currentSeason.contractAddress;
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
-    // NOTE: rarible.com/nodes/ethereum-node is a marketing PAGE, not an RPC —
-    // it returns HTTP 405 to JSON-RPC posts and every rarible RPC hostname is
-    // NXDOMAIN (checked 2026-06-09). Live-tested public endpoint instead.
-    const READ_RPC_ENDPOINT = 'https://ethereum-rpc.publicnode.com'; // For read operations
-    const WRITE_RPC_ENDPOINT = 'https://ethereum-rpc.publicnode.com'; // Fallback only - actual writes use the wallet provider
+    // Rarible's node: POST-only JSON-RPC on this path (GET returns 405).
+    // Verified working from browser context with CORS + contract reads.
+    const READ_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For read operations (same node the Rarible site uses)
+    const WRITE_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // Fallback only - actual writes use the wallet provider
 
     // Public steaking UI opens May 1, 2026 at 00:00 US Eastern (EDT, UTC-4).
     const STEAKING_OPENS_MS = new Date('2026-05-01T04:00:00.000Z').getTime();
