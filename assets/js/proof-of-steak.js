@@ -46,10 +46,18 @@
 
     const PROOF_OF_STEAK_CONTRACT_ADDRESS = PROOF_OF_STEAK_CONFIG.currentSeason.contractAddress;
     const UNICORN_MEAT_TOKEN_ADDRESS = '0xDFA208BB0B811cFBB5Fa3Ea98Ec37Aa86180e668'; // w🍖
-    // Rarible's node: POST-only JSON-RPC on this path (GET returns 405).
-    // Verified working from browser context with CORS + contract reads.
-    const READ_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // For read operations (same node the Rarible site uses)
-    const WRITE_RPC_ENDPOINT = 'https://rarible.com/nodes/ethereum-node'; // Fallback only - actual writes use the wallet provider
+    // Read RPC endpoints, tried in order. The Rarible node has been the primary, but if it is
+    // down / blocked / rate-limited in a given user's network, reads must fail over to another
+    // public node instead of silently returning nothing (which renders as "no steak"). All are
+    // CORS-enabled Ethereum mainnet JSON-RPC endpoints.
+    const READ_RPC_ENDPOINTS = [
+        'https://rarible.com/nodes/ethereum-node',
+        'https://ethereum-rpc.publicnode.com',
+        'https://cloudflare-eth.com',
+        'https://eth.llamarpc.com'
+    ];
+    const READ_RPC_ENDPOINT = READ_RPC_ENDPOINTS[0]; // For read operations (same node the Rarible site uses)
+    const WRITE_RPC_ENDPOINT = READ_RPC_ENDPOINTS[0]; // Fallback only - actual writes use the wallet provider
 
     // Public steaking UI opens May 1, 2026 at 00:00 US Eastern (EDT, UTC-4).
     const STEAKING_OPENS_MS = new Date('2026-05-01T04:00:00.000Z').getTime();
@@ -250,6 +258,41 @@
     let prevTotalSteaked = null;
     let stickyData = { stakerCount: '-', totalSteaked: '-', progressLabel: 'Season active' };
 
+    // Create a mainnet JSON-RPC provider with a STATIC network. ethers v5 otherwise lazily probes
+    // eth_chainId on first use, and that probe intermittently fails ("could not detect network"),
+    // which made reads throw and render as "no steak". Pinning chainId=1 skips the probe entirely.
+    function mainnetRpc(url) {
+        return new window.ethers.providers.JsonRpcProvider(url, { chainId: 1, name: 'homestead' });
+    }
+
+    // Primary read provider (single node). We intentionally do NOT use ethers FallbackProvider:
+    // its cross-provider network detection fails hard if any configured public node is
+    // unreachable/blocked on the user's network, which breaks ALL reads. Instead, the critical
+    // reads use explicit per-endpoint failover (readSteaksWithFailover) so one bad node can't
+    // silently zero out a user's stake (which renders as "no steak").
+    function buildReadProvider() {
+        return mainnetRpc(READ_RPC_ENDPOINT);
+    }
+
+    // Read steaks(address) with explicit per-endpoint failover and logging. Used as a resilient
+    // path so a flaky primary RPC can never silently zero out a user's stake.
+    async function readSteaksWithFailover(address) {
+        let lastErr;
+        for (const url of READ_RPC_ENDPOINTS) {
+            try {
+                const prov = mainnetRpc(url);
+                const c = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, prov);
+                const info = await c.steaks(address);
+                console.info('[steak] steaks(' + address + ') via ' + url + ' -> amount=' + info.amount.toString() + ' maxAmount=' + info.maxAmount.toString() + ' claimed=' + info.claimed);
+                return info;
+            } catch (e) {
+                lastErr = e;
+                console.warn('[steak] steaks() read failed on ' + url + ':', e && e.message ? e.message : e);
+            }
+        }
+        throw lastErr || new Error('All RPC endpoints failed for steaks()');
+    }
+
     // Initialize on DOM ready. If init() throws for any unforeseen reason, still start a minimal
     // polling bridge so a connected wallet can activate the Unsteak UI and recover funds.
     document.addEventListener('DOMContentLoaded', function() {
@@ -259,7 +302,7 @@
             console.error('Proof of Steak init failed; starting recovery bridge:', e);
             try {
                 if (!readContract && typeof window.ethers !== 'undefined') {
-                    readProvider = new window.ethers.providers.JsonRpcProvider(READ_RPC_ENDPOINT);
+                    readProvider = mainnetRpc(READ_RPC_ENDPOINT);
                     readContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, readProvider);
                     readTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, readProvider);
                 }
@@ -290,7 +333,7 @@
         // Set up read provider (public RPC) for read operations. Reads + the wallet polling
         // bridge must come up no matter what an injected wallet does, so build these FIRST and
         // never let the (fragile) wallet-provider setup below abort the rest of init().
-        readProvider = new window.ethers.providers.JsonRpcProvider(READ_RPC_ENDPOINT);
+        readProvider = buildReadProvider();
         readContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, readProvider);
         readTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, readProvider);
 
@@ -305,12 +348,12 @@
                     window.ethereum.on('accountsChanged', handleAccountsChanged);
                 }
             } else {
-                writeProvider = new window.ethers.providers.JsonRpcProvider(WRITE_RPC_ENDPOINT);
+                writeProvider = mainnetRpc(WRITE_RPC_ENDPOINT);
             }
         } catch (walletErr) {
             console.warn('Wallet provider setup failed; using RPC fallback:', walletErr);
             try {
-                writeProvider = new window.ethers.providers.JsonRpcProvider(WRITE_RPC_ENDPOINT);
+                writeProvider = mainnetRpc(WRITE_RPC_ENDPOINT);
             } catch (e2) { /* writes resolve their own signer later */ }
         }
 
@@ -348,8 +391,8 @@
             syncWalletConnection();
         }, 1000);
 
-        // Base chain provider for bridge detection
-        baseProvider = new window.ethers.providers.JsonRpcProvider('https://mainnet.base.org');
+        // Base chain provider for bridge detection (static network to skip the flaky chainId probe).
+        baseProvider = new window.ethers.providers.JsonRpcProvider('https://mainnet.base.org', { chainId: 8453, name: 'base' });
     }
 
     function setupEventListeners() {
@@ -424,6 +467,7 @@
             isHandlingConnection = true;
             try {
                 userAddress = connected;
+                console.info('[steak] wallet connected:', connected, '(contract ' + PROOF_OF_STEAK_CONTRACT_ADDRESS + ')');
                 await handleWalletConnected();
             } finally {
                 isHandlingConnection = false;
@@ -729,7 +773,7 @@
             // Storage layout: 0=seasonStart, 1=seasonEnd, 2=totalSteaked, 3=totalSteakTime,
             // 4=lastGlobalUpdate (rewardPool/seasonLengthSeconds are immutable, not in storage).
             const [steakInfo, balance, seasonEnd, seasonStarted, seasonStart, totalSteakTime, totalSteaked, rewardPool, lastGlobalUpdateRaw] = await Promise.all([
-                readContract.steaks(userAddress),
+                readSteaksWithFailover(userAddress),
                 readTokenContract.balanceOf(userAddress),
                 readContract.seasonEnd(),
                 readContract.seasonStarted(),
@@ -895,19 +939,23 @@
             // Re-affirm Unsteak availability now that the full render has completed.
             setUnsteakAvailability(userSteakAmount);
         } catch (error) {
-            console.warn('loadUserStats failed:', error);
+            console.warn('[steak] loadUserStats failed:', error);
             // Never trap a staker's funds: if the full stats load failed (e.g. a flaky
-            // RPC), still try a minimal standalone read so the Unsteak button reflects
-            // the wallet's actual stake. Especially critical once the season has ended.
+            // RPC), still try a minimal standalone read (with RPC failover) so the Unsteak
+            // button reflects the wallet's actual stake. Especially critical once ended.
             try {
                 showSteakActions();
-                const info = await readContract.steaks(userAddress);
+                const info = await readSteaksWithFailover(userAddress);
                 const amt = (info.amount && info.amount._hex)
                     ? window.ethers.BigNumber.from(info.amount._hex)
                     : info.amount;
                 setUnsteakAvailability(amt);
+                // Reflect at least the staked amount even though the full render failed.
+                const amtEl = document.getElementById('user-steaked-amount');
+                if (amtEl) amtEl.textContent = formatTokenAmount(amt, 3) + ' w🍖';
+                showUserStats();
             } catch (fallbackError) {
-                console.warn('Unsteak fallback read failed:', fallbackError);
+                console.warn('[steak] Unsteak fallback read failed on all RPCs:', fallbackError);
             }
         }
     }
