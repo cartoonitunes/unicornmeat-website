@@ -250,9 +250,26 @@
     let prevTotalSteaked = null;
     let stickyData = { stakerCount: '-', totalSteaked: '-', progressLabel: 'Season active' };
 
-    // Initialize on DOM ready
+    // Initialize on DOM ready. If init() throws for any unforeseen reason, still start a minimal
+    // polling bridge so a connected wallet can activate the Unsteak UI and recover funds.
     document.addEventListener('DOMContentLoaded', function() {
-        init();
+        try {
+            init();
+        } catch (e) {
+            console.error('Proof of Steak init failed; starting recovery bridge:', e);
+            try {
+                if (!readContract && typeof window.ethers !== 'undefined') {
+                    readProvider = new window.ethers.providers.JsonRpcProvider(READ_RPC_ENDPOINT);
+                    readContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, readProvider);
+                    readTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, readProvider);
+                }
+                setupEventListeners();
+                setInterval(syncWalletConnection, 1000);
+                syncWalletConnection();
+            } catch (e2) {
+                console.error('Recovery bridge failed:', e2);
+            }
+        }
     });
 
     function init() {
@@ -270,25 +287,42 @@
             return;
         }
 
-        // Set up read provider (public RPC) for read operations
+        // Set up read provider (public RPC) for read operations. Reads + the wallet polling
+        // bridge must come up no matter what an injected wallet does, so build these FIRST and
+        // never let the (fragile) wallet-provider setup below abort the rest of init().
         readProvider = new window.ethers.providers.JsonRpcProvider(READ_RPC_ENDPOINT);
-        
-        // Set up write provider (will use wallet provider when available, fallback to RPC)
-        if (window.ethereum) {
-            writeProvider = new window.ethers.providers.Web3Provider(window.ethereum);
-            // Listen for account changes
-            window.ethereum.on('accountsChanged', handleAccountsChanged);
-        } else {
-            writeProvider = new window.ethers.providers.JsonRpcProvider(WRITE_RPC_ENDPOINT);
-        }
-
-        // Create read contract instances (using public RPC for reads)
         readContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, readProvider);
         readTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, readProvider);
-        
-        // Create write contract instances (using wallet provider for writes)
-        writeContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, writeProvider);
-        writeTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, writeProvider);
+
+        // Set up write provider (wallet provider when available, fallback to RPC). Wrapped because
+        // with multiple wallet extensions installed, window.ethereum can be a conflicting proxy
+        // where the constructor or .on() throws — which previously aborted init() before the
+        // polling bridge was registered, leaving Unsteak permanently dead for those users.
+        try {
+            if (window.ethereum) {
+                writeProvider = new window.ethers.providers.Web3Provider(window.ethereum);
+                if (typeof window.ethereum.on === 'function') {
+                    window.ethereum.on('accountsChanged', handleAccountsChanged);
+                }
+            } else {
+                writeProvider = new window.ethers.providers.JsonRpcProvider(WRITE_RPC_ENDPOINT);
+            }
+        } catch (walletErr) {
+            console.warn('Wallet provider setup failed; using RPC fallback:', walletErr);
+            try {
+                writeProvider = new window.ethers.providers.JsonRpcProvider(WRITE_RPC_ENDPOINT);
+            } catch (e2) { /* writes resolve their own signer later */ }
+        }
+
+        // Create write contract instances (using wallet provider for writes).
+        try {
+            if (writeProvider) {
+                writeContract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, writeProvider);
+                writeTokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, writeProvider);
+            }
+        } catch (e) {
+            console.warn('Write contract setup failed:', e);
+        }
 
         // Setup event listeners
         setupEventListeners();
@@ -963,8 +997,10 @@
         try {
             steakBtn.disabled = true;
             showTransactionStatus('Preparing transaction...');
-            const contractWithSigner = writeContract.connect(signer);
-            const tokenContractWithSigner = writeTokenContract.connect(signer);
+            // Build directly from the signer rather than relying on writeContract, which may not
+            // have been created if wallet-provider setup failed at init.
+            const contractWithSigner = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, signer);
+            const tokenContractWithSigner = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, signer);
 
             const decimals = 3;
             const amountWei = window.ethers.utils.parseUnits(amount.toString(), decimals);
@@ -1023,20 +1059,27 @@
         }
 
         let signer;
-        if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected && window.unicornMeatWalletKit.signer) {
-            signer = window.unicornMeatWalletKit.signer;
-        } else if (window.ethereum) {
-            const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
-            signer = walletProvider.getSigner();
-        } else {
-            showError('Please connect your wallet to unsteak');
+        try {
+            if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected && window.unicornMeatWalletKit.signer) {
+                signer = window.unicornMeatWalletKit.signer;
+            } else if (window.ethereum) {
+                const walletProvider = new window.ethers.providers.Web3Provider(window.ethereum);
+                signer = walletProvider.getSigner();
+            } else {
+                showError('Please connect your wallet to unsteak');
+                return;
+            }
+        } catch (signerErr) {
+            showError('Could not access your wallet to unsteak: ' + (signerErr.message || signerErr));
             return;
         }
 
         try {
             unsteakBtn.disabled = true;
             showTransactionStatus('Preparing unsteak transaction...');
-            const contractWithSigner = writeContract.connect(signer);
+            // Build directly from the signer rather than relying on writeContract, which may not
+            // have been created if wallet-provider setup failed at init.
+            const contractWithSigner = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, signer);
 
             showTransactionStatus('Unstaking your Meat... Please confirm in your wallet.');
             const unsteakTx = await contractWithSigner.unsteak();
