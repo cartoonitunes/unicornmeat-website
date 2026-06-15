@@ -471,6 +471,25 @@
         }
     }
 
+    // Enable the Unsteak button whenever the connected wallet has a non-zero stake.
+    // Unsteak is always permitted on-chain (it withdraws, and auto-claims after the
+    // season ends), so this must NOT be gated by the steaking-open window. Kept in a
+    // standalone helper so it can run early and from the error fallback — a staker's
+    // ability to recover funds must never depend on the full stats render succeeding.
+    function setUnsteakAvailability(amountBN) {
+        const unsteakBtn = document.getElementById('unsteak-btn');
+        if (!unsteakBtn) {
+            return;
+        }
+        let hasStake = false;
+        try {
+            hasStake = !!amountBN && (amountBN.isZero ? !amountBN.isZero() : amountBN.toString() !== '0');
+        } catch (e) {
+            hasStake = false;
+        }
+        unsteakBtn.disabled = !hasStake;
+    }
+
     async function loadSteakData() {
         try {
             hideError();
@@ -649,7 +668,12 @@
             const endTime = seasonEnd.toNumber();
             const startTime = seasonStart.toNumber();
             const isStarted = seasonStarted;
-            
+
+            // Enable Unsteak immediately — before any of the stats/reward rendering
+            // below, which involves many DOM writes that must not be allowed to trap
+            // a staker's funds if one of them throws.
+            setUnsteakAvailability(userSteakAmount);
+
             // Display basic user stats
             document.getElementById('user-steaked-amount').textContent = formatTokenAmount(userSteakAmount, decimals) + ' w🍖';
             // user-steak-time is commented out in HTML, so we don't set it
@@ -780,14 +804,23 @@
                 shareSection.classList.remove('d-none');
             }
 
-            // Update button states
-            const unsteakBtn = document.getElementById('unsteak-btn');
-            if (unsteakBtn) {
-                const amount = steakInfo.amount._hex ? window.ethers.BigNumber.from(steakInfo.amount._hex) : steakInfo.amount;
-                unsteakBtn.disabled = amount.isZero ? amount.isZero() : (amount.toString() === '0');
-            }
+            // Re-affirm Unsteak availability now that the full render has completed.
+            setUnsteakAvailability(userSteakAmount);
         } catch (error) {
-            // Silently handle user stats loading errors
+            console.warn('loadUserStats failed:', error);
+            // Never trap a staker's funds: if the full stats load failed (e.g. a flaky
+            // RPC), still try a minimal standalone read so the Unsteak button reflects
+            // the wallet's actual stake. Especially critical once the season has ended.
+            try {
+                showSteakActions();
+                const info = await readContract.steaks(userAddress);
+                const amt = (info.amount && info.amount._hex)
+                    ? window.ethers.BigNumber.from(info.amount._hex)
+                    : info.amount;
+                setUnsteakAvailability(amt);
+            } catch (fallbackError) {
+                console.warn('Unsteak fallback read failed:', fallbackError);
+            }
         }
     }
 
