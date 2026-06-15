@@ -297,17 +297,21 @@
         loadSteakData();
 
         // Check if wallet is already connected
-        checkWalletConnection();
+        syncWalletConnection();
 
         // Auto-refresh every 30 seconds
         setInterval(function() {
             loadSteakData();
             if (userAddress) loadUserStats();
         }, 30000);
-        // Live countdown ticker + last-refreshed label (every second)
+        // Live countdown ticker + last-refreshed label (every second).
+        // Also poll wallet state: the shared header "Connect Wallet" button is handled by
+        // WalletKit, which does NOT notify this page. Polling lets us pick up a connection
+        // (or disconnect) made anywhere on the page so the Unsteak UI activates without a reload.
         setInterval(function() {
             updateHeroCountdown();
             updateLastRefreshed();
+            syncWalletConnection();
         }, 1000);
 
         // Base chain provider for bridge detection
@@ -357,13 +361,44 @@
         }
     }
 
-    async function checkWalletConnection() {
+    // Resolve the currently-connected address from any source (WalletKit or injected wallet).
+    function getConnectedAddress() {
+        try {
+            if (window.unicornMeatWalletKit &&
+                window.unicornMeatWalletKit.isConnected &&
+                window.unicornMeatWalletKit.account &&
+                window.unicornMeatWalletKit.account.address) {
+                return window.unicornMeatWalletKit.account.address;
+            }
+        } catch (e) { /* ignore */ }
         if (window.ethereum && window.ethereum.selectedAddress) {
-            userAddress = window.ethereum.selectedAddress;
-            await handleWalletConnected();
-        } else if (window.unicornMeatWalletKit && window.unicornMeatWalletKit.isConnected) {
-            userAddress = window.unicornMeatWalletKit.account.address;
-            await handleWalletConnected();
+            return window.ethereum.selectedAddress;
+        }
+        return null;
+    }
+
+    // Keep this page's wallet state in sync with the rest of the site. Called once on load and
+    // then polled, so a connection made via the shared header button (handled by WalletKit, which
+    // never calls back into this page) still activates the Steak/Unsteak UI — and a disconnect
+    // tears it back down. Only fires the (network) handlers when the address actually changes.
+    let isHandlingConnection = false;
+    async function syncWalletConnection() {
+        if (isHandlingConnection) return;
+        const connected = getConnectedAddress();
+        const current = userAddress;
+        if (connected && (!current || current.toLowerCase() !== connected.toLowerCase())) {
+            isHandlingConnection = true;
+            try {
+                userAddress = connected;
+                await handleWalletConnected();
+            } finally {
+                isHandlingConnection = false;
+            }
+        } else if (!connected && current) {
+            userAddress = null;
+            hideUserStats();
+            hideSteakActions();
+            showConnectWallet();
         }
     }
 
@@ -398,12 +433,12 @@
                     }, 500);
                 }
             } else if (window.ethereum) {
-                // Direct MetaMask connection
+                // Direct injected-wallet connection. (Previously assigned to undeclared
+                // `provider`/`contract`/`tokenContract`, which threw a ReferenceError under
+                // 'use strict' and aborted the connect — leaving the Unsteak button dead.
+                // The write contracts/signer are resolved on demand in handleSteak/handleUnsteak.)
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 userAddress = accounts[0];
-                provider = new window.ethers.providers.Web3Provider(window.ethereum);
-                contract = new window.ethers.Contract(PROOF_OF_STEAK_CONTRACT_ADDRESS, PROOF_OF_STEAK_ABI, provider.getSigner());
-                tokenContract = new window.ethers.Contract(UNICORN_MEAT_TOKEN_ADDRESS, ERC20_ABI, provider.getSigner());
                 await handleWalletConnected();
             } else {
                 showError('Please install MetaMask or connect a Web3 wallet');
@@ -542,6 +577,20 @@
 
             updateSeasonLiveCopy(statusText);
 
+            // Keep the hero headline consistent with the season state.
+            const heroStatusEl = document.getElementById('hero-season-status');
+            if (heroStatusEl) {
+                if (statusText === 'Ended') {
+                    heroStatusEl.textContent = 'Season 2 has ended. Unsteak any time to get your tokens and rewards.';
+                } else if (statusText === 'Active') {
+                    heroStatusEl.textContent = 'The grill is hot. Season 2 is sizzling.';
+                } else if (statusText === 'Ready to Start') {
+                    heroStatusEl.textContent = 'Season 2 is fired up and ready. The first steak starts the clock.';
+                } else {
+                    heroStatusEl.textContent = 'Season 2 is warming up.';
+                }
+            }
+
             document.getElementById('season-status').textContent = statusText;
             document.getElementById('season-start').textContent = startTime > 0 ? new Date(startTime * 1000).toLocaleString() : 'Not started';
             document.getElementById('season-end').textContent = endTime > 0 ? new Date(endTime * 1000).toLocaleString() : 'Not started';
@@ -599,7 +648,7 @@
         }
 
         if (statusText === 'Ended') {
-            copyEl.textContent = 'Season 2 has ended. You can still unsteak and check final rewards below.';
+            copyEl.textContent = 'Season 2 has ended. You can now unsteak your tokens and claim any remaining rewards — your reward is paid out automatically when you unsteak.';
             return;
         }
 
@@ -640,8 +689,12 @@
         }
 
         try {
-            // Get all user steak information and related data (using read contract with public RPC)
-            const [steakInfo, balance, seasonEnd, seasonStarted, seasonStart, totalSteakTime, totalSteaked, rewardPool] = await Promise.all([
+            // Get all user steak information and related data (using read contract with public RPC).
+            // lastGlobalUpdate is `private` in the contract, but we need it to project steak-time
+            // to season end (see reward calc below), so read it directly from storage slot 4.
+            // Storage layout: 0=seasonStart, 1=seasonEnd, 2=totalSteaked, 3=totalSteakTime,
+            // 4=lastGlobalUpdate (rewardPool/seasonLengthSeconds are immutable, not in storage).
+            const [steakInfo, balance, seasonEnd, seasonStarted, seasonStart, totalSteakTime, totalSteaked, rewardPool, lastGlobalUpdateRaw] = await Promise.all([
                 readContract.steaks(userAddress),
                 readTokenContract.balanceOf(userAddress),
                 readContract.seasonEnd(),
@@ -649,7 +702,8 @@
                 readContract.seasonStart(),
                 readContract.totalSteakTime(),
                 readContract.totalSteaked(),
-                readContract.rewardPool()
+                readContract.rewardPool(),
+                readProvider.getStorageAt(PROOF_OF_STEAK_CONTRACT_ADDRESS, 4).catch(() => null)
             ]);
 
             const decimals = 3;
@@ -680,16 +734,23 @@
             // document.getElementById('user-steak-time').textContent = formatLargeNumber(userSteakTime.toString());
             document.getElementById('user-max-amount').textContent = formatTokenAmount(userMaxAmount, decimals) + ' w🍖';
 
-            // Eligibility warning
+            // Eligibility warning (season-aware: after the season you can no longer steak more)
+            const seasonHasEnded = isStarted && now >= endTime;
             const eligibilityDiv = document.getElementById('steak-eligibility-status');
             if (eligibilityDiv && !userSteakAmount.isZero()) {
                 if (userSteakAmount.lt(userMaxAmount)) {
-                    const deficit = userMaxAmount.sub(userSteakAmount);
                     eligibilityDiv.className = 'steak-eligibility-warning mt-2 mb-2';
-                    eligibilityDiv.innerHTML = `⚠️ <strong>Off the grill!</strong> You've dropped below your peak of ${formatTokenAmount(userMaxAmount, decimals)} w🍖. Steak at least ${formatTokenAmount(deficit, decimals)} more to stay eligible for the feast.`;
+                    if (seasonHasEnded) {
+                        eligibilityDiv.innerHTML = `ℹ️ Your final balance is below your peak of ${formatTokenAmount(userMaxAmount, decimals)} w🍖, so this stake isn't eligible for rewards. You can still unsteak to recover your tokens.`;
+                    } else {
+                        const deficit = userMaxAmount.sub(userSteakAmount);
+                        eligibilityDiv.innerHTML = `⚠️ <strong>Off the grill!</strong> You've dropped below your peak of ${formatTokenAmount(userMaxAmount, decimals)} w🍖. Steak at least ${formatTokenAmount(deficit, decimals)} more to stay eligible for the feast.`;
+                    }
                 } else {
                     eligibilityDiv.className = 'steak-eligibility-ok mt-2 mb-2';
-                    eligibilityDiv.innerHTML = `✅ <strong>Well done!</strong> Your steak is eligible for the feast.`;
+                    eligibilityDiv.innerHTML = seasonHasEnded
+                        ? `✅ <strong>Eligible!</strong> Unsteak to receive your tokens and your reward.`
+                        : `✅ <strong>Well done!</strong> Your steak is eligible for the feast.`;
                 }
                 eligibilityDiv.classList.remove('d-none');
             } else if (eligibilityDiv) {
@@ -705,91 +766,84 @@
                 document.getElementById('user-last-update').textContent = 'Never';
             }
             
-            // Simulate steak times for accurate calculations
-            let simulatedTotalSteakTime = totalSteakTimeBN;
-            let simulatedUserSteakTime = userSteakTime;
-            
-            if (isStarted && startTime > 0) {
-                const effectiveNow = Math.min(now, endTime);
-                const lastGlobalUpdate = startTime; // Base estimate (contract sets this at season start)
-                
-                // Global steakTime update
-                const timeDiff = effectiveNow - lastGlobalUpdate;
-                if (timeDiff > 0 && totalSteakedBN.gt(0)) {
-                    const additionalGlobal = totalSteakedBN.mul(timeDiff);
-                    simulatedTotalSteakTime = totalSteakTimeBN.add(additionalGlobal);
-                }
-                
-                // User steakTime update
-                const userLastUpdate = lastUpdate.toNumber();
-                const userLastUpdateTime = userLastUpdate > 0 ? userLastUpdate : startTime;
-                const userTimeDiff = effectiveNow - userLastUpdateTime;
-                if (userTimeDiff > 0 && userSteakAmount.gt(0)) {
-                    const additionalUser = userSteakAmount.mul(userTimeDiff);
-                    simulatedUserSteakTime = userSteakTime.add(additionalUser);
-                }
+            // Project steak-time forward, mirroring the contract's _updateGlobal()/_updateUser()
+            // exactly. The contract only accrues steakTime up to each party's last interaction,
+            // so the on-chain pendingReward() / steaks().steakTime read 0 (or stale) for anyone
+            // who steaked once and never touched it again. unsteak() runs _updateUser() FIRST —
+            // finalizing steakTime to season end — and only then pays out. So the reward a user
+            // will actually receive is this projection, NOT the raw pendingReward(). We replicate
+            // the contract math so the displayed number matches what unsteak() will pay.
+            const isSeasonEnded = isStarted && now >= endTime;
+            // until = min(now, seasonEnd) — the contract caps accrual at seasonEnd.
+            const until = (endTime > 0 && now > endTime) ? endTime : now;
+
+            // Global: lastGlobalUpdate comes from storage slot 4; fall back to seasonStart.
+            let lastGlobalUpdate = startTime;
+            if (lastGlobalUpdateRaw) {
+                try {
+                    const lgu = window.ethers.BigNumber.from(lastGlobalUpdateRaw).toNumber();
+                    if (lgu > 0) lastGlobalUpdate = lgu;
+                } catch (e) { /* keep fallback */ }
             }
-            
-            // Calculate user's percentage of the pool using simulated values
+
+            let projectedTotalSteakTime = totalSteakTimeBN;
+            if (isStarted && until > lastGlobalUpdate && totalSteakedBN.gt(0)) {
+                projectedTotalSteakTime = totalSteakTimeBN.add(totalSteakedBN.mul(until - lastGlobalUpdate));
+            }
+
+            // User: accrue from the user's own lastUpdate (matches _updateUser).
+            const userLastUpdateSec = lastUpdate.toNumber();
+            let projectedUserSteakTime = userSteakTime;
+            if (isStarted && userLastUpdateSec > 0 && until > userLastUpdateSec && userSteakAmount.gt(0)) {
+                projectedUserSteakTime = userSteakTime.add(userSteakAmount.mul(until - userLastUpdateSec));
+            }
+
+            // Pool share + headline reward estimate.
             let poolSharePercent = '0.00%';
             let estimatedReward = '0 w🍖';
-            
-            if (simulatedTotalSteakTime.gt(0) && simulatedUserSteakTime.gt(0)) {
-                // Calculate percentage: (simulatedUserSteakTime / simulatedTotalSteakTime) * 100
-                const shareBN = simulatedUserSteakTime.mul(10000).div(simulatedTotalSteakTime); // Multiply by 10000 for 2 decimal precision
+            if (projectedTotalSteakTime.gt(0) && projectedUserSteakTime.gt(0)) {
+                const shareBN = projectedUserSteakTime.mul(10000).div(projectedTotalSteakTime);
                 poolSharePercent = (shareBN.toNumber() / 100).toFixed(2) + '%';
-                
-                // Calculate estimated reward: (simulatedUserSteakTime / simulatedTotalSteakTime) * rewardPool
-                const estimatedRewardBN = rewardPoolBN.mul(simulatedUserSteakTime).div(simulatedTotalSteakTime);
+                const estimatedRewardBN = rewardPoolBN.mul(projectedUserSteakTime).div(projectedTotalSteakTime);
                 estimatedReward = formatTokenAmount(estimatedRewardBN, decimals) + ' w🍖';
             }
-            
             document.getElementById('user-pool-share').textContent = poolSharePercent;
             document.getElementById('user-estimated-reward').textContent = estimatedReward;
-            
-            // Simulate pending reward with eligibility checks
-            let simulatedPendingReward = window.ethers.BigNumber.from(0);
-            
-            // Eligibility checks (must pass all in order)
-            const userAmountBN = userSteakAmount;
-            const userMaxAmountBN = userMaxAmount;
-            
-            // Check eligibility rules (early returns)
-            if (userAmountBN.isZero()) {
-                // amount == 0, return 0
-                simulatedPendingReward = window.ethers.BigNumber.from(0);
-            } else if (userAmountBN.lt(userMaxAmountBN)) {
-                // amount < maxAmount, return 0
-                simulatedPendingReward = window.ethers.BigNumber.from(0);
-            } else if (!isStarted) {
-                // !seasonStarted, return 0
-                simulatedPendingReward = window.ethers.BigNumber.from(0);
-            } else if (now < endTime) {
-                // now < seasonEnd, return 0
-                simulatedPendingReward = window.ethers.BigNumber.from(0);
-            } else if (simulatedTotalSteakTime.isZero()) {
-                // simulatedTotalSteakTime == 0, return 0
-                simulatedPendingReward = window.ethers.BigNumber.from(0);
-            } else {
-                // All eligibility checks passed, calculate reward using simulated values
-                // reward = rewardPool * simulatedUserSteakTime / simulatedTotalSteakTime
-                simulatedPendingReward = rewardPoolBN.mul(simulatedUserSteakTime).div(simulatedTotalSteakTime);
-            }
-            
-            // Display pending reward
-            const isSeasonEnded = isStarted && now >= endTime;
+
+            // Eligibility mirrors _claimFeast: not claimed, amount > 0, amount >= maxAmount,
+            // projected steak-time > 0, projected total > 0.
+            const isEligible = !steakInfo.claimed &&
+                userSteakAmount.gt(0) &&
+                userSteakAmount.gte(userMaxAmount) &&
+                projectedUserSteakTime.gt(0) &&
+                projectedTotalSteakTime.gt(0);
+
+            const projectedReward = isEligible
+                ? rewardPoolBN.mul(projectedUserSteakTime).div(projectedTotalSteakTime)
+                : window.ethers.BigNumber.from(0);
+
+            // Display reward. After season end an eligible stake's reward is paid automatically
+            // on unsteak(), so show it as the amount they'll receive — not a scary "0".
             const pendingEl = document.getElementById('user-pending-reward');
-            if (simulatedPendingReward.gt(0)) {
-                pendingEl.textContent = formatTokenAmount(simulatedPendingReward, decimals) + ' w🍖';
+            if (steakInfo.claimed) {
+                pendingEl.textContent = 'Already claimed ✅';
             } else if (isSeasonEnded) {
-                pendingEl.textContent = '0 w🍖 (Not eligible — see requirements above)';
-            } else if (simulatedUserSteakTime.gt(0) && simulatedTotalSteakTime.gt(0)) {
-                const estBN = rewardPoolBN.mul(simulatedUserSteakTime).div(simulatedTotalSteakTime);
-                pendingEl.textContent = '~' + formatTokenAmount(estBN, decimals) + ' w🍖 (estimated)';
+                if (isEligible && projectedReward.gt(0)) {
+                    pendingEl.textContent = formatTokenAmount(projectedReward, decimals) + ' w🍖 — paid automatically when you unsteak';
+                } else if (!userSteakAmount.isZero() && userSteakAmount.lt(userMaxAmount)) {
+                    pendingEl.textContent = 'Not eligible — your balance fell below your peak. You can still unsteak to recover your tokens.';
+                } else if (userSteakAmount.isZero()) {
+                    pendingEl.textContent = 'No active stake';
+                } else {
+                    pendingEl.textContent = '0 w🍖';
+                }
+            } else if (projectedReward.gt(0) || (projectedUserSteakTime.gt(0) && projectedTotalSteakTime.gt(0))) {
+                const estBN = rewardPoolBN.mul(projectedUserSteakTime).div(projectedTotalSteakTime);
+                pendingEl.textContent = '~' + formatTokenAmount(estBN, decimals) + ' w🍖 (estimated — final at season end)';
             } else {
                 pendingEl.textContent = '0 w🍖 (Steak to start earning)';
             }
-            
+
             document.getElementById('user-claimed').textContent = steakInfo.claimed ? 'Yes' : 'No';
             document.getElementById('user-meat-balance').textContent = formatTokenAmount(balance, decimals);
 
@@ -1236,7 +1290,7 @@
         const now = Math.floor(Date.now() / 1000);
         if (now >= seasonEndTime) {
             countdownEl.classList.remove('d-none');
-            countdownText.textContent = 'Season ended';
+            countdownText.textContent = '🏁 Season 2 has ended';
             return;
         }
         const remaining = seasonEndTime - now;
@@ -1244,7 +1298,7 @@
         const hours = Math.floor((remaining % 86400) / 3600);
         const minutes = Math.floor((remaining % 3600) / 60);
         const secs = remaining % 60;
-        countdownText.textContent = `${days}d ${hours}h ${minutes}m ${secs}s`;
+        countdownText.textContent = `⏳ ${days}d ${hours}h ${minutes}m ${secs}s left on the grill`;
         countdownEl.classList.remove('d-none');
     }
 
