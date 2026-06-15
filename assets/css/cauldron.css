@@ -412,6 +412,8 @@ h1,h2,h3,h4 { font-family: var(--display); }
 
 .foot { text-align: center; margin-top: 46px; color: var(--ink-2); font-weight: 700; font-size: 13px; }
 .foot a { color: var(--gold-deep); }
+.foot-link { text-decoration: none; }
+.foot-link:hover { text-decoration: underline; }
 
 /* boost the prize */
 .boost-badge {

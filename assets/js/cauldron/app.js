@@ -640,7 +640,16 @@ function App() {
         React.createElement(HowItWorks, null),
         React.createElement(SecondaryTabs, { stats: stats, flashKey: flashKey, leaderboard: leaderboard, history: history, account: account, ethUsd: ethUsd, boost: { roundId: raffle.roundId, boostEth: boostEth, recent: recentBoosts, onBoost: handleBoost, busy: boosting, connected: connected, onConnect: handleConnect, paused: paused } })
       ),
-      React.createElement("div", { className: "foot" }, "🍖 Routes through Uniswap V3 · ", tokenSym, " token ", React.createElement("span", { className: "mono" }, trunc(TOKEN.address)))
+      React.createElement("div", { className: "foot" },
+        "🍖 Routes through Uniswap V3 · ", tokenSym, " token ", React.createElement("span", { className: "mono" }, trunc(TOKEN.address)),
+        " · ",
+        React.createElement("a", {
+          className: "foot-link",
+          href: "https://etherscan.io/address/0x8Bd3c60B270eF1e4c5c10fb6f5e4BFAba52c5eBf",
+          target: "_blank",
+          rel: "noopener noreferrer"
+        }, "Verified Contract: ", React.createElement("span", { className: "mono" }, "0x8Bd3…eBf"))
+      )
     ),
     React.createElement(Toasts, { toasts: toasts })
   );
