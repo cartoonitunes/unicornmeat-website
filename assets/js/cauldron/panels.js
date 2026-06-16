@@ -570,7 +570,7 @@ function SecondaryTabs({
   boost
 }) {
   const [tab, setTab] = React.useState('stats');
-  const tabs = [['stats', '📊', 'Stats'], ['leaders', '🏆', 'Leaders'], ['winners', '🎲', 'Winners'], ['boost', '🔥', 'Boost']];
+  const tabs = [['stats', '📊', 'Your Stats'], ['leaders', '🏆', 'Leaders'], ['winners', '🎲', 'Winners'], ['boost', '🔥', 'Boost']];
   return /*#__PURE__*/React.createElement("div", {
     className: "card tabs-card"
   }, /*#__PURE__*/React.createElement("div", {
