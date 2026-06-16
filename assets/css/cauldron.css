@@ -499,6 +499,27 @@ h1,h2,h3,h4 { font-family: var(--display); }
   font-family: var(--display); font-weight: 700; font-size: 12.5px; color: var(--ink); }
 .sym-chip.nft { border-color: var(--brew); color: var(--brew-deep); }
 
+/* Bundled NFT prize showcase — the card image + collection + name a visitor can actually win. */
+.nft-prizes { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 2px; }
+.nft-prize { display: flex; align-items: stretch; gap: 13px; padding: 11px;
+  background: linear-gradient(120deg, #faf5ff, var(--card));
+  border: 2px solid #000; border-radius: var(--radius-sm); box-shadow: 3px 3px 0 0 var(--brew-deep); }
+.nft-prize-media { flex: none; width: 92px; height: 92px; border-radius: 10px; overflow: hidden;
+  border: 2px solid #000; box-shadow: 2px 2px 0 0 #000; background: var(--field); }
+.nft-prize-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nft-prize-ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; background: radial-gradient(120% 120% at 30% 20%, #f3e8ff, var(--brew)); }
+.nft-prize-ph-glyph { font-size: 32px; line-height: 1; }
+.nft-prize-ph-id { font-family: var(--mono); font-weight: 700; font-size: 12px; color: #fff; }
+.nft-prize-body { display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; }
+.nft-prize-badge { align-self: flex-start; font-family: var(--mono); font-weight: 700; font-size: 10.5px;
+  letter-spacing: .07em; text-transform: uppercase; color: #fff;
+  background: linear-gradient(120deg, var(--brew), var(--brew-2)); border: 1.5px solid #000;
+  border-radius: 999px; padding: 3px 9px; box-shadow: 1.5px 1.5px 0 0 #000; }
+.nft-prize-name { font-family: var(--display); font-weight: 700; font-size: 18px; line-height: 1.15;
+  color: var(--ink); overflow-wrap: anywhere; }
+.nft-prize-sub { font-family: var(--mono); font-weight: 600; font-size: 12px; color: var(--brew-deep); overflow-wrap: anywhere; }
+
 .potbar-wrap { margin: 16px 0 4px; }
 .potbar-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 7px; }
 .potbar-label { font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--ink); }

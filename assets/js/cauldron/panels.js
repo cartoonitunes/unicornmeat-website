@@ -52,6 +52,47 @@ function TokenGlyph({
   });
 }
 
+// ---------- NFT prize showcase ----------
+// A bundled NFT prize, shown prominently so a visitor sees what they can actually win — the card
+// image, the collection, and the card's own name — instead of a truncated contract address. If the
+// image is missing or fails to load (IPFS hiccup, no tokenURI), a styled placeholder stands in,
+// still carrying the collection name and token id so the prize never reads as a hex string.
+function NftPrizeCard({
+  nft,
+  roundId
+}) {
+  const [imgFailed, setImgFailed] = React.useState(false);
+  const showImg = nft.image && !imgFailed;
+  const title = nft.name || nft.collection || 'NFT Prize';
+  // Sub-line: when the card has its own name, surface the collection beside the id; otherwise just id.
+  const sub = [nft.name ? nft.collection : null, nft.id].filter(Boolean).join(' · ');
+  return /*#__PURE__*/React.createElement("div", {
+    className: "nft-prize"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "nft-prize-media"
+  }, showImg ? /*#__PURE__*/React.createElement("img", {
+    className: "nft-prize-img",
+    src: nft.image,
+    alt: title,
+    loading: "lazy",
+    onError: () => setImgFailed(true)
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "nft-prize-ph"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nft-prize-ph-glyph"
+  }, "🖼️"), /*#__PURE__*/React.createElement("span", {
+    className: "nft-prize-ph-id"
+  }, nft.id))), /*#__PURE__*/React.createElement("div", {
+    className: "nft-prize-body"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nft-prize-badge"
+  }, "🏆 Win this NFT", roundId ? " · Round #" + roundId + " prize" : ""), /*#__PURE__*/React.createElement("div", {
+    className: "nft-prize-name"
+  }, title), sub ? /*#__PURE__*/React.createElement("div", {
+    className: "nft-prize-sub"
+  }, sub) : null));
+}
+
 // ---------- Current round status (primary zone, beside the swap card) ----------
 // One card that carries everything about the open round: round number, the prize (pot + boost +
 // bundled extras), a labelled pot-progress bar toward the threshold, participants, and your entries.
@@ -106,15 +147,18 @@ function RoundStatus({
     className: "u"
   }, "ETH")), /*#__PURE__*/React.createElement("div", {
     className: "prize-cap"
-  }, "Prize pot", boostEth > 0 ? " (incl. " + fmtEth(boostEth) + " boost)" : "", hasExtras ? " plus bundled prizes" : ""))), hasExtras && /*#__PURE__*/React.createElement("div", {
+  }, "Prize pot", boostEth > 0 ? " (incl. " + fmtEth(boostEth) + " boost)" : "", hasExtras ? " plus bundled prizes" : ""))), tokens.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "chip-row"
   }, tokens.map((t, i) => /*#__PURE__*/React.createElement("span", {
     className: "sym-chip",
     key: 't' + i
-  }, t.amount, " ", t.sym)), nfts.map((n, i) => /*#__PURE__*/React.createElement("span", {
-    className: "sym-chip nft",
+  }, t.amount, " ", t.sym))), nfts.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "nft-prizes"
+  }, nfts.map((n, i) => /*#__PURE__*/React.createElement(NftPrizeCard, {
+    nft: n,
+    roundId: raffle.roundId,
     key: 'n' + i
-  }, n.collection, " ", n.id))),
+  }))),
   // Pot progress toward the draw threshold, clearly labelled.
   /*#__PURE__*/React.createElement("div", {
     className: "potbar-wrap"

@@ -50,6 +50,12 @@
     'function approve(address,uint256) returns (bool)',
   ];
 
+  // Minimal ERC-721 metadata ABI for resolving NFT prizes to a collection name + card image.
+  const ERC721_META_ABI = [
+    'function name() view returns (string)',
+    'function tokenURI(uint256) view returns (string)',
+  ];
+
   const QUOTER_V2_ABI = [
     'function quoteExactInputSingle((address tokenIn,address tokenOut,uint256 amountIn,uint24 fee,uint160 sqrtPriceLimitX96)) returns (uint256 amountOut,uint160 sqrtPriceX96After,uint32 initializedTicksCrossed,uint256 gasEstimate)',
   ];
@@ -302,6 +308,54 @@
 
   // Resolve raw (address, amount) ERC-20 prize pairs into display objects, best-effort
   // reading each token's symbol + decimals so amounts format correctly. `amount` is a float.
+  // Rewrite ipfs:// (and ipfs://ipfs/) URIs to an HTTP gateway so the browser can load them.
+  function _ipfsToHttp(uri) {
+    if (!uri || typeof uri !== 'string') return uri;
+    if (uri.startsWith('ipfs://ipfs/')) return 'https://ipfs.io/ipfs/' + uri.slice(12);
+    if (uri.startsWith('ipfs://')) return 'https://ipfs.io/ipfs/' + uri.slice(7);
+    return uri;
+  }
+
+  // Resolve ERC-721 prize NFTs to display metadata: the collection name (name()), and the card's
+  // own name + image from its tokenURI JSON (handles ipfs:// and base64/utf8 data URIs). Every
+  // lookup is best-effort and isolated: on any failure the entry still carries address + tokenId,
+  // so the UI can fall back to a styled placeholder. Never throws.
+  async function _resolveNftPrizes(addresses, ids) {
+    const provider = readProvider();
+    const out = [];
+    for (let i = 0; i < addresses.length; i++) {
+      const address = addresses[i];
+      const tokenId = ids[i].toString();
+      const entry = { address, tokenId, collection: null, name: null, image: null };
+      try {
+        const nft = new window.ethers.Contract(address, ERC721_META_ABI, provider);
+        const [collection, uriRaw] = await Promise.all([
+          nft.name().catch(() => null),
+          nft.tokenURI(tokenId).catch(() => null),
+        ]);
+        entry.collection = collection || null;
+        const uri = _ipfsToHttp(uriRaw);
+        if (uri) {
+          let json = null;
+          if (uri.startsWith('data:application/json;base64,')) {
+            json = JSON.parse(atob(uri.slice('data:application/json;base64,'.length)));
+          } else if (uri.startsWith('data:application/json,')) {
+            json = JSON.parse(decodeURIComponent(uri.slice('data:application/json,'.length)));
+          } else {
+            const r = await fetch(uri);
+            if (r.ok) json = await r.json();
+          }
+          if (json) {
+            entry.name = json.name || null;
+            entry.image = _ipfsToHttp(json.image || json.image_url || null);
+          }
+        }
+      } catch (_e) { /* leave placeholders; UI renders collection + id */ }
+      out.push(entry);
+    }
+    return out;
+  }
+
   async function _resolveTokenPrizes(addresses, amounts) {
     const provider = readProvider();
     const out = [];
@@ -339,7 +393,7 @@
     ]);
     return {
       tokens: await _resolveTokenPrizes(tokens, amounts),
-      nfts: nfts.map((addr, i) => ({ address: addr, tokenId: ids[i].toString() })),
+      nfts: await _resolveNftPrizes(nfts, ids),
     };
   }
 
@@ -358,7 +412,7 @@
     return {
       roundId: window.ethers.BigNumber.from(rid).toNumber(),
       tokens: await _resolveTokenPrizes(tokens, amounts),
-      nfts: nfts.map((addr, i) => ({ address: addr, tokenId: ids[i].toString() })),
+      nfts: await _resolveNftPrizes(nfts, ids),
     };
   }
 

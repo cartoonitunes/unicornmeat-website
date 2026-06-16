@@ -295,7 +295,15 @@ function App() {
         if (q) {
           setQueued({
             tokens: q.tokens.map(t => ({ sym: t.sym || trunc(t.address), amount: compact(t.amount), glyph: '🎁' })),
-            nfts: q.nfts.map(n => ({ collection: trunc(n.address), id: '#' + n.tokenId, glyph: '🖼️' }))
+            nfts: q.nfts.map(n => ({
+              collection: n.collection || trunc(n.address),
+              name: n.name || null,
+              image: n.image || null,
+              id: '#' + n.tokenId,
+              address: n.address,
+              tokenId: n.tokenId,
+              glyph: '🖼️'
+            }))
           });
         }
       } catch (_e) {}
