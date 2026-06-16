@@ -644,7 +644,7 @@ function App() {
           React.createElement(ClaimPrize, { claimable: claimable, busy: claiming, onClaim: handleClaim })
         ),
         React.createElement("div", { className: "round-col" },
-          React.createElement(RoundStatus, { raffle: raffle, pot: pot, boostEth: boostEth, prize: prize, drawable: drawable, onDraw: handleDraw, drawing: drawing, paused: paused, raffleLive: entriesLive })
+          React.createElement(RoundStatus, { raffle: raffle, pot: pot, boostEth: boostEth, prize: prize, drawable: drawable, onDraw: handleDraw, drawing: drawing, paused: paused, raffleLive: entriesLive, connected: connected, holderBps: stats.holderBps, onConnect: handleConnect })
         ),
         React.createElement(HowItWorks, null),
         React.createElement(SecondaryTabs, { stats: stats, flashKey: flashKey, leaderboard: leaderboard, history: history, account: account, ethUsd: ethUsd, boost: { roundId: raffle.roundId, boostEth: boostEth, recent: recentBoosts, onBoost: handleBoost, busy: boosting, connected: connected, onConnect: handleConnect, paused: paused } })

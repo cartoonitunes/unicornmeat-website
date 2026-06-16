@@ -111,7 +111,10 @@ function RoundStatus({
   onDraw,
   drawing,
   paused,
-  raffleLive
+  raffleLive,
+  connected,
+  holderBps,
+  onConnect
 }) {
   const pct = Math.max(0, Math.min(1, pot.threshold ? pot.eth / pot.threshold : 0));
   const tokens = prize && prize.tokens || [];
@@ -183,8 +186,13 @@ function RoundStatus({
   })), /*#__PURE__*/React.createElement("div", {
     className: "potbar-note"
   }, paused ? "Swaps are disabled until the owner unpauses. The prize can still be boosted." : pct >= 1 ? "Pot is full. The next swap draws a winner automatically." : "Each swap adds a 0.3% fee to the pot. When it fills, a winner is drawn automatically.")),
-  // Round stats: participants, your entries, win odds.
+  // Round Stats — global figures that are true for everyone, so they read as shared round
+  // state rather than "your zero". Always shown, connected or not.
   /*#__PURE__*/React.createElement("div", {
+    className: "stats-block"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stats-h"
+  }, "Round Stats"), /*#__PURE__*/React.createElement("div", {
     className: "round-stats"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "rk"
@@ -192,13 +200,39 @@ function RoundStatus({
     className: "rv"
   }, commas(raffle.participants))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "rk"
+  }, "Total Entries"), /*#__PURE__*/React.createElement("div", {
+    className: "rv"
+  }, commas(raffle.totalEntries))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "rk"
+  }, "Pot Filled"), /*#__PURE__*/React.createElement("div", {
+    className: "rv"
+  }, Math.round(pct * 100), "%")))),
+  // Your Stats — personal figures. Gated on wallet connection so an empty state reads as
+  // "connect to see yours", never as global stats that are all zero.
+  /*#__PURE__*/React.createElement("div", {
+    className: "stats-block"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stats-h"
+  }, "Your Stats"), connected ? /*#__PURE__*/React.createElement("div", {
+    className: "round-stats"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "rk"
   }, "Your Entries"), /*#__PURE__*/React.createElement("div", {
     className: "rv gold"
-  }, raffleLive ? commas(raffle.userEntries) : '0')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, commas(raffle.userEntries))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "rk"
-  }, "Win Odds"), /*#__PURE__*/React.createElement("div", {
+  }, "Your Win Odds"), /*#__PURE__*/React.createElement("div", {
     className: "rv"
-  }, raffleLive ? `${odds.toFixed(odds < 10 ? 2 : 1)}%` : '·'))), drawable && /*#__PURE__*/React.createElement("div", {
+  }, raffle.totalEntries ? `${odds.toFixed(odds < 10 ? 2 : 1)}%` : '·')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "rk"
+  }, "Holder Multiplier"), /*#__PURE__*/React.createElement("div", {
+    className: "rv"
+  }, fmtMult(holderBps == null ? 10000 : holderBps)))) : /*#__PURE__*/React.createElement("div", {
+    className: "stats-connect"
+  }, /*#__PURE__*/React.createElement("span", null, "Connect wallet to see your stats"), onConnect ? /*#__PURE__*/React.createElement("button", {
+    className: "btn ghost",
+    onClick: onConnect
+  }, "Connect wallet") : null)), drawable && /*#__PURE__*/React.createElement("div", {
     className: "draw-row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "draw-note"
