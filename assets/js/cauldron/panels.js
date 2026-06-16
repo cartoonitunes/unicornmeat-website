@@ -148,7 +148,7 @@ function RoundStatus({
     size: 34
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "prize-amt"
-  }, fmtEth(prize.ethFloat), " ", /*#__PURE__*/React.createElement("span", {
+  }, fmtPotEth(prize.ethFloat), " ", /*#__PURE__*/React.createElement("span", {
     className: "u"
   }, "ETH")), /*#__PURE__*/React.createElement("div", {
     className: "prize-cap"
@@ -171,7 +171,7 @@ function RoundStatus({
     className: "potbar-top"
   }, /*#__PURE__*/React.createElement("span", {
     className: "potbar-label"
-  }, "Pot: ", fmtEth(pot.eth), " / ", pot.threshold, " ETH"), /*#__PURE__*/React.createElement("span", {
+  }, "Pot: ", fmtPotEth(pot.eth), " / ", pot.threshold, " ETH"), /*#__PURE__*/React.createElement("span", {
     className: "potbar-pct"
   }, Math.round(pct * 100), "%")), /*#__PURE__*/React.createElement("div", {
     className: "potbar"

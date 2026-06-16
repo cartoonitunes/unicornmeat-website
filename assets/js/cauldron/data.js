@@ -132,6 +132,14 @@ function fmtEth(n) {
   if (n >= 1) return commas(n, 2);
   return commas(n, 4);
 }
+// Pot amount specifically: it accrues from 0.3% swap fees, so early in a round it sits in the
+// 1e-5–1e-4 ETH range, which fmtEth's 4-dp floor flattens to "0.0000". Show 6 dp so those small
+// fee accruals are visible (e.g. 0.000030). Used for the pot/prize headline, not boosts or winners.
+function fmtPotEth(n) {
+  if (n >= 100) return commas(n, 1);
+  if (n >= 1) return commas(n, 2);
+  return commas(n, 6);
+}
 function fmtUsd(n) {
   return '$' + compact(n);
 }
@@ -273,6 +281,7 @@ Object.assign(window, {
   commas,
   compact,
   fmtEth,
+  fmtPotEth,
   fmtUsd,
   trunc,
   truncDecimals,
