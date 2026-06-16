@@ -326,7 +326,7 @@
     for (let i = 0; i < addresses.length; i++) {
       const address = addresses[i];
       const tokenId = ids[i].toString();
-      const entry = { address, tokenId, collection: null, name: null, image: null };
+      const entry = { address, tokenId, collection: null, name: null, image: null, originalContract: null };
       try {
         const nft = new window.ethers.Contract(address, ERC721_META_ABI, provider);
         const [collection, uriRaw] = await Promise.all([
@@ -348,6 +348,14 @@
           if (json) {
             entry.name = json.name || null;
             entry.image = _ipfsToHttp(json.image || json.image_url || null);
+            // Wrapped legacy NFTs (eg. Wrapped CryptoPokemons) carry the original pre-wrap contract
+            // in an attribute, so we can deep-link its provenance instead of the wrapper.
+            const attrs = Array.isArray(json.attributes) ? json.attributes : [];
+            const orig = attrs.find(a => a && typeof a.trait_type === 'string' &&
+              a.trait_type.toLowerCase() === 'original contract');
+            if (orig && /^0x[0-9a-fA-F]{40}$/.test(String(orig.value || '').trim())) {
+              entry.originalContract = String(orig.value).trim().toLowerCase();
+            }
           }
         }
       } catch (_e) { /* leave placeholders; UI renders collection + id */ }

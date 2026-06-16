@@ -90,7 +90,12 @@ function NftPrizeCard({
     className: "nft-prize-name"
   }, title), sub ? /*#__PURE__*/React.createElement("div", {
     className: "nft-prize-sub"
-  }, sub) : null));
+  }, sub) : null, nft.originalContract ? /*#__PURE__*/React.createElement("a", {
+    className: "nft-prize-prov",
+    href: "https://ethereumhistory.com/contract/" + nft.originalContract,
+    target: "_blank",
+    rel: "noopener noreferrer"
+  }, "View provenance on Ethereum History ↗") : null));
 }
 
 // ---------- Current round status (primary zone, beside the swap card) ----------

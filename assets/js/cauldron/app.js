@@ -302,6 +302,7 @@ function App() {
               id: '#' + n.tokenId,
               address: n.address,
               tokenId: n.tokenId,
+              originalContract: n.originalContract || null,
               glyph: '🖼️'
             }))
           });

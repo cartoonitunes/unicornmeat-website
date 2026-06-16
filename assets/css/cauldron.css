@@ -519,6 +519,10 @@ h1,h2,h3,h4 { font-family: var(--display); }
 .nft-prize-name { font-family: var(--display); font-weight: 700; font-size: 18px; line-height: 1.15;
   color: var(--ink); overflow-wrap: anywhere; }
 .nft-prize-sub { font-family: var(--mono); font-weight: 600; font-size: 12px; color: var(--brew-deep); overflow-wrap: anywhere; }
+.nft-prize-prov { align-self: flex-start; margin-top: 2px; font-family: var(--mono); font-weight: 700;
+  font-size: 11px; letter-spacing: .02em; color: var(--ink-2); text-decoration: none;
+  border-bottom: 1px dotted var(--ink-2); padding-bottom: 1px; transition: color .12s ease, border-color .12s ease; }
+.nft-prize-prov:hover { color: var(--brew-deep); border-bottom-color: var(--brew-deep); }
 
 .potbar-wrap { margin: 16px 0 4px; }
 .potbar-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 7px; }
