@@ -19,10 +19,13 @@
       ]
     }
   ],
+  "rewrites": [
+    { "source": "/api/total-supply", "destination": "/supply/total-supply.txt" },
+    { "source": "/api/circulating-supply", "destination": "/supply/circulating-supply.txt" }
+  ],
   "redirects": [
     { "source": "/contact", "destination": "/", "statusCode": 301 },
     { "source": "/newsletter", "destination": "/", "statusCode": 301 },
-    { "source": "/api/:path*", "destination": "/", "statusCode": 301 },
     { "source": "/how-to-buy", "destination": "/swap", "permanent": true }
   ]
 }
