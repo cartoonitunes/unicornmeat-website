@@ -28,7 +28,8 @@
   ],
   "rewrites": [
     { "source": "/api/total-supply", "destination": "/supply/total-supply.txt" },
-    { "source": "/api/circulating-supply", "destination": "/supply/circulating-supply.txt" }
+    { "source": "/api/circulating-supply", "destination": "/supply/circulating-supply.txt" },
+    { "source": "/deck", "destination": "/pitch-deck" }
   ],
   "redirects": [
     { "source": "/contact", "destination": "/", "statusCode": 301 },
