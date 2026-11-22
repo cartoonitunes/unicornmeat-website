@@ -334,7 +334,7 @@ def page(*, title, description, canonical, og_image, og_type, jsonld, body):
     <script src="/assets/js/uni-core/js/uni-core-bundle.min.js"></script>
     <link rel="stylesheet" href="/assets/css/theme/hero-bg.css">
     <link rel="stylesheet" href="/assets/css/custom.css?v=4">
-    <link rel="stylesheet" href="/assets/css/artifacts.css?v=3">
+    <link rel="stylesheet" href="/assets/css/artifacts.css?v=5">
     <script type="application/ld+json">
 {json.dumps(jsonld, indent=2, ensure_ascii=False)}
     </script>
@@ -456,7 +456,7 @@ def artifact_body(a):
 {logo_img(a, "artifact-logo", 160)}                        <h1 class="h2 sm:h1 xl:display-6 m-0 ls-0"><span class="artifact-title">{e(a['symbol'])}</span></h1>
                         <p class="fs-6 fw-bold text-uppercase m-0 artifact-subtitle">{e(a['name'])}</p>
                         <p class="fs-5 xl:fs-4 text-dark m-0">{e(a['oneLiner'])}</p>
-                        <div class="hstack flex-wrap justify-center gap-2 mt-2">
+                        <div class="artifact-actions hstack flex-wrap justify-center gap-2 mt-2">
                             <a class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm -rotate-1 hover:rotate-0 fw-bold" href="{e(a['tradeUrl'])}" target="_blank" rel="noopener">Trade on Uniswap ↗</a>
                             <a class="btn btn-md btn-white border border-2 border-black contrast-shadow-sm rotate-1 hover:rotate-0" href="{e(a['ehUrl'])}" target="_blank" rel="noopener">Ethereum History ↗</a>
                         </div>
@@ -517,7 +517,7 @@ def artifact_body(a):
                             </div>
                         </div>
                         <div class="vstack items-center gap-3 mt-6 text-center">
-                            <div class="hstack flex-wrap justify-center gap-2">
+                            <div class="artifact-actions hstack flex-wrap justify-center gap-2">
                                 <a class="btn btn-md btn-secondary border border-2 border-black contrast-shadow-sm fw-bold" href="{e(a['tradeUrl'])}" target="_blank" rel="noopener">Trade {e(a['symbol'])} on Uniswap ↗</a>
                                 <a class="btn btn-md btn-white border border-2 border-black contrast-shadow-sm" href="{e(share)}" target="_blank" rel="noopener">Share on X</a>
                                 <a class="btn btn-md btn-white border border-2 border-black contrast-shadow-sm" href="/artifacts">All artifacts</a>
