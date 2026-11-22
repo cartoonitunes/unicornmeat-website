@@ -40,7 +40,8 @@
           "9 trillion, a limit it will never reach"
         ]
       ],
-      "accent": "#ffba00"
+      "accent": "#ffba00",
+      "logo": "assets/images/artifacts/0xdoge-logo.png"
     }
   ]
 }

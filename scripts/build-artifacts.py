@@ -71,6 +71,8 @@ def load():
         a["number"] = i
         a.setdefault("accent", "#ffba00")
         a.setdefault("facts", [])
+        if a.get("logo") and not (ROOT / a["logo"]).is_file():
+            sys.exit(f"{a['slug']}: logo file not found: {a['logo']}")
         a.setdefault("tradeUrl",
                      f"https://app.uniswap.org/swap?inputCurrency=ETH&outputCurrency={a['address']}")
         a.setdefault("ehUrl", f"https://www.ethereumhistory.com/contract/{a['address'].lower()}")
@@ -190,6 +192,17 @@ def build_og(a):
     card(img, (40, 158, OG_W - 52, OG_H - 46), "#ffffff")
 
     x, max_w = 84, OG_W - 84 - 100
+    if a.get("logo"):
+        # pixel art: scale with NEAREST so it stays crisp
+        size = 250
+        lx, ly = OG_W - 52 - 44 - size, 196
+        tile = Image.open(ROOT / a["logo"]).convert("RGBA").resize((size, size), Image.NEAREST)
+        rounded = Image.new("L", (size, size), 0)
+        ImageDraw.Draw(rounded).rounded_rectangle((0, 0, size - 1, size - 1), 24, fill=255)
+        d.rounded_rectangle((lx - 4 + 10, ly - 4 + 10, lx + size + 4 + 10, ly + size + 4 + 10), 28, fill="#000")
+        img.paste(tile, (lx, ly), rounded)
+        d.rounded_rectangle((lx - 4, ly - 4, lx + size + 4, ly + size + 4), 28, outline="#000", width=5)
+        max_w = lx - 40 - x
     title_font = fit(d, a["symbol"], FONT_DISPLAY, 112, 56, max_w)
     # offset shadow under the title, like .steak-title-highlight on the site
     shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -217,7 +230,7 @@ def build_og(a):
     py = OG_H - 46 - 86
     b = pill(img, (x, py), f"{a['supply']['display']} coins", a["accent"], pf)
     b = pill(img, (b[2] + 22, py), f"Launched {a['deployedHuman']}", "#ffffff", pf)
-    pill(img, (b[2] + 22, py), "Trade it for w🍖 on Uniswap", "#ffe6f0", pf)
+    pill(img, (b[2] + 22, py), "Trade it with w🍖 on Uniswap", "#ffe6f0", pf)
     return img.convert("RGB")
 
 
@@ -229,7 +242,7 @@ def build_index_og(items):
     d.text((x, 190), "Artifacts", font=font(FONT_DISPLAY, 112), fill="#ff4fa3")
     body = font(FONT_BOLD, 40)
     y = 330
-    for line in wrap(d, "Coins from Ethereum's early days that you can trade for w🍖.", body, OG_W - 200):
+    for line in wrap(d, "Coins from Ethereum's early days that you can trade with w🍖.", body, OG_W - 200):
         draw_text(img, (x, y), line, body)
         y += 52
     pf = font(FONT_BOLD, 24)
@@ -321,7 +334,7 @@ def page(*, title, description, canonical, og_image, og_type, jsonld, body):
     <script src="/assets/js/uni-core/js/uni-core-bundle.min.js"></script>
     <link rel="stylesheet" href="/assets/css/theme/hero-bg.css">
     <link rel="stylesheet" href="/assets/css/custom.css?v=4">
-    <link rel="stylesheet" href="/assets/css/artifacts.css?v=2">
+    <link rel="stylesheet" href="/assets/css/artifacts.css?v=3">
     <script type="application/ld+json">
 {json.dumps(jsonld, indent=2, ensure_ascii=False)}
     </script>
@@ -420,6 +433,14 @@ def page(*, title, description, canonical, og_image, og_type, jsonld, body):
 """
 
 
+def logo_img(a, cls, size, indent=" " * 24):
+    if not a.get("logo"):
+        return ""
+    tag = (f'<img class="{cls}" src="/{e(a["logo"])}" width="{size}" height="{size}" '
+           f'alt="{e(a["symbol"])} logo">')
+    return f"{indent}{tag}\n" if indent else tag
+
+
 def artifact_body(a):
     story = "\n".join(f'                                <p class="fs-6 mb-3">{e(p)}</p>' for p in a["story"])
     facts = "\n".join(
@@ -431,8 +452,8 @@ def artifact_body(a):
     return f"""            <section class="artifact-hero section panel overflow-hidden">
                 <div class="container artifact-hero-inner">
                     <div class="artifact-hero-copy mx-auto text-center vstack items-center gap-3">
-                        <a class="artifact-pill" href="/artifacts">🏺 Artifact #{a['number']:03d} · Trade it for w🍖</a>
-                        <h1 class="h2 sm:h1 xl:display-6 m-0 ls-0"><span class="artifact-title">{e(a['symbol'])}</span></h1>
+                        <a class="artifact-pill" href="/artifacts">🏺 Artifact #{a['number']:03d} · Trade it with w🍖</a>
+{logo_img(a, "artifact-logo", 160)}                        <h1 class="h2 sm:h1 xl:display-6 m-0 ls-0"><span class="artifact-title">{e(a['symbol'])}</span></h1>
                         <p class="fs-6 fw-bold text-uppercase m-0 artifact-subtitle">{e(a['name'])}</p>
                         <p class="fs-5 xl:fs-4 text-dark m-0">{e(a['oneLiner'])}</p>
                         <div class="hstack flex-wrap justify-center gap-2 mt-2">
@@ -515,7 +536,7 @@ def index_body(items):
         cards.append(f"""                            <div>
                                 <a class="artifact-card panel vstack gap-2 p-4 border border-2 border-black contrast-shadow-lg bg-white h-100 text-none {tilt}" href="/artifacts/{a['slug']}">
                                     <span class="fs-7 fw-bold text-uppercase text-muted">Artifact #{a['number']:03d} · {e(a['deployedHuman'])}</span>
-                                    <span class="h3 m-0 artifact-title">{e(a['symbol'])}</span>
+                                    <span class="hstack gap-3 items-center">{logo_img(a, "artifact-logo artifact-logo-sm", 64, indent="")}<span class="h3 m-0 artifact-title">{e(a['symbol'])}</span></span>
                                     <span class="fs-7 fw-bold text-uppercase">{e(a['name'])}</span>
                                     <span class="fs-6 text-dark">{e(a['oneLiner'])}</span>
                                     <span class="hstack justify-between items-center mt-auto pt-2">
@@ -529,8 +550,8 @@ def index_body(items):
                     <div class="artifact-hero-copy mx-auto text-center vstack items-center gap-3">
                         <span class="artifact-pill">🏺 {len(items)} {"artifact" if len(items) == 1 else "artifacts"}</span>
                         <h1 class="h2 sm:h1 xl:display-6 m-0 ls-0"><span class="artifact-title">Artifacts</span></h1>
-                        <p class="fs-5 xl:fs-4 text-dark m-0">Coins from Ethereum's early days, each with a story, that you can trade for w🍖 on Uniswap.</p>
-                        <p class="fs-6 text-dark m-0">Unicorn Meat has been on Ethereum since March 2016. Artifacts are other coins from those early years that you can now swap for w🍖.</p>
+                        <p class="fs-5 xl:fs-4 text-dark m-0">Coins from Ethereum's early days, each with a story, that you can trade with w🍖 on Uniswap.</p>
+                        <p class="fs-6 text-dark m-0">Unicorn Meat has been on Ethereum since March 2016. Artifacts are other coins from those early years that you can now swap with w🍖.</p>
                     </div>
                 </div>
             </section>
@@ -582,7 +603,7 @@ def main():
         title = f"{a['symbol']}: {a['oneLiner']}"
         if len(title) > 70:
             title = f"{a['symbol']} · Unicorn Meat Artifacts"
-        description = f"{a['oneLiner']} {a['name']} ({a['symbol']}), launched {a['deployedHuman']}. Trade it for w🍖 on Uniswap."
+        description = f"{a['oneLiner']} {a['name']} ({a['symbol']}), launched {a['deployedHuman']}. Trade it with w🍖 on Uniswap."
         jsonld = {
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -613,8 +634,8 @@ def main():
         "hasPart": [{"@type": "WebPage", "url": a["url"], "name": a["name"]} for a in items],
     }
     (OUT_PAGES / "index.html").write_text(page(
-        title="Artifacts · Early Ethereum coins you can trade for w🍖",
-        description="Coins from Ethereum's early days that you can trade for w🍖 on Uniswap: "
+        title="Artifacts · Early Ethereum coins you can trade with w🍖",
+        description="Coins from Ethereum's early days that you can trade with w🍖 on Uniswap: "
                     + ", ".join(a["symbol"] for a in items) + ".",
         canonical=f"{SITE}/artifacts",
         og_image=f"{SITE}/assets/images/artifacts/index-og.png?v={v}",
