@@ -1998,14 +1998,12 @@
     <a href="#main-content" class="skip-to-content">Skip to content</a>
 
     <!-- Announcement Banner -->
-    <div id="announcement-banner" class="announcement-banner" style="position: sticky; top: 0; z-index: 1000; background: linear-gradient(135deg, #b45309, #d97706); border-bottom: 2px solid #000; padding: 0.75rem 1rem;">
+    <div id="announcement-banner" class="announcement-banner" style="position: sticky; top: 0; z-index: 1000; background: linear-gradient(135deg, #be185d, #ff4fa3); border-bottom: 2px solid #000; padding: 0.75rem 1rem;">
         <div class="container" style="position: relative;">
             <div class="text-center w-100" style="padding-right: 2.5rem;">
                 <p class="mb-0 fw-bold fs-7 sm:fs-6 lg:fs-5" style="color: #fff;">
-                    ⚡ <strong>BREAKING:</strong> Etherscan officially recognizes Unicorn Meat as created by <strong>Avsa of the Ethereum Foundation</strong>.
-                    <a href="https://etherscan.io/token/0xed6ac8de7c7ca7e3a22952e09c2a2a1232ddef9a" target="_blank" rel="noopener" style="color: #fff; text-decoration: underline; font-weight: 600;">See the note on Etherscan →</a>
-                    <span class="d-none d-sm-inline">&nbsp;·&nbsp;</span><br class="d-sm-none">
-                    <a href="https://x.com/ethereum/status/715821110722433024" target="_blank" rel="noopener" style="color: #fff; text-decoration: underline; font-weight: 600;">Originally announced by @ethereum in 2016</a>
+                    🏺 <strong>NEW: Artifacts.</strong> Coins from Ethereum's early days that you can trade with w🍖. First up: 0xDOGE, the first copy of 0xBitcoin.
+                    <a href="/artifacts" style="color: #fff; text-decoration: underline; font-weight: 600;">See the artifacts →</a>
                 </p>
             </div>
             <button id="close-announcement" class="btn btn-sm border border-2 border-black contrast-shadow-sm fs-7 sm:fs-6" style="position: absolute; top: 50%; right: 0; transform: translateY(-50%); background: white; color: #000; min-width: auto; padding: 0.25rem 0.5rem; flex-shrink: 0;" aria-label="Close announcement">
@@ -3972,13 +3970,13 @@
                 closeAnnouncement.addEventListener('click', function() {
                     announcementBanner.style.display = 'none';
                     // Optionally save to localStorage so it doesn't show again
-                    localStorage.setItem('announcement-dismissed', 'true');
+                    localStorage.setItem('announcement-dismissed-artifacts', 'true');
                     // Update navbar position after hiding
                     setTimeout(updateNavbarPosition, 10);
                 });
                 
                 // Check if announcement was previously dismissed
-                if (localStorage.getItem('announcement-dismissed') === 'true') {
+                if (localStorage.getItem('announcement-dismissed-artifacts') === 'true') {
                     announcementBanner.style.display = 'none';
                 }
                 

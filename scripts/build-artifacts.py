@@ -551,7 +551,7 @@ def index_body(items):
                         <span class="artifact-pill">🏺 {len(items)} {"artifact" if len(items) == 1 else "artifacts"}</span>
                         <h1 class="h2 sm:h1 xl:display-6 m-0 ls-0"><span class="artifact-title">Artifacts</span></h1>
                         <p class="fs-5 xl:fs-4 text-dark m-0">Coins from Ethereum's early days, each with a story, that you can trade with w🍖 on Uniswap.</p>
-                        <p class="fs-6 text-dark m-0">Unicorn Meat has been on Ethereum since March 2016. Artifacts are other coins from those early years that you can now swap with w🍖.</p>
+                        <p class="fs-6 text-dark m-0">Unicorn Meat has been on Ethereum since March 2016. Artifacts are other coins from early years that you can now swap with w🍖.</p>
                     </div>
                 </div>
             </section>
