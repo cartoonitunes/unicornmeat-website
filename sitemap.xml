@@ -42,4 +42,18 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  <!-- artifacts:start -->
+  <url>
+    <loc>https://unicornmeateth.com/artifacts</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://unicornmeateth.com/artifacts/0xdoge</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- artifacts:end -->
 </urlset>

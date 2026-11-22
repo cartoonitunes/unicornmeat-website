@@ -1,0 +1,29 @@
+{
+  "_readme": "Source of truth for /artifacts. Edit this file, then run: python3 scripts/build-artifacts.py",
+  "artifacts": [
+    {
+      "slug": "0xdoge",
+      "name": "0xDOGE Token",
+      "symbol": "0xDOGE",
+      "address": "0x0d8bB998900AbDB60D7414145e1c542C2CF4e7A9",
+      "deployed": "2018-02-16",
+      "oneLiner": "First 0xBitcoin clone. Bricked after 12 mints. Fixed supply forever.",
+      "story": [
+        "Deployed on February 16, 2018, just 10 days after 0xBitcoin, 0xDOGE was the first 0xBitcoin clone: a proof-of-work token mined by submitting solutions onchain.",
+        "A bug in the reward formula and a recursive era cap bricked the contract after 12 successful mints. No further mint can ever succeed.",
+        "1.2 million tokens exist, and no more can ever be created. 0xDOGE is the first proof-of-work token on Ethereum to permanently brick itself."
+      ],
+      "supply": {
+        "display": "1,200,000",
+        "label": "Fixed forever"
+      },
+      "facts": [
+        ["Successful mints", "12"],
+        ["Decimals", "8"],
+        ["tokensMinted()", "1,200,000.0012"],
+        ["totalSupply() reports", "9,000,000,000,000 (unreachable cap)"]
+      ],
+      "accent": "#ffba00"
+    }
+  ]
+}

@@ -150,3 +150,14 @@ If you have questions or need help, reach out to us:
 *Made with 🦄 magic and 🍖 love by the Unicorn Meat community*
 
 *"In a world where unicorns roam the blockchain, Unicorn Meat is the rarest delicacy of all!"* ✨ 
+## 🏺 Artifacts (`/artifacts`)
+
+Historic Ethereum tokens paired with w🍖. Pages are pre-rendered static HTML so each one has its own OG/Twitter tags and share image.
+
+To add or edit an artifact:
+
+1. Edit `assets/data/artifacts.json` (slug, name, symbol, EIP-55 address, deployed date, one-liner, story paragraphs, supply, optional facts/accent/tradeUrl). Verify the address first with `cast code <address>`.
+2. Run `python3 scripts/build-artifacts.py` (needs Pillow).
+3. Commit the regenerated `artifacts/*.html`, `assets/images/artifacts/*.png` and `sitemap.xml`.
+
+Don't hand-edit the generated HTML; change the template in the script instead.
