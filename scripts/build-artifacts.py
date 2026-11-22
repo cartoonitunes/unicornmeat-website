@@ -203,16 +203,21 @@ def build_og(a):
     d.text((x, y), a["name"], font=font(FONT_BOLD, 30), fill="#3a3a3a")
     y += 58
 
-    body = font(FONT_BOLD, 40)
-    for line in wrap(d, a["oneLiner"], body, max_w)[:3]:
+    # shrink the one-liner until it fits in two lines above the pills
+    for size in range(40, 27, -2):
+        body = font(FONT_BOLD, size)
+        lines = wrap(d, a["oneLiner"], body, max_w)
+        if len(lines) <= 2:
+            break
+    for line in lines[:3]:
         d.text((x, y), line, font=body, fill="#000")
-        y += 52
+        y += int(size * 1.3)
 
     pf = font(FONT_BOLD, 24)
     py = OG_H - 46 - 86
-    b = pill(img, (x, py), f"Supply {a['supply']['display']}", a["accent"], pf)
-    b = pill(img, (b[2] + 22, py), f"Deployed {a['deployedHuman']}", "#ffffff", pf)
-    pill(img, (b[2] + 22, py), "Paired with w🍖 on Uniswap", "#ffe6f0", pf)
+    b = pill(img, (x, py), f"{a['supply']['display']} coins", a["accent"], pf)
+    b = pill(img, (b[2] + 22, py), f"Launched {a['deployedHuman']}", "#ffffff", pf)
+    pill(img, (b[2] + 22, py), "Trade it for w🍖 on Uniswap", "#ffe6f0", pf)
     return img.convert("RGB")
 
 
@@ -224,7 +229,7 @@ def build_index_og(items):
     d.text((x, 190), "Artifacts", font=font(FONT_DISPLAY, 112), fill="#ff4fa3")
     body = font(FONT_BOLD, 40)
     y = 330
-    for line in wrap(d, "Historic Ethereum tokens, paired with w🍖 on Uniswap.", body, OG_W - 200):
+    for line in wrap(d, "Coins from Ethereum's early days that you can trade for w🍖.", body, OG_W - 200):
         draw_text(img, (x, y), line, body)
         y += 52
     pf = font(FONT_BOLD, 24)
@@ -419,14 +424,14 @@ def artifact_body(a):
     story = "\n".join(f'                                <p class="fs-6 mb-3">{e(p)}</p>' for p in a["story"])
     facts = "\n".join(
         f'                                    <tr><th scope="row">{e(k)}</th><td>{e(v)}</td></tr>'
-        for k, v in [("Contract", a["address"]), ("Symbol", a["symbol"]),
-                     ("Deployed", a["deployedHuman"]), *a["facts"]])
+        for k, v in [("Contract address", a["address"]), ("Ticker", a["symbol"]),
+                     ("Launched", a["deployedHuman"]), *a["facts"]])
     share_text = quote(f"{a['symbol']}: {a['oneLiner']} A w🍖 Artifact.")
     share = f"https://twitter.com/intent/tweet?text={share_text}&url={quote(a['url'], safe='')}"
     return f"""            <section class="artifact-hero section panel overflow-hidden">
                 <div class="container artifact-hero-inner">
                     <div class="artifact-hero-copy mx-auto text-center vstack items-center gap-3">
-                        <a class="artifact-pill" href="/artifacts">🏺 Artifact #{a['number']:03d} · Paired with w🍖</a>
+                        <a class="artifact-pill" href="/artifacts">🏺 Artifact #{a['number']:03d} · Trade it for w🍖</a>
                         <h1 class="h2 sm:h1 xl:display-6 m-0 ls-0"><span class="artifact-title">{e(a['symbol'])}</span></h1>
                         <p class="fs-6 fw-bold text-uppercase m-0 artifact-subtitle">{e(a['name'])}</p>
                         <p class="fs-5 xl:fs-4 text-dark m-0">{e(a['oneLiner'])}</p>
@@ -451,14 +456,14 @@ def artifact_body(a):
                             </div>
                             <div class="col">
                                 <div class="panel p-4 border border-2 border-black contrast-shadow-lg bg-white h-100 rotate-1">
-                                    <h2 class="h6 mb-2 text-uppercase">Deployed</h2>
+                                    <h2 class="h6 mb-2 text-uppercase">Launched</h2>
                                     <p class="fs-3 fw-bold mb-1">{e(a['deployedHuman'])}</p>
-                                    <p class="fs-7 mb-0 text-muted">Ethereum mainnet</p>
+                                    <p class="fs-7 mb-0 text-muted">On Ethereum</p>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="panel p-4 border border-2 border-black contrast-shadow-lg bg-white h-100 -rotate-1">
-                                    <h2 class="h6 mb-2 text-uppercase">Contract</h2>
+                                    <h2 class="h6 mb-2 text-uppercase">Contract address</h2>
                                     <p class="fs-7 fw-bold mb-2 artifact-mono">{e(a['address'])}</p>
                                     <p class="fs-7 mb-0"><a href="{e(a['etherscanUrl'])}" target="_blank" rel="noopener">Etherscan ↗</a></p>
                                 </div>
@@ -481,7 +486,7 @@ def artifact_body(a):
                             </div>
                             <div class="col">
                                 <div class="panel p-4 sm:p-5 border border-2 border-black contrast-shadow-lg bg-white h-100 rotate-1">
-                                    <h2 class="h5 sm:h4 mb-3 text-uppercase">Onchain facts</h2>
+                                    <h2 class="h5 sm:h4 mb-3 text-uppercase">Quick facts</h2>
                                     <table class="artifact-facts">
                                         <tbody>
 {facts}
@@ -496,7 +501,7 @@ def artifact_body(a):
                                 <a class="btn btn-md btn-white border border-2 border-black contrast-shadow-sm" href="{e(share)}" target="_blank" rel="noopener">Share on X</a>
                                 <a class="btn btn-md btn-white border border-2 border-black contrast-shadow-sm" href="/artifacts">All artifacts</a>
                             </div>
-                            <p class="fs-7 text-muted m-0 max-w-600px">Historic tokens can be thinly traded. Check the pool and the contract address before you swap. Not financial advice.</p>
+                            <p class="fs-7 text-muted m-0 max-w-600px">Old coins like this don't trade often, so the price can jump around. Double-check the contract address before you trade. Not financial advice.</p>
                         </div>
                     </div>
                 </div>
@@ -514,7 +519,7 @@ def index_body(items):
                                     <span class="fs-7 fw-bold text-uppercase">{e(a['name'])}</span>
                                     <span class="fs-6 text-dark">{e(a['oneLiner'])}</span>
                                     <span class="hstack justify-between items-center mt-auto pt-2">
-                                        <span class="artifact-chip" style="background:{e(a['accent'])}">Supply {e(a['supply']['display'])}</span>
+                                        <span class="artifact-chip" style="background:{e(a['accent'])}">{e(a['supply']['display'])} coins</span>
                                         <span class="fw-bold">View →</span>
                                     </span>
                                 </a>
@@ -522,10 +527,10 @@ def index_body(items):
     return f"""            <section class="artifact-hero section panel overflow-hidden">
                 <div class="container artifact-hero-inner">
                     <div class="artifact-hero-copy mx-auto text-center vstack items-center gap-3">
-                        <span class="artifact-pill">🏺 {len(items)} paired {"token" if len(items) == 1 else "tokens"}</span>
+                        <span class="artifact-pill">🏺 {len(items)} {"artifact" if len(items) == 1 else "artifacts"}</span>
                         <h1 class="h2 sm:h1 xl:display-6 m-0 ls-0"><span class="artifact-title">Artifacts</span></h1>
-                        <p class="fs-5 xl:fs-4 text-dark m-0">Historic Ethereum tokens, paired with w🍖 on Uniswap.</p>
-                        <p class="fs-6 text-dark m-0">Unicorn Meat has been on Ethereum since March 2016. Artifacts are other relics from the early chain that now trade against w🍖.</p>
+                        <p class="fs-5 xl:fs-4 text-dark m-0">Coins from Ethereum's early days, each with a story, that you can trade for w🍖 on Uniswap.</p>
+                        <p class="fs-6 text-dark m-0">Unicorn Meat has been on Ethereum since March 2016. Artifacts are other coins from those early years that you can now swap for w🍖.</p>
                     </div>
                 </div>
             </section>
@@ -577,7 +582,7 @@ def main():
         title = f"{a['symbol']}: {a['oneLiner']}"
         if len(title) > 70:
             title = f"{a['symbol']} · Unicorn Meat Artifacts"
-        description = f"{a['oneLiner']} {a['name']} ({a['symbol']}), deployed {a['deployedHuman']}. Paired with w🍖 on Uniswap."
+        description = f"{a['oneLiner']} {a['name']} ({a['symbol']}), launched {a['deployedHuman']}. Trade it for w🍖 on Uniswap."
         jsonld = {
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -608,8 +613,8 @@ def main():
         "hasPart": [{"@type": "WebPage", "url": a["url"], "name": a["name"]} for a in items],
     }
     (OUT_PAGES / "index.html").write_text(page(
-        title="Artifacts · Historic Ethereum tokens paired with w🍖",
-        description="Historic Ethereum tokens paired with w🍖 on Uniswap: "
+        title="Artifacts · Early Ethereum coins you can trade for w🍖",
+        description="Coins from Ethereum's early days that you can trade for w🍖 on Uniswap: "
                     + ", ".join(a["symbol"] for a in items) + ".",
         canonical=f"{SITE}/artifacts",
         og_image=f"{SITE}/assets/images/artifacts/index-og.png?v={v}",

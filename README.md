@@ -161,3 +161,5 @@ To add or edit an artifact:
 3. Commit the regenerated `artifacts/*.html`, `assets/images/artifacts/*.png` and `sitemap.xml`.
 
 Don't hand-edit the generated HTML; change the template in the script instead.
+
+Write all artifact copy for someone who has never used crypto. Avoid jargon like "bricked", "mint", "proof-of-work", "onchain" or "pool". If a technical detail matters, explain it in everyday words.

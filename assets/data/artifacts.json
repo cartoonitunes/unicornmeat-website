@@ -1,5 +1,6 @@
 {
   "_readme": "Source of truth for /artifacts. Edit this file, then run: python3 scripts/build-artifacts.py",
+  "_style": "Write for someone who has never used crypto. No jargon (bricked, mint, proof-of-work, onchain, pool, decimals). If a technical idea matters, explain it in everyday words.",
   "artifacts": [
     {
       "slug": "0xdoge",
@@ -7,21 +8,29 @@
       "symbol": "0xDOGE",
       "address": "0x0d8bB998900AbDB60D7414145e1c542C2CF4e7A9",
       "deployed": "2018-02-16",
-      "oneLiner": "First 0xBitcoin clone. Bricked after 12 mints. Fixed supply forever.",
+      "oneLiner": "The first copy of 0xBitcoin. A bug broke it for good after 12 payouts, so no new coins can ever be made.",
       "story": [
-        "Deployed on February 16, 2018, just 10 days after 0xBitcoin, 0xDOGE was the first 0xBitcoin clone: a proof-of-work token mined by submitting solutions onchain.",
-        "A bug in the reward formula and a recursive era cap bricked the contract after 12 successful mints. No further mint can ever succeed.",
-        "1.2 million tokens exist, and no more can ever be created. 0xDOGE is the first proof-of-work token on Ethereum to permanently brick itself."
+        "0xDOGE launched on February 16, 2018, just 10 days after 0xBitcoin. 0xBitcoin was a coin on Ethereum that people earned by having their computers solve math puzzles, the same way Bitcoin works. 0xDOGE was the first copy of it.",
+        "Its code had two mistakes: one in how rewards were calculated, and one in a built-in limit that tripped over itself. Together they made 0xDOGE stop working forever after only 12 payouts. Nobody can earn new coins from it, and nobody ever will.",
+        "That left exactly 1.2 million coins in existence, with no way to make more. 0xDOGE was the first coin of its kind on Ethereum to permanently break itself."
       ],
       "supply": {
         "display": "1,200,000",
-        "label": "Fixed forever"
+        "label": "No more can ever be made"
       },
       "facts": [
-        ["Successful mints", "12"],
-        ["Decimals", "8"],
-        ["tokensMinted()", "1,200,000.0012"],
-        ["totalSupply() reports", "9,000,000,000,000 (unreachable cap)"]
+        [
+          "Times coins were paid out",
+          "12"
+        ],
+        [
+          "Coins that exist",
+          "1,200,000"
+        ],
+        [
+          "Supply shown on Etherscan",
+          "9 trillion, a limit it will never reach"
+        ]
       ],
       "accent": "#ffba00"
     }
